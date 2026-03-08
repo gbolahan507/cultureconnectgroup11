@@ -226,6 +226,54 @@ Visual guide for the prototype user interface.
 └────────────────────────────────────────────────────┘
 ```
 
+### 7. REGISTRATION PAGE (with Admin Code)
+
+```
+┌────────────────────────────────────────────────────┐
+│                                                    │
+│              ┌─────────────────────┐               │
+│              │   REGISTER          │               │
+│              │                     │               │
+│              │  Name:              │               │
+│              │  [________________] │               │
+│              │                     │               │
+│              │  Email:             │               │
+│              │  [________________] │               │
+│              │                     │               │
+│              │  Password:          │               │
+│              │  [________________] │               │
+│              │                     │               │
+│              │  Area:              │               │
+│              │  [Select Area ▼]    │               │
+│              │                     │               │
+│              │  ──────────────────  │               │
+│              │  Have Admin Code?   │               │
+│              │  (Leave blank if    │               │
+│              │   registering as    │               │
+│              │   resident)         │               │
+│              │                     │               │
+│              │  Admin Code:        │               │
+│              │  [________________] │               │
+│              │                     │               │
+│              │  [Register]         │               │
+│              │                     │               │
+│              │  Already have       │               │
+│              │  account? [Login]   │               │
+│              └─────────────────────┘               │
+│                                                    │
+└────────────────────────────────────────────────────┘
+```
+
+**How Admin Code Works:**
+
+| User enters | Result |
+|-------------|--------|
+| No code | Registers as `resident` |
+| Wrong code | Registers as `resident` |
+| Correct code (`GROUP11ADMIN`) | Registers as `admin` |
+
+**Security:** Admin code is stored in `settings` table in database.
+
 ---
 
 ## User Flow Summary
@@ -303,3 +351,38 @@ pages/
 4. Tables for list views
 5. Clear navigation between pages
 6. Form validation with meaningful error messages (5 marks for UI)
+
+---
+
+## Demo Login Credentials
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@cultureconnect.com | admin123 |
+| Resident | john@example.com | password123 |
+
+**Admin Code for Registration:** `GROUP11ADMIN`
+
+---
+
+## Access Control After Login
+
+| Page | Resident | Admin |
+|------|----------|-------|
+| Home | ✓ | ✓ |
+| View Products | ✓ | ✓ |
+| Vote | ✓ | ✓ |
+| Add Area | ✗ | ✓ |
+| Add Product | ✗ | ✓ |
+| Edit Product | ✗ | ✓ |
+| View Residents | ✗ | ✓ |
+
+**Navigation Changes Based on Role:**
+
+```
+RESIDENT:
+[Home]  [Products]  [Vote]  [Profile]  [Logout]
+
+ADMIN:
+[Home]  [Areas]  [Residents]  [Products]  [Votes]  [Logout]
+```

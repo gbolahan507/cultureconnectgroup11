@@ -26,8 +26,18 @@ CREATE TABLE residents (
     age_group VARCHAR(20),
     gender VARCHAR(20),
     interests TEXT,
+    role ENUM('resident', 'admin') DEFAULT 'resident',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (area_id) REFERENCES areas(id) ON DELETE SET NULL
+);
+
+-- =====================
+-- TABLE: settings
+-- =====================
+CREATE TABLE settings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    setting_key VARCHAR(50) NOT NULL UNIQUE,
+    setting_value VARCHAR(255) NOT NULL
 );
 
 -- =====================
@@ -118,14 +128,21 @@ INSERT INTO products (platform_id, name, description, price, category) VALUES
 (5, 'Instrument Rental - Weekly', 'Rent a traditional instrument for a week', 50.00, 'Service');
 
 -- =====================
+-- SAMPLE DATA: settings
+-- =====================
+INSERT INTO settings (setting_key, setting_value) VALUES
+('admin_code', 'GROUP11ADMIN');
+
+-- =====================
 -- SAMPLE DATA: residents
 -- =====================
-INSERT INTO residents (name, email, password, area_id, age_group, gender, interests) VALUES
-('John Smith', 'john@example.com', 'password123', 1, '26-35', 'Male', 'Art, Music'),
-('Sarah Johnson', 'sarah@example.com', 'password123', 2, '18-25', 'Female', 'Dance, Food'),
-('Michael Brown', 'michael@example.com', 'password123', 3, '36-45', 'Male', 'Crafts, Art'),
-('Emily Davis', 'emily@example.com', 'password123', 1, '26-35', 'Female', 'Music, Experience'),
-('David Wilson', 'david@example.com', 'password123', 4, '46-55', 'Male', 'Food, Crafts');
+INSERT INTO residents (name, email, password, area_id, age_group, gender, interests, role) VALUES
+('Admin User', 'admin@cultureconnect.com', SHA1('admin123'), 1, '26-35', 'Male', 'Administration', 'admin'),
+('John Smith', 'john@example.com', SHA1('password123'), 1, '26-35', 'Male', 'Art, Music', 'resident'),
+('Sarah Johnson', 'sarah@example.com', SHA1('password123'), 2, '18-25', 'Female', 'Dance, Food', 'resident'),
+('Michael Brown', 'michael@example.com', SHA1('password123'), 3, '36-45', 'Male', 'Crafts, Art', 'resident'),
+('Emily Davis', 'emily@example.com', SHA1('password123'), 1, '26-35', 'Female', 'Music, Experience', 'resident'),
+('David Wilson', 'david@example.com', SHA1('password123'), 4, '46-55', 'Male', 'Food, Crafts', 'resident');
 
 -- =====================
 -- SAMPLE DATA: votes
