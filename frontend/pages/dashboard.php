@@ -1,3 +1,27 @@
+<?php
+$page = $_GET['page'] ?? 'home';
+
+$allowedPages = [
+    'home',
+    'analytics',
+    'manage-area',
+    'manage-users',
+    'manage-council',
+    'review-products',
+    'reports',
+    'profile',
+    'activity',
+    'votes',
+    'add-products',
+    'manage-listings',
+    'view-votes',
+    'settings'
+];
+
+if (!in_array($page, $allowedPages)) {
+    $page = 'home';
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,9 +64,15 @@
    </div>
 
    <div class="dashboard-content">
+   <?php
+   $file = "../pages/" . $page . ".php";
 
-            <h2>Dashboard Display</h2>
-            <p>When a sidebar option is clicked, the content will appear here.</p>
+   if (file_exists($file)) {
+    include $file;
+   } else {
+    include "../pages/home.php";
+   }?>
+   
    </div>
 </div>
 

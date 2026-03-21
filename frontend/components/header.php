@@ -18,7 +18,7 @@ $logged_in = $_SESSION['logged_in'] ?? false;
         <ul>
             <!-- Common links always shown -->
             <li>
-                <a href="../pages/home.php" class="<?= $current_page == 'home.php' ? 'active' : '' ?>">
+                <a href="../pages/index.php" class="<?= $current_page == 'index.php' ? 'active' : '' ?>">
                     Home
                 </a>
             </li>
@@ -32,8 +32,13 @@ $logged_in = $_SESSION['logged_in'] ?? false;
             <!-- Conditional links based on login -->
             <?php if (!$logged_in): ?>
                 <li>
-                    <a href="../pages/register.php" class="<?= $current_page == 'register.php' ? 'active' : '' ?>">
+                    <a href="../pages/login.php" class="<?= $current_page == 'login.php' ? 'active' : '' ?>">
                         Register
+                    </a>
+                </li>
+                <li>
+                    <a href="../pages/register.php" class="<?= $current_page == 'register.php' ? 'active' : '' ?>">
+                        Login
                     </a>
                 </li>
             <?php else: ?>
