@@ -1,0 +1,312 @@
+/* Header styling */
+* {
+margin: 10px;
+padding: 0;
+box-sizing: border-box;
+}
+
+body {
+margin: 0;
+padding: 0;
+font-family: Arial, Helvetica, sans-serif;
+}
+
+.site-header{
+background:#ffff;
+color:rgb(0, 0, 0);
+padding:15px 30px;
+margin-bottom: 0;
+}
+
+.header-container{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+.logo-section{
+display:flex;
+align-items:center;
+gap:10px
+}
+
+.logo{
+width:40px;
+height:40px;
+object-fit:contain;
+}
+
+/* Navigation menu */
+
+nav ul{
+display:flex;
+gap:20px;
+list-style:none;
+padding: o;
+margin: 0;
+}
+
+nav a{
+color:rgb(0, 0, 0);
+margin-left:20px;
+text-decoration:none;
+padding-bottom:4px;
+position: relative;
+}
+
+nav a.active{
+font-weight: 600;
+border-bottom:2px solid #dd3ab5;
+color: #dd3ab5;
+padding-bottom: 4px;
+}
+
+/* Footer */
+.footer {
+  background-color: black;
+  color: #030213;
+  margin: 0;
+  padding: 5px;
+  width: 100%;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.logo-container {
+display: flex;
+align-items: center;
+gap: 2px;
+text-decoration: solid;
+}
+
+.column {
+  flex: 1;
+  text-align: left;
+}
+
+.column ul {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+}
+
+.column a{
+  text-decoration: none;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Dashboard page styling */
+
+/* dashboard welcome Card */
+.dashboard-content{
+flex:1;
+padding:10px 0;
+width: 100%;
+}
+
+.dashboard-welcome {
+  background:linear-gradient(135deg, #dd3ab5, #a81c87);
+  padding: 64px 32px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 0%;
+  margin: 0px 0;
+  width: 100%;
+}
+
+.welcome-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.welcome-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.welcome-subtitle {
+  font-size: 1rem;
+  color: #ffffff;
+  margin-top: 4px;
+}
+
+.role-badge {
+  background-color: #ececf0; 
+  padding: 12px 16px;
+  border-radius: 8px;
+  text-align: center;
+  min-width: 140px;
+  margin-top: 12px;
+}
+
+.role-label {
+  font-size: 0.75rem;
+  color: #717182; 
+  margin-bottom: 4px;
+}
+
+.role-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #030213; 
+  margin: 0;
+}
+
+/* sidebar + Content */
+.dashboard-layout3 {
+display:flex;
+min-height: 600px;
+margin-bottom: 0;
+}
+
+/* side bar section */
+.sidebar{
+width:120px;
+background:#eeeeee;
+padding-top:0px;
+flex-shrink: 0;
+min-height:500px;
+}
+
+.sidebar ul{
+list-style:none;
+padding:0;
+margin:0;
+}
+
+.sidebar li{
+padding:15px 10px;
+text-align:center;
+background:#eeeeee;
+cursor:pointer;
+}
+
+.sidebar a{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap: 1px;
+text-decoration: none;
+text-align: center;
+color:#333;
+font-size:13px;
+}
+
+.sidebar svg{
+  width:22px;
+  height:22px;
+}
+
+/* Sidebar Content Display section */
+.dashboard-content {
+  flex: 1;
+  padding: 20px;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: rgba(0,0,0,0.6);
+}
+
+/* Register Page */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+    margin-top: 40px;
+    color: #333;
+}
+
+.user-type-selector {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.user-type-selector button {
+    padding: 10px 25px;
+    border: 2px solid #007BFF;
+    background-color: white;
+    color: #007BFF;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.user-type-selector button:hover {
+    background-color: #007BFF;
+    color: white;
+}
+
+form {
+    max-width: 500px;
+    margin: 0 auto 50px auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #007BFF;
+}
+
+form label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #555;
+}
+
+form input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+form button[type="submit"] {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    background-color: #007BFF;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
