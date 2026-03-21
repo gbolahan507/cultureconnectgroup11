@@ -63,7 +63,7 @@ padding-bottom: 4px;
 /* Footer */
 .footer {
   background-color: black;
-  color: #030213;
+  color: white;
   margin: 0;
   padding: 5px;
   width: 100%;
@@ -79,12 +79,12 @@ padding-bottom: 4px;
 display: flex;
 align-items: center;
 gap: 2px;
-text-decoration: solid;
 }
 
 .column {
   flex: 1;
   text-align: left;
+  color: white;
 }
 
 .column ul {
@@ -93,13 +93,19 @@ text-decoration: solid;
   text-align: left;
 }
 
+.column li {
+  color: white;
+}
+
 .column a{
   text-decoration: none;
+  color: white;
 }
 
 .footer-bottom {
   text-align: center;
   margin-top: 20px;
+  color: rgba(255,255,255,0.7);
 }
 
 /* Dashboard page styling */
@@ -117,7 +123,7 @@ width: 100%;
   padding-left: 5px;
   padding-right: 5px;
   border-radius: 0%;
-  margin: 0px 0;
+  margin: 0px;
   width: 100%;
 }
 
@@ -172,7 +178,9 @@ width: 100%;
 .dashboard-layout3 {
 display:flex;
 min-height: 600px;
+margin-top: 0;
 margin-bottom: 0;
+margin: 0;
 }
 
 /* side bar section */
@@ -208,6 +216,20 @@ color:#333;
 font-size:13px;
 }
 
+.sidebar a.active {
+  background: linear-gradient(135deg, #dd3ab5, #a81c87);
+  border-radius: 10px;
+  color: white;           
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sidebar a.active svg {
+  stroke: white;
+}
+
 .sidebar svg{
   width:22px;
   height:22px;
@@ -215,10 +237,16 @@ font-size:13px;
 
 /* Sidebar Content Display section */
 .dashboard-content {
-  flex: 1;
-  padding: 20px;
-  background: #f5f5f5;
-  display: flex;
+  flex: 1;                     
+  padding: 20px 30px;          
+  background: #f5f5f5;        
+  min-height: 400px;           
+  color: rgba(0,0,0,0.85);  
+  margin: 0;
+}
+
+.dashboard-content.centered {
+  display: block;
   justify-content: center;
   align-items: center;
   text-align: center;
@@ -310,3 +338,185 @@ form button[type="submit"]:hover {
     background-color: #0056b3;
 }
 
+/* Manage Area Page */
+.manage-area-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Header */
+.manage-area-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 0px;
+}
+
+.icon-wrapper svg {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #dd3ab5, #a81c87);
+  border-radius: 10px;
+  padding: 5px;
+  stroke: white;
+  margin: 0px;
+}
+
+.manage-area-text h2 {
+  font-weight: bold;
+  margin: 0;
+}
+
+.manage-area-text p {
+  margin: 0;
+  color: rgba(0,0,0,0.7);
+}
+
+/* Add Area Button */
+.manage-area-actions {
+  margin: 0px;
+}
+
+#add-area-btn {
+  background: linear-gradient(135deg, #dd3ab5, #a81c87);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+
+#add-area-btn:hover {
+  opacity: 0.9;
+}
+
+/* Table */
+.area-table-wrapper {
+  overflow-x: auto;
+  margin-top: 0px;
+  margin-bottom: 2px;
+}
+
+.area-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.area-table th, .area-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.area-table th {
+  background-color: #e10080;
+  color: white;
+  text-align: left;
+}
+
+.area-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.edit-btn, .delete-btn {
+  padding: 5px 10px;
+  margin-right: 5px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.edit-btn {
+  background-color: #e5e5e5;
+  color: black;
+}
+
+.delete-btn {
+  background-color: black;
+  color: white;
+}
+
+/* Table Filters */
+.table-filters {
+  margin-bottom: 10px;
+}
+
+.table-filters input {
+  padding: 8px 10px;
+  width: 250px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+/* Add Area Form Styling */
+.add-area-form {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  align-items: flex-start;
+  padding: 10px;
+}
+
+.add-area-form h3 {
+  margin: 0;
+  font-weight: bold;
+  text-align: left;
+}
+
+.addAreaForm {
+  margin: 0;              
+    text-align: left;
+}
+
+.add-area-form label {
+  font-weight: 500;
+  margin: 0;
+}
+
+.add-area-form input,
+.add-area-form textarea {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-align: left;
+}
+
+.add-area-form input[readonly] {
+  background-color: #f5f5f5;
+}
+
+.add-area-form button {
+  background-color: black;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  align-self: flex-start;
+}
+
+.add-area-form button:hover {
+  opacity: 0.9;
+}
+
+.add-area-form button[type="submit"] {
+    background-color: #E00180; 
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-area-form button[type="submit"]:hover {
+    background-color: #c4006d;
+}
