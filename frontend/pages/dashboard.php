@@ -1,4 +1,12 @@
 <?php
+session_start(); 
+
+// Redirect to login if session not set
+if (!isset($_SESSION['user_role'])) {
+    header("Location: ../login.php");
+    exit();
+}
+
 $page = $_GET['page'] ?? 'home';
 
 $allowedPages = [

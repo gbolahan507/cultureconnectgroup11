@@ -526,24 +526,28 @@ form button[type="submit"]:hover {
 /* Manage Users Page Sytling */
 /* Page container */
 .manage-users-page {
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    background: #f5f5f5;
-    width: 100%;
-    max-width: 100%;
-    display: block;
-    box-sizing: border-box;
-    clear: both; 
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 /* Header */
+.manage-users-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 0px;
+  font-size: 28px;
+  color: #333;
+}
 .page-header h2 {
-    font-size: 28px;
-    color: #333;
-    display: flex;
-    align-items: center;
-    gap: 15px;
+    font-weight: bold;
     margin: 0px;
+}
+
+.page-header p {
+  margin: 0;
+  color: rgba(0,0,0,0.7);
 }
 
 /* Tabs */
@@ -677,7 +681,7 @@ form button[type="submit"]:hover {
 
 /* Reject Modal Styling */
 #rejectModal {
-    display: none; /* Hidden by default */
+    display: none; 
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -685,12 +689,12 @@ form button[type="submit"]:hover {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.5); /* Semi-transparent overlay */
+    background-color: rgba(0,0,0,0.5); 
 }
 
 #rejectModal .modal-content {
     background-color: #fff;
-    margin: 10% auto; /* Center vertically */
+    margin: 10% auto; 
     padding: 20px;
     border-radius: 8px;
     width: 450px;
@@ -745,4 +749,120 @@ form button[type="submit"]:hover {
     margin-top: 5px;
     display: block;
     text-align: left;
+}
+
+/* Profile Page Styling */
+/* Main Container */
+.profile-wrapper {
+    width: 70%;
+    margin: 40px auto;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 0px;
+  font-size: 28px;
+  color: #333;
+}
+
+.profile-text h2 {
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Section Card */
+.profile-card {
+    background: #f1f3f6;
+    border-radius: 12px;
+    padding: 20px 25px;
+    margin-bottom: 25px;
+    border: 1px solid #E00180;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* Section Title */
+.profile-card h2,
+.profile-card h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* Row Layout */
+.profile-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    gap: 10px;
+}
+
+/* Remove last border */
+.profile-row:last-child {
+    border-bottom: none;
+}
+
+/* Label */
+.profile-label {
+    font-weight: 600;
+    color: #555;
+    width: 40%;
+    background: #f9fafb;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+/* Value */
+.profile-value {
+    width: 60%;
+    color: #222;
+    text-align: right;
+    background: #ffffff;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+.profile-row:hover .profile-value {
+    background-color: #fff0f7;
+}
+/* Status Styling */
+.status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.status.approved {
+    background-color: #e6f7ec;
+    color: #1a7f37;
+}
+
+.status.pending {
+    background-color: #fff4e5;
+    color: #b26a00;
+}
+
+.status.suspended {
+    background-color: #fdecea;
+    color: #b42318;
+}
+
+/* Button (for future edit feature) */
+.edit-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 16px;
+    background-color: #E00180;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.edit-btn:hover {
+    opacity: 0.9;
 }

@@ -1,15 +1,14 @@
 <?php
 // Start session
 session_start();
+$allowedRoles = ['Council Administrator', 'Council_member'];
 
-// Access control: only root_admin and council_member can access
-//$allowedRoles = ['root_admin', 'council_member'];
-
-//if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], $allowedRoles)) {
-    // Redirect unauthorized users to dashboard home
-   // header("Location: ../dashboard.php?page=home");
-   // exit();
-//}
+// Check if user is logged in AND has the correct role
+if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowedRoles)) {
+    // Redirect unauthorized users
+    header("Location: ../pages/dashboard.php?page=home");
+    exit();
+}
 ?>
 
 <div class="manage-area-page">
@@ -23,7 +22,7 @@ session_start();
         </div>
         <div class="manage-area-text">
             <h2>Manage Area</h2>
-            <p>Here you can view, add, edit, or remove areas under the council's jurisdiction.</p>
+            <p>Here you can View, Add, Edit, or Remove Areas under the Council's Jurisdiction.</p>
         </div>
     </div>
 

@@ -1,35 +1,16 @@
 <?php
 // Start session
 session_start();
+$allowedRoles = ['Council Administrator', 'Council_member'];
 
-// Access control: only root_admin and council_member can access
-//$allowedRoles = ['root_admin', 'council_member'];
+// Check if user is logged in AND has the correct role
+if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowedRoles)) {
+    // Redirect unauthorized users
+    header("Location: ../pages/dashboard.php?page=home");
+    exit();
+}
 
-//if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], $allowedRoles)) {
-    // Redirect unauthorized users to dashboard home
-   // header("Location: ../dashboard.php?page=home");
-   // exit();
-//}
-
-
-/* BACKEND DATABASE INTEGRATION REMINDER
-   1. PHP Logic:
-      - Fetch all pending requests:
-          $query = "SELECT * FROM pending_registration ORDER BY created_at DESC";
-          $requests = mysqli_query($conn, $query);
-
-      - Loop through $requests to populate the table body:
-          foreach($requests as $req){
-              // Output table rows dynamically
-              // Use $req['details'] for the View modal
-              // Conditional buttons: Show Approve/Reject only if status == 'pending'
-          }
-
-   3. Actions:
-      - Approve: Update 'status' = 'approved', move/copy relevant data to users/SME table
-      - Reject: Update 'status' = 'rejected', optionally log reason or delete entry
-      - View: Show $req['details'] in the modal
------------------------------------------------------------------- */
+// Mock data, should be deleted 
 $requests = [
     ['id'=>1,'name'=>'John Doe','type'=>'Resident','email'=>'john@email.com','date_submitted'=>'2026-03-21','status'=>'pending','details'=>'Address: 123 Street, DOB: 1990-01-01'],
     ['id'=>2,'name'=>'Alice Smith','type'=>'SME','email'=>'alice@business.com','date_submitted'=>'2026-03-20','status'=>'pending','details'=>'Business: Alice Bakery, License: 12345'],
@@ -41,15 +22,17 @@ $requests = [
 <div class="manage-users-page">
 
     <div class="manage-users-header">
-        <div class="icon-wrapper">
+      <div class="icon-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
         </svg>
-        </div>
-
-    <div class="page-header">
+        <div class="page-header">
         <h2>Manage Users</h2>
+        <p>Here you can View, Approve or Reject Registration Requests.</p>
+        </div>
+      </div>
     </div>
+    
 
     <!-- Tabs for filtering -->
     <div class="status-tabs">
@@ -95,28 +78,30 @@ $requests = [
             <?php endforeach; ?>
         </tbody>
     </table>
-</div>
 
-<!-- View Modal -->
-<div id="viewModal" class="modal">
+
+   <!-- View Modal -->
+  <div id="viewModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
         <h3>User Details</h3>
         <div id="modal-body"></div>
         <div id="modal-comments" style="margin-top: 10px; font-style: italic; color: #555;"></div>
     </div>
-</div>
+  </div>
 
-<!-- Reject Modal -->
-<div id="rejectModal" class="modal">
+   <!-- Reject Modal -->
+  <div id="rejectModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
         <h3>Reject Request</h3>
         <textarea id="rejectComment" placeholder="Add a comment (optional)" rows="4"></textarea>
         <button id="submitReject">Submit</button>
     </div>
-</div>
+  </div>
 
+   </div>
+</div>
 <script>
 // --- View Modal Logic ---
 const modal = document.getElementById('viewModal');

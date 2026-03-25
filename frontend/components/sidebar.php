@@ -1,6 +1,11 @@
 <?php
+// Make sure session is started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-$userRole = $_SESSION['user_role'];
+// Get user role from session
+$userRole = $_SESSION['user_role'] ?? '';
 
 ?>
 
@@ -8,7 +13,7 @@ $userRole = $_SESSION['user_role'];
 
 <ul>
 
-<?php if($userRole == "root_admin"){ ?>
+<?php if($userRole == "Council Administrator"){ ?>
 
 <li>
 <a href="dashboard.php?page=analytics" class="<?php echo ($page == 'analytics') ? 'active' : ''; ?>">
@@ -77,7 +82,7 @@ $userRole = $_SESSION['user_role'];
 
 <?php } ?>
 
-<?php if($userRole == "council_member"){ ?>
+<?php if($userRole == "Council_member"){ ?>
 
 <li>
 <a href="dashboard.php?page=analytics" class="<?php echo ($page == 'analytics') ? 'active' : ''; ?>">
@@ -137,7 +142,7 @@ $userRole = $_SESSION['user_role'];
 
 <?php } ?>
 
-<?php if($userRole == "resident"){ ?>
+<?php if($userRole == "Resident"){ ?>
 
 <li>
 <a href="dashboard.php?page=profile" class="<?php echo ($page == 'profile') ? 'active' : ''; ?>">
@@ -178,7 +183,7 @@ $userRole = $_SESSION['user_role'];
 
 <?php } ?>
 
-<?php if($userRole == "sme"){ ?>
+<?php if($userRole == "SME"){ ?>
 
 <li>
 <a href="dashboard.php?page=add-products" class="<?php echo ($page == 'add-product') ? 'active' : ''; ?>">

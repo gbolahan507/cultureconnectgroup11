@@ -3,8 +3,8 @@
 session_start(); 
 $current_page = basename($_SERVER['PHP_SELF']);
 
-// Check if user is logged in
-$logged_in = $_SESSION['logged_in'] ?? false;
+// Check if user is logged in based on user_role
+$logged_in = isset($_SESSION['user_role']);
 ?>
 
 <div class="header-container">
@@ -33,12 +33,12 @@ $logged_in = $_SESSION['logged_in'] ?? false;
             <?php if (!$logged_in): ?>
                 <li>
                     <a href="../pages/login.php" class="<?= $current_page == 'login.php' ? 'active' : '' ?>">
-                        Register
+                        Login
                     </a>
                 </li>
                 <li>
                     <a href="../pages/register.php" class="<?= $current_page == 'register.php' ? 'active' : '' ?>">
-                        Login
+                        Register
                     </a>
                 </li>
             <?php else: ?>
