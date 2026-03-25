@@ -1,6 +1,8 @@
 <?php
-// Start session
-session_start();
+// Start session if not already active
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $allowedRoles = ['Council Administrator', 'Council_member', 'Resident', 'SME'];
 
 // Check if user is logged in AND has the correct role
@@ -9,6 +11,23 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowed
     header("Location: ../pages/dashboard.php?page=home");
     exit();
 }
+
+// Use session data with safe fallbacks until backend is connected
+$user = [
+    'name' => $_SESSION['user_name'] ?? 'N/A',
+    'email' => $_SESSION['user_email'] ?? 'N/A',
+    'role_name' => $_SESSION['user_role'] ?? 'N/A',
+    'address' => $_SESSION['user_address'] ?? 'N/A',
+    'area_name' => $_SESSION['user_area'] ?? 'N/A',
+    'status' => $_SESSION['user_status'] ?? 'active',
+    'created_at' => $_SESSION['user_created_at'] ?? 'N/A',
+];
+
+$sme = [
+    'business_name' => $_SESSION['business_name'] ?? 'N/A',
+    'business_type' => $_SESSION['business_type'] ?? 'N/A',
+    'phone' => $_SESSION['business_phone'] ?? 'N/A',
+];
 ?>
 
 <div class="profile-wrapper">

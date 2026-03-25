@@ -1,6 +1,8 @@
 <?php
-// Start session
-session_start();
+// Start session if not already active
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $allowedRoles = ['Council Administrator', 'Council_member'];
 
 // Check if user is logged in AND has the correct role
