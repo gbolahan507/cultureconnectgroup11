@@ -20,13 +20,17 @@ A platform for residents to browse and vote on cultural products and services in
 
 ## Team - Group 11
 
-| Name | Role |
-|------|------|
-| Victor | Product Owner |
-| Oyin | Requirement Engineer, Database Admin, QA |
-| Jake | Scrum Master, QA |
-| Josephine | Frontend Developer, Project Coordinator |
-| Habeeb | Backend Developer |
+| Name | Role | Username | password | 
+|------|------|------| ------|
+| Victor Ikekhua| Product Owner | victor@cconnect.com | Test1234!|
+| Oyenike Alade | Requirement Engineer, Database Admin, QA | nike.alade01@gmail.com | Test1234!|
+| Kenneth Onyeabor | Scrum Master, QA | jake@cconnect.com | Test1234!|
+| Josephine Abioye| Frontend Developer, Project Coordinator | josephineabioye@yahoo.com | Test1234!|
+| Habeeblahi Hameed | Backend Developer | habeeb@cconnect.com | Test1234!|
+| Admin | Council_Administrator | admin@cconnect.com | Test1234!|
+| Council Member | Council_member |Cmember@cconnect.com | Test1234!|
+| SME | SME Business | info@harmonywellbeing.com | Test1234!|
+
 
 ## Getting Started
 
