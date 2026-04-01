@@ -7,6 +7,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 // Check if user is logged in based on user_role
 $logged_in = isset($_SESSION['user_role']);
+
+// Establish database connection
+$servername = "localhost"; 
+$username = "root"; 
+$password = ""; 
+$dbname ="culturConnectGroup11";
+$conn = new mysqli($servername, $username, $password, $dbname);
 ?>
 
 <div class="header-container">

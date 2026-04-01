@@ -1,99 +1,197 @@
 <?php
-// test-login.php
-session_start();
+// Handle redirect before any output
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-/* FRONT-END TEST LOGIN PAGE
-   Purpose: This page allows different user roles testing as
-   sidebar menu and dashboard render role-specific options.
-*/
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Set the session role based on selected user type
-    $_SESSION['user_role'] = $_POST['role'] ?? 'Guest';
-    $_SESSION['user_name'] = $_POST['name'] ?? 'Test User'; // optional name for welcome message
-
-    // Redirect to dashboard
-    header("Location: dashboard.php");
+// Redirect if already logged in
+if (isset($_SESSION['user_ref_no'])) {
+    header("Location: dashboard.php?page=home");
     exit();
 }
+
+$errors = [];
+$post_email = '';
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Test Login - Dashboard</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    display:flex;
-    height:100vh;
-    justify-content:center;
-    align-items:center;
-    background:#f5f5f5;
-  }
-  .login-container {
-    background:white;
-    padding:30px;
-    border-radius:8px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.2);
-    width:300px;
-  }
-  h2 {
-    text-align:center;
-    margin-bottom:20px;
-  }
-  select, input, button {
-    width:100%;
-    padding:10px;
-    margin:10px 0;
-    border-radius:6px;
-    border:1px solid #ccc;
-    font-size:14px;
-  }
-  button {
-    background:#E00180;
-    color:white;
-    border:none;
-    cursor:pointer;
-    transition: background 0.2s ease;
-  }
-  button:hover {
-    background:#c3006d;
-  }
-  .note {
-    font-size:12px;
-    color:#555;
-    margin-top:10px;
-    text-align:center;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CultureConnect</title>
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
 
-<?php
-    /*
-    Import  header component*/
-    include "../components/header.php";
-?>
+<?php 
+// Header brings in $conn and session_start
+include '../components/header.php'; 
 
-<div class="login-container">
-    <h2>Test Login</h2>
-    <form method="POST">
-        <label for="name">Your Name:</label>
-        <input type="text" name="name" id="name" placeholder="Enter name (optional)">
-        
-        <label for="role">Select User Role:</label>
-        <select name="role" id="role">
-            <option value="Council Administrator">Council Admin</option>
-            <option value="Council_member">Council Member</option>
-            <option value="Resident">Resident</option>
-            <option value="SME">SME</option>
-        </select>
-        <button type="submit">Login</button>
-    </form>
-    <p class="note">This login is only for front-end testing. Sidebar menu adapts to the selected role.</p>
+// Now $conn is available, handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $post_email = trim($_POST['email'] ?? '');
+    $password   = trim($_POST['password'] ?? '');
+
+    // Validation
+    if (empty($post_email)) {
+        $errors[] = "Email is required.";
+    }
+    if (empty($password)) {
+        $errors[] = "Password is required.";
+    }
+
+    if (empty($errors)) {
+        $email_safe = mysqli_real_escape_string($conn, $post_email);
+        $sql = "SELECT * FROM users WHERE email = '$email_safe' LIMIT 1";
+        $result = mysqli_query($conn, $sql);
+
+        if ($result && mysqli_num_rows($result) === 1) {
+            $user = mysqli_fetch_assoc($result);
+
+            if (password_verify($password, $user['password'])) {
+                $user_ref_no = $user['user_ref_no'];
+                $role_id     = $user['role_id'];
+                $status      = null;
+
+                // Check approval status with role id
+                if ($role_id == 1) {
+                // Resident — check resident_profiles
+                $status_result = mysqli_query($conn, "SELECT approval_status FROM resident_profiles 
+                    WHERE user_ref_no = '$user_ref_no' LIMIT 1");
+                if ($row = mysqli_fetch_assoc($status_result)) {
+                    $status = $row['approval_status'];
+                } }
+
+                elseif ($role_id == 2) {
+                // SME — check sme_profiles
+                $status_result = mysqli_query($conn, "SELECT approval_status FROM sme_profiles 
+                    WHERE user_ref_no = '$user_ref_no' LIMIT 1");
+                if ($row = mysqli_fetch_assoc($status_result)) {
+                    $status = $row['approval_status'];
+                } }
+ 
+                elseif ($role_id == 3 || $role_id == 4) {
+                // Council Member and Admin — no profile table, always approved
+                $status = 'approved';
+                }
+                
+                // Set core session variables
+                if ($status === 'approved') {
+                    $_SESSION['user_ref_no'] = $user['user_ref_no'];
+                    $_SESSION['user_name']   = $user['name'];
+                    $_SESSION['user_email']  = $user['email'];
+                    $_SESSION['user_code']   = $user['user_code'];
+                    $_SESSION['role_id']     = $user['role_id'];
+
+                // Set role name
+                $roles = [
+                    1 => 'Resident',
+                    2 => 'SME',
+                    3 => 'Council_member',
+                    4 => 'Council Administrator'];
+                $_SESSION['user_role'] = $roles[$user['role_id']] ?? 'Unknown';
+
+                // Fetch extra details based on role
+                if ($role_id == 2) {
+                    $sme_sql = "SELECT * FROM sme_profiles WHERE user_ref_no = '$user_ref_no' LIMIT 1";
+                    $sme_result = mysqli_query($conn, $sme_sql);
+                    if ($sme_result && mysqli_num_rows($sme_result) === 1) {
+                        $sme = mysqli_fetch_assoc($sme_result);
+                        $_SESSION['sme_id']        = $sme['sme_id'];
+                        $_SESSION['business_name'] = $sme['business_name'];
+                    }
+                }     
+                elseif ($role_id == 1) {
+                    $res_sql = "SELECT * FROM resident_profiles WHERE user_ref_no = '$user_ref_no' LIMIT 1";
+                    $res_result = mysqli_query($conn, $res_sql);
+                    if ($res_result && mysqli_num_rows($res_result) === 1) {
+                        $resident = mysqli_fetch_assoc($res_result);
+                        $_SESSION['given_name']  = $resident['given_name'];
+                        $_SESSION['family_name'] = $resident['family_name'];
+                    }
+                }
+
+                   // Redirect to dashboard
+                    header("Location: dashboard.php?page=home");
+                    exit();
+                }
+
+            elseif ($status == 'pending') {
+                $errors[] = "Your account is currently pending approval. You will be notified once a decision has been made.";
+            }
+            elseif ($status == 'rejected') {
+            $errors[] = "Your account application was not approved. Please contact the council for more information.";
+            }
+            else { $errors[] = "Your account status could not be verified. Please contact support.";} 
+            }
+            else { $errors[] = "Incorrect email or password.";} 
+            }
+            else{$errors[] = "Incorrect email or password.";}
+    }
+}
+?>
+<div class="login-page-wrapper">
+<!-- Background Slideshow uses same styling with bg in register-page -->
+    <div class="login-bg-slideshow">
+        <div class="login-slide" style="background-image: url('../images/event1.jpg')"></div>
+        <div class="login-slide" style="background-image: url('../images/event2.jpg')"></div>
+        <div class="login-slide" style="background-image: url('../images/event3.jpg')"></div>
+        <div class="login-slide" style="background-image: url('../images/event4.jpg')"></div>
+    </div>
+
+    <!-- Dark overlay -->
+    <div class="login-overlay"></div>
+
+<!-- Login form Content -->
+<div class="login-content">
+    <div class="login-card">
+
+        <h2>Welcome Back</h2>
+        <p>Login to your CultureConnect account</p>
+
+        <!-- Error Messages -->
+        <?php if (!empty($errors)) : ?>
+            <div class="alert-box error-box">
+                <strong>Please fix the following:</strong>
+                <ul>
+                    <?php foreach ($errors as $error) : ?>
+                        <li><?php echo $error; ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+
+        <!-- Login Form -->
+        <form id="login-form" action="" method="POST">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email"
+                       value="<?php echo htmlspecialchars($post_email); ?>"
+                       placeholder="Enter your email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password"
+                       placeholder="Enter your password" required>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="submit-btn">Login</button>
+            </div>
+
+            <p class="login-register-link">
+                Don't have an account? 
+                <a href="../pages/register.php">Register here</a>
+            </p>
+        </form>
+
+    </div>
 </div>
+</div>
+
+<?php include '../components/footer.php'; ?>
 
 </body>
 </html>
