@@ -20,7 +20,7 @@ $allowedPages = [
     'profile',
     'activity',
     'votes',
-    'add-products',
+    'add-product',
     'manage-listings',
     'view-votes',
     'settings'
@@ -53,12 +53,34 @@ if (!in_array($page, $allowedPages)) {
 <section class="dashboard-welcome">
   <div class="container welcome-container">
     <div class="welcome-text">
-      <h1 class="welcome-title">Hi, <span id="userName">User</span>! 👋</h1>
+      <h1 class="welcome-title">Hi, 
+      <span id="userName">
+       <?php
+            // Show business name for SME, given name for resident, full name for others
+            if ($_SESSION['role_id'] == 2) {
+                echo htmlspecialchars($_SESSION['business_name'] ?? 'User');
+            } elseif ($_SESSION['role_id'] == 1) {
+                echo htmlspecialchars($_SESSION['given_name'] ?? 'User');
+            } else {
+                echo htmlspecialchars($_SESSION['user_name'] ?? 'User');
+            }
+          ?>
+      </span>! 👋</h1>
       <p class="welcome-subtitle">Welcome to your dashboard</p>
     </div>
     <div class="role-badge">
       <p class="role-label">Role</p>
-      <p class="role-name" id="userRole">Loading...</p>
+      <p class="role-name" id="userRole">
+    <?php
+            $role_display = [
+                1 => 'Resident',
+                2 => 'SME',
+                3 => 'Council Member',
+                4 => 'Council Administrator'
+            ];
+            echo htmlspecialchars($role_display[$_SESSION['role_id']] ?? 'Unknown');
+        ?>
+    </p>
     </div>
   </div>
 </section>

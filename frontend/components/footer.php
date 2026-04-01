@@ -14,7 +14,7 @@
     <div class="column">
         <h4>Quick Links</h4>
         <ul>
-            <li><a href="../pages/home.php">Home</a></li>
+            <li><a href="../pages/index.php">Home</a></li>
             <li><a href="../pages/browse.php">Browse</a></li>
             <li><a href="../pages/dashboard.php">Dashboard</a></li>
         </ul>
