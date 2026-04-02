@@ -410,7 +410,7 @@ CREATE TABLE `user_documents` (
 -- Table structure for table `user_profiles`
 --
 
-CREATE TABLE `user_profiles` (
+CREATE TABLE `resident_profiles` (
   `profile_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `first_name` varchar(50) NOT NULL,
