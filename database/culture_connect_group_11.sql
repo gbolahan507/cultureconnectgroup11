@@ -428,7 +428,7 @@ CREATE TABLE `resident_profiles` (
 -- Dumping data for table `user_profiles`
 --
 
-INSERT INTO `user_profiles` (`profile_id`, `user_id`, `first_name`, `last_name`, `email_address`, `date_of_birth`, `gender`, `address`, `phone`, `postcode`, `created_at`) VALUES
+INSERT INTO `resident_profiles` (`profile_id`, `user_id`, `first_name`, `last_name`, `email_address`, `date_of_birth`, `gender`, `address`, `phone`, `postcode`, `created_at`) VALUES
 (1, 1, 'Kwame', 'Mensah', 'info@heritagehands.co.uk', NULL, 'Prefer not to say', NULL, '07700111222', NULL, '2026-03-30 19:05:10'),
 (2, 2, 'Aisha', 'Rahman', 'contact@rhythmrootsdance.co.uk', NULL, 'Prefer not to say', NULL, '07700333444', NULL, '2026-03-30 19:05:10'),
 (3, 3, 'Daniel', 'Thompson', 'council.officer@hertscouncil.gov.uk', NULL, 'Prefer not to say', NULL, '07700555666', NULL, '2026-03-30 19:05:10'),
