@@ -1660,3 +1660,38 @@ font-size:13px;
 .settings-modal-danger-btn:hover {
     opacity: 0.9;
 }
+
+/* Alert/Error box styling */
+.alert-box {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.alert-box ul {
+    margin: 8px 0 0 20px;
+    padding: 0;
+}
+
+.alert-box ul li {
+    margin-bottom: 4px;
+}
+
+.error-box {
+    background-color: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+}
+
+.success-box {
+    background-color: #f0fdf4;
+    border: 1px solid #86efac;
+    color: #166534;
+}
+
+.warning-box {
+    background-color: #fffbeb;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+}
