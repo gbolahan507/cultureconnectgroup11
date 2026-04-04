@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Redirect if already logged in
-if (isset($_SESSION['user_ref_no'])) {
+if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php?page=home");
     exit();
 }
@@ -29,108 +29,88 @@ $post_email = '';
 include '../components/header.php'; 
 
 // Now $conn is available, handle form submission
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $post_email = trim($_POST['email'] ?? '');
     $password   = trim($_POST['password'] ?? '');
 
-    // Validation
-    if (empty($post_email)) {
-        $errors[] = "Email is required.";
-    }
-    if (empty($password)) {
-        $errors[] = "Password is required.";
-    }
+    if (empty($post_email)) $errors[] = "Email is required.";
+    if (empty($password))   $errors[] = "Password is required.";
 
     if (empty($errors)) {
         $email_safe = mysqli_real_escape_string($conn, $post_email);
-        $sql = "SELECT * FROM users WHERE email = '$email_safe' LIMIT 1";
-        $result = mysqli_query($conn, $sql);
+        $sql        = "SELECT * FROM users WHERE email_address = '$email_safe' LIMIT 1";
+        $result     = mysqli_query($conn, $sql);
 
         if ($result && mysqli_num_rows($result) === 1) {
             $user = mysqli_fetch_assoc($result);
 
-            if (password_verify($password, $user['password'])) {
-                $user_ref_no = $user['user_ref_no'];
-                $role_id     = $user['role_id'];
-                $status      = null;
+            if (password_verify($password, $user['password_hash'])) {
+                $user_id = $user['user_id'];
+                $role    = $user['role'];
 
-                // Check approval status with role id
-                if ($role_id == 1) {
-                // Resident — check resident_profiles
-                $status_result = mysqli_query($conn, "SELECT approval_status FROM resident_profiles 
-                    WHERE user_ref_no = '$user_ref_no' LIMIT 1");
-                if ($row = mysqli_fetch_assoc($status_result)) {
-                    $status = $row['approval_status'];
-                } }
-
-                elseif ($role_id == 2) {
-                // SME — check sme_profiles
-                $status_result = mysqli_query($conn, "SELECT approval_status FROM sme_profiles 
-                    WHERE user_ref_no = '$user_ref_no' LIMIT 1");
-                if ($row = mysqli_fetch_assoc($status_result)) {
-                    $status = $row['approval_status'];
-                } }
- 
-                elseif ($role_id == 3 || $role_id == 4) {
-                // Council Member and Admin — no profile table, always approved
-                $status = 'approved';
-                }
-                
-                // Set core session variables
-                if ($status === 'approved') {
-                    $_SESSION['user_ref_no'] = $user['user_ref_no'];
-                    $_SESSION['user_name']   = $user['name'];
-                    $_SESSION['user_email']  = $user['email'];
-                    $_SESSION['user_code']   = $user['user_code'];
-                    $_SESSION['role_id']     = $user['role_id'];
-
-                // Set role name
-                $roles = [
-                    1 => 'Resident',
-                    2 => 'SME',
-                    3 => 'Council_member',
-                    4 => 'Council Administrator'];
-                $_SESSION['user_role'] = $roles[$user['role_id']] ?? 'Unknown';
-
-                // Fetch extra details based on role
-                if ($role_id == 2) {
-                    $sme_sql = "SELECT * FROM sme_profiles WHERE user_ref_no = '$user_ref_no' LIMIT 1";
-                    $sme_result = mysqli_query($conn, $sme_sql);
-                    if ($sme_result && mysqli_num_rows($sme_result) === 1) {
-                        $sme = mysqli_fetch_assoc($sme_result);
-                        $_SESSION['sme_id']        = $sme['sme_id'];
-                        $_SESSION['business_name'] = $sme['business_name'];
+                // Check account status
+                if ($user['account_status'] !== 'approved') {
+                    if ($user['account_status'] === 'pending') {
+                        $errors[] = "Your account is currently pending approval. You will be notified once a decision has been made.";
+                    } elseif ($user['account_status'] === 'rejected') {
+                        $errors[] = "Your account application was not approved. Please contact the council for more information.";
+                    } else {
+                        $errors[] = "Your account status could not be verified. Please contact support.";
                     }
-                }     
-                elseif ($role_id == 1) {
-                    $res_sql = "SELECT * FROM resident_profiles WHERE user_ref_no = '$user_ref_no' LIMIT 1";
-                    $res_result = mysqli_query($conn, $res_sql);
-                    if ($res_result && mysqli_num_rows($res_result) === 1) {
-                        $resident = mysqli_fetch_assoc($res_result);
-                        $_SESSION['given_name']  = $resident['given_name'];
-                        $_SESSION['family_name'] = $resident['family_name'];
-                    }
-                }
+                } else {
+                    // Set core session variables
+                    $_SESSION['user_id']    = $user['user_id'];
+                    $_SESSION['user_email'] = $user['email_address'];
+                    $_SESSION['user_role']  = $user['role'];
 
-                   // Redirect to dashboard
+                    // Update last login
+                    mysqli_query($conn, "UPDATE users SET last_login = NOW() WHERE user_id = '$user_id'");
+
+                    // Fetch extra details based on role
+                    if ($role === 'SME') {
+                        $sme_result = mysqli_query($conn, "SELECT * FROM sme_profiles WHERE user_id = '$user_id' LIMIT 1");
+                        if ($sme_result && mysqli_num_rows($sme_result) === 1) {
+                            $sme = mysqli_fetch_assoc($sme_result);
+                            $_SESSION['sme_id']        = $sme['sme_id'];
+                            $_SESSION['business_name'] = $sme['business_name'];
+                            $_SESSION['sme_status']    = $sme['approval_status'];
+                        }
+                    } elseif ($role === 'Resident') {
+                        $res_result = mysqli_query($conn, "SELECT * FROM resident_profiles WHERE user_id = '$user_id' LIMIT 1");
+                        if ($res_result && mysqli_num_rows($res_result) === 1) {
+                            $resident = mysqli_fetch_assoc($res_result);
+                            $_SESSION['first_name'] = $resident['first_name'];
+                            $_SESSION['last_name']  = $resident['last_name'];
+                        }
+                    } elseif ($role === 'Council Member' || $role === 'Council Administrator') {
+                        // Fetch from resident_profiles since council members
+                        // profiles are stored there
+                        $res_result = mysqli_query($conn, "SELECT * FROM resident_profiles WHERE user_id = '$user_id' LIMIT 1");
+                        if ($res_result && mysqli_num_rows($res_result) === 1) {
+                            $resident = mysqli_fetch_assoc($res_result);
+                            $_SESSION['first_name'] = $resident['first_name'];
+                            $_SESSION['last_name']  = $resident['last_name'];
+                        }
+                    }
+
+                    // Redirect to dashboard
                     header("Location: dashboard.php?page=home");
                     exit();
                 }
-
-            elseif ($status == 'pending') {
-                $errors[] = "Your account is currently pending approval. You will be notified once a decision has been made.";
+            } else {
+                $errors[] = "Incorrect email or password.";
             }
-            elseif ($status == 'rejected') {
-            $errors[] = "Your account application was not approved. Please contact the council for more information.";
-            }
-            else { $errors[] = "Your account status could not be verified. Please contact support.";} 
-            }
-            else { $errors[] = "Incorrect email or password.";} 
-            }
-            else{$errors[] = "Incorrect email or password.";}
+        } else {
+            $errors[] = "Incorrect email or password.";
+        }
     }
-}
+}  
+
 ?>
+
+<!-- Login Page -->
+
 <div class="login-page-wrapper">
 <!-- Background Slideshow uses same styling with bg in register-page -->
     <div class="login-bg-slideshow">
@@ -151,16 +131,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <p>Login to your CultureConnect account</p>
 
         <!-- Error Messages -->
-        <?php if (!empty($errors)) : ?>
-            <div class="alert-box error-box">
-                <strong>Please fix the following:</strong>
-                <ul>
-                    <?php foreach ($errors as $error) : ?>
-                        <li><?php echo $error; ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-        <?php endif; ?>
+             <?php if (!empty($errors)) : ?>
+                <div class="alert-box error-box">
+                    <?php echo $errors[0]; ?>
+                </div>
+             <?php endif; ?>
 
         <!-- Login Form -->
         <form id="login-form" action="" method="POST">

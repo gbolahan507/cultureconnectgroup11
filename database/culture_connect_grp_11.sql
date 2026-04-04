@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Apr 03, 2026 at 12:14 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost
+-- Generation Time: Apr 04, 2026 at 08:37 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `culture_connect_group_11`
+-- Database: `culture_connect_grp_11`
 --
 
 -- --------------------------------------------------------
@@ -227,7 +227,7 @@ CREATE TABLE `product_service_reviews` (
   `rating` int(11) DEFAULT NULL,
   `comment` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -273,6 +273,13 @@ CREATE TABLE `resident_profiles` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `area_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `resident_profiles`
+--
+
+INSERT INTO `resident_profiles` (`profile_id`, `user_id`, `first_name`, `last_name`, `date_of_birth`, `gender`, `address`, `phone`, `postcode`, `created_at`, `area_id`) VALUES
+(6, 6, 'Council', 'Admin', '2026-03-02', 'Prefer not to say', 'Hatfield', '+44 7700000000', 'AL10 9NA', '2026-04-04 14:41:33', 1);
 
 --
 -- Triggers `resident_profiles`
@@ -392,7 +399,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`, `role`, `email_address`) VALUES
-(1, 'hashed_pw', '2026-03-30 19:04:24', 'approved', 'Council Member', '');
+(6, '$2y$10$vl0Sgha5uievy.RR/NuPdekJNjU0QmCEZy84fLZ9Wt5S8zhekHN2C', '2026-04-04 14:56:11', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
+(7, '$2y$10$Clz6UuYhy3OwxNXEHXL4suJ6ETglieSSljOWa8hAX7gqryZboXi6S', '2026-04-04 15:27:16', 'pending', 'Resident', 'victor@cultureconnect.com');
 
 -- --------------------------------------------------------
 
@@ -706,7 +714,7 @@ ALTER TABLE `product_service_subcategories`
 -- AUTO_INCREMENT for table `resident_profiles`
 --
 ALTER TABLE `resident_profiles`
-  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `sme_profiles`
@@ -718,7 +726,7 @@ ALTER TABLE `sme_profiles`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `user_documents`

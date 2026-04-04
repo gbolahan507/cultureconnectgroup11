@@ -1215,6 +1215,27 @@ font-size:13px;
     text-decoration: underline;
 }
 
+#login-form .form-group {
+    margin-bottom: 20px;
+}
+
+#login-form .submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(90deg, #bf2ab9, #e00180) !important;
+    color: #ffffff !important;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+#login-form .submit-btn:hover {
+    opacity: 0.9;
+}
+
 /* ================================
    Register Page
 ================================ */
@@ -1292,11 +1313,11 @@ font-size:13px;
 }
 
 /* Fix label and input layout - each on its own line */
-.resident-given-name, .resident-family-name,
+.resident-first-name, .resident-last-name,
 .resident-dob, .resident-gender,
 .resident-phone, .resident-email,
-.resident-confirm-email, .resident-address,
-.resident-postcode, .resident-area,
+.resident-address,
+.resident-area,
 .resident-password, .resident-confirm-password,
 .resident-doc-type, .resident-doc-upload,
 .resident-submit,

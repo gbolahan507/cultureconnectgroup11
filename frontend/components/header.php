@@ -6,13 +6,13 @@ if (session_status() === PHP_SESSION_NONE) {
 $current_page = basename($_SERVER['PHP_SELF']);
 
 // Check if user is logged in based on user_role
-$logged_in = isset($_SESSION['user_role']);
+$logged_in = isset($_SESSION['user_id']);
 
 // Establish database connection
 $servername = "localhost"; 
 $username = "root"; 
 $password = ""; 
-$dbname ="culturConnectGroup11";
+$dbname ="culture_connect_grp_11";
 $conn = new mysqli($servername, $username, $password, $dbname);
 ?>
 

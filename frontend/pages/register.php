@@ -3,11 +3,14 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-$success = "";
-$errors = [];
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+if (isset($_SESSION['user_id'])) {
+    header("Location: dashboard.php?page=home");
+    exit();
+}
+
+$success = "";
+$errors  = [];
 ?>
 
 <!DOCTYPE html>
@@ -15,187 +18,217 @@ ini_set('display_errors', 1);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>register - CultureConnect</title>
+    <title>Register - CultureConnect</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/styles1.css">
 </head>
-
 <body>
 
-  <?php include "../components/header.php";
-  // FORM SUBMISSION
-  //(1)For Residents
-      if ($_SERVER["REQUEST_METHOD"] == "POST") {
-          $type = $_POST['form_type'] ?? '';
+<?php
+include "../components/header.php";
 
-          if ($type === 'resident') {
-              $given_name      = trim($_POST['given_name'] ?? '');
-              $family_name     = trim($_POST['family_name'] ?? '');
-              $email           = trim($_POST['email'] ?? '');
-              $confirm_email   = trim($_POST['confirm_email'] ?? '');
-              $password        = trim($_POST['password'] ?? '');
-              $confirm_password = trim($_POST['confirm_password'] ?? '');
-              $dob             = trim($_POST['dob'] ?? '');
-              $gender          = trim($_POST['gender'] ?? '');
-              $phone           = trim($_POST['phone'] ?? '');
-              $address         = trim($_POST['address'] ?? '');
-              $postcode        = trim($_POST['postcode'] ?? '');
-              $area_id         = trim($_POST['area_id'] ?? '');
+// Fetch areas
+$areas_result = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_name");
+$areas        = [];
+while ($row = mysqli_fetch_assoc($areas_result)) {
+    $areas[] = $row;
+}
 
-           // check that user is not already registered
-           $email_safe = mysqli_real_escape_string($conn, $email);
-           $check = mysqli_query($conn, "SELECT user_ref_no FROM users WHERE email = '$email_safe' LIMIT 1");
-           if (mysqli_num_rows($check) > 0) {
-            $errors[] = "Email is already registered.";
-             }
+// Fetch subcategories for SME
+$sub_result    = mysqli_query($conn, "
+    SELECT ps.subcategory_id, ps.subcategory_name, psc.category_name 
+    FROM product_service_subcategories ps
+    JOIN product_service_categories psc ON ps.category_id = psc.category_id
+    ORDER BY psc.category_name, ps.subcategory_name
+");
+$subcategories = [];
+while ($row = mysqli_fetch_assoc($sub_result)) {
+    $subcategories[] = $row;
+}
 
-          // if user does not exist, hash password and
-          if (empty($errors)) {
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $type = $_POST['form_type'] ?? '';
 
-          // Step 1: Insert new resident into resident table
-            $given_safe   = mysqli_real_escape_string($conn, $given_name);
-            $family_safe  = mysqli_real_escape_string($conn, $family_name);
-            $phone_safe   = mysqli_real_escape_string($conn, $phone);
-            $address_safe = mysqli_real_escape_string($conn, $address);
-            $post_code_safe = mysqli_real_escape_string($conn, $postcode);
+    // ================================
+    // RESIDENT REGISTRATION
+    // ================================
+    if ($type === 'resident') {
+        $first_name  = trim($_POST['first_name'] ?? '');
+        $last_name   = trim($_POST['last_name'] ?? '');
+        $email       = trim($_POST['email'] ?? '');
+        $password    = trim($_POST['password'] ?? '');
+        $dob         = trim($_POST['dob'] ?? '');
+        $gender      = trim($_POST['gender'] ?? '');
+        $phone       = trim($_POST['phone'] ?? '');
+        $address     = trim($_POST['address'] ?? '');
+        $area_id     = trim($_POST['area_id'] ?? '');
 
-            $res_sql = "INSERT INTO resident_profiles (given_name, family_name, dob, gender, address, post_code, area_id, phone, approval_status)
-                VALUES ('$given_safe', '$family_safe', '$dob', '$gender', '$address_safe', '$post_code_safe', '$area_id', '$phone_safe', 'pending')";
-          
-          // Step 2: Insert into users table
-          if (mysqli_query($conn, $res_sql)) {
-                $profile_id = mysqli_insert_id($conn);
+        // Get postcode from selected area
+        $area_safe   = mysqli_real_escape_string($conn, $area_id);
+        $area_row    = mysqli_fetch_assoc(mysqli_query($conn, "SELECT postcode FROM areas WHERE area_id = '$area_safe' LIMIT 1"));
+        $postcode    = $area_row['postcode'] ?? '';
 
-          $sql = "INSERT INTO users (name, email, password, role_id, address, area_id)
-                        VALUES ('$given_safe $family_safe',
-                                '$email_safe',
-                                '$hashed_password',
-                                 1,
-                                '$address_safe',
-                                '$area_id' )";
-              
-          // Step 3: Generate and update User Code RES-**** E.g RES-0001
-          if (mysqli_query($conn, $sql)) {
-                    $user_ref_no = mysqli_insert_id($conn);
+        // Validation
+        if (empty($first_name))  $errors[] = "First name is required.";
+        if (empty($last_name))   $errors[] = "Last name is required.";
+        if (empty($email))       $errors[] = "Email is required.";
+        if (empty($password))    $errors[] = "Password is required.";
+        if (strlen($password) < 8) $errors[] = "Password must be at least 8 characters.";
+        if (empty($dob))         $errors[] = "Date of birth is required.";
+        if (empty($gender))      $errors[] = "Please select a gender.";
+        if (empty($phone))       $errors[] = "Phone number is required.";
+        if (empty($address))     $errors[] = "Address is required.";
+        if (empty($area_id))     $errors[] = "Please select an area.";
 
-                    // Generate code
-                    $user_code = 'RES-' . str_pad($user_ref_no, 4, '0', STR_PAD_LEFT);
-                    mysqli_query($conn, "UPDATE users SET user_code = '$user_code' WHERE user_ref_no = '$user_ref_no'");
-
-                    // Update resident_profiles with user_ref_no
-                    mysqli_query($conn, "UPDATE resident_profiles SET user_ref_no = '$user_ref_no' WHERE profile_id = '$profile_id'");
-
-           // Step 4: Handle verification document upload
-           if (isset($_FILES['verification_doc']) && $_FILES['verification_doc']['error'] == 0) {
-                        $allowed = ['application/pdf', 'image/jpeg', 'image/png'];
-                        if (in_array($_FILES['verification_doc']['type'], $allowed)) {
-                            $doc_name = time() . "_" . basename($_FILES['verification_doc']['name']);
-                            $doc_path = "../uploads/verification_documents/" . $doc_name;
-                            move_uploaded_file($_FILES['verification_doc']['tmp_name'], $doc_path);
-                            $doc_type = mysqli_real_escape_string($conn, $_POST['doc_type'] ?? 'ID');
-                            mysqli_query($conn, "INSERT INTO verification_documents 
-                                (user_ref_no, user_type, document_type, document_file)
-                                VALUES ('$user_ref_no', 'Resident', '$doc_type', '$doc_name')");
-                        }
-            }
-            $success = "resident";
-                } 
-          else {
-                    $errors[] = "Registration failed: " . mysqli_error($conn);
-                }
-            } 
-          else {
-                $errors[] = "Profile creation failed: " . mysqli_error($conn);
-            }
-        }
-
-    }
-
-  //(2)For SMEs
-  elseif ($type === 'sme') {
-        $business_name    = trim($_POST['business_name'] ?? '');
-        $category         = trim($_POST['category'] ?? '');
-        $new_category     = trim($_POST['new_category'] ?? '');
-        $business_reg_no  = trim($_POST['business_reg_no'] ?? '');
-        $address          = trim($_POST['address'] ?? '');
-        $postcode         = trim($_POST['postcode'] ?? '');
-        $area_id          = trim($_POST['area_id'] ?? '');
-        $phone            = trim($_POST['phone'] ?? '');
-        $email            = trim($_POST['email'] ?? '');
-        $password         = trim($_POST['password'] ?? '');
-        $description      = trim($_POST['description'] ?? '');
-
-        // Handle new category if Other was selected
-        if ($category === 'other' && !empty($new_category)) {
-            $new_cat_safe = mysqli_real_escape_string($conn, $new_category);
-            mysqli_query($conn, "INSERT INTO business_categories (category_name) VALUES ('$new_cat_safe')");
-            $category = mysqli_insert_id($conn);
-        }
-
-        // check that user is not already registered
-        $email_safe = mysqli_real_escape_string($conn, $email);
-        $check = mysqli_query($conn, "SELECT user_ref_no FROM users WHERE email = '$email_safe' LIMIT 1");
-        if (mysqli_num_rows($check) > 0) {
-            $errors[] = "Email is already registered.";
-        }
-
-          // if user does not exist, hash password
+        // Check email not already registered
         if (empty($errors)) {
-            $hashed_password  = password_hash($password, PASSWORD_DEFAULT);
-            $bname_safe       = mysqli_real_escape_string($conn, $business_name);
-            $breg_safe        = mysqli_real_escape_string($conn, $business_reg_no);
-            $bloc_safe        = mysqli_real_escape_string($conn, $address);
-            $post_code_safe    = mysqli_real_escape_string($conn, $postcode);
-            $bdesc_safe       = mysqli_real_escape_string($conn, $description);
-            $bphone_safe      = mysqli_real_escape_string($conn, $phone);
+            $email_safe = mysqli_real_escape_string($conn, $email);
+            $check      = mysqli_query($conn, "SELECT user_id FROM users WHERE email_address = '$email_safe' LIMIT 1");
+            if (mysqli_num_rows($check) > 0) {
+                $errors[] = "This email is already registered.";
+            }
+        }
 
-          // Step 1: Insert new sme into sme_profiles table
-            $sme_sql = "INSERT INTO sme_profiles (business_name, business_reg_no, business_description, category, address, post_code, area_id, phone, approval_status)
-                VALUES ('$bname_safe', '$breg_safe', '$bdesc_safe', '$category', '$bloc_safe', '$post_code_safe', '$area_id', 
-                        '$bphone_safe', 'pending')";
+        // Document validation
+        if (!isset($_FILES['verification_doc']) || $_FILES['verification_doc']['error'] != 0) {
+            $errors[] = "A verification document is required.";
+        }
 
-          // Step 2: Insert into users table
-          if (mysqli_query($conn, $sme_sql)) {
-                $sme_id = mysqli_insert_id($conn);
+        if (empty($errors)) {
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $first_safe      = mysqli_real_escape_string($conn, $first_name);
+            $last_safe       = mysqli_real_escape_string($conn, $last_name);
+            $phone_safe      = mysqli_real_escape_string($conn, $phone);
+            $address_safe    = mysqli_real_escape_string($conn, $address);
+            $postcode_safe   = mysqli_real_escape_string($conn, $postcode);
+            $doc_type        = $_POST['doc_type'] ?? 'Driver_License';
 
-              $sql = "INSERT INTO users (name, email, password, role_id, address, area_id)
-                      VALUES ('$bname_safe', '$email_safe', '$hashed_password', 2, '$bloc_safe', '$area_id')";
+            // Step 1: Insert into users
+            $sql = "INSERT INTO users (password_hash, account_status, role, email_address)
+                    VALUES ('$hashed_password', 'pending', 'Resident', '$email_safe')";
 
-          // Step 3: Generate and update User Code SME-**** E.g SME-0001
-          if (mysqli_query($conn, $sql)) {
-              $user_ref_no = mysqli_insert_id($conn);
+            if (mysqli_query($conn, $sql)) {
+                $user_id = mysqli_insert_id($conn);
 
-                // Generate user code SME-0001
-                    $user_code = 'SME-' . str_pad($user_ref_no, 4, '0', STR_PAD_LEFT);
-                    mysqli_query($conn, "UPDATE users SET user_code = '$user_code' WHERE user_ref_no = '$user_ref_no'");
+                // Step 2: Insert into resident_profiles
+                // Trigger will auto set area_id from postcode
+                $res_sql = "INSERT INTO resident_profiles 
+                            (user_id, first_name, last_name, date_of_birth, gender, address, phone, postcode)
+                            VALUES ('$user_id', '$first_safe', '$last_safe', '$dob', '$gender', '$address_safe', '$phone_safe', '$postcode_safe')";
 
-                // Update sme_profiles with user_ref_no
-                    mysqli_query($conn, "UPDATE sme_profiles SET user_ref_no = '$user_ref_no' WHERE sme_id = '$sme_id'");
+                if (mysqli_query($conn, $res_sql)) {
 
-          // Step 4: Handle verification document upload
-          if (isset($_FILES['verification_doc']) && $_FILES['verification_doc']['error'] == 0) {
+                    // Step 3: Handle document upload
+                    if (isset($_FILES['verification_doc']) && $_FILES['verification_doc']['error'] == 0) {
                         $allowed = ['application/pdf', 'image/jpeg', 'image/png'];
                         if (in_array($_FILES['verification_doc']['type'], $allowed)) {
-                            $doc_name = time() . "_" . basename($_FILES['verification_doc']['name']);
-                            $doc_path = "../uploads/verification_documents/" . $doc_name;
+                            $doc_name  = time() . "_" . basename($_FILES['verification_doc']['name']);
+                            $doc_path  = "../uploads/verification_documents/" . $doc_name;
                             move_uploaded_file($_FILES['verification_doc']['tmp_name'], $doc_path);
-                            $doc_type = mysqli_real_escape_string($conn, $_POST['doc_type'] ?? 'Business Document');
-                            mysqli_query($conn, "INSERT INTO verification_documents 
-                                (user_ref_no, user_type, document_type, document_file)
-                                VALUES ('$user_ref_no', 'SME', '$doc_type', '$doc_name')");
+
+                            $doc_safe  = mysqli_real_escape_string($conn, $doc_path);
+                            $type_safe = mysqli_real_escape_string($conn, $doc_type);
+                            mysqli_query($conn, "INSERT INTO user_documents (user_id, document_type, file_path)
+                                                VALUES ('$user_id', '$type_safe', '$doc_safe')");
                         }
                     }
-             $success = "sme";
-        }
-      else {
-                    $errors[] = "Registration failed: " . mysqli_error($conn);
+
+                    $success = "resident";
+                } else {
+                    $errors[] = "Profile creation failed: " . mysqli_error($conn);
+                    // Rollback user insert
+                    mysqli_query($conn, "DELETE FROM users WHERE user_id = '$user_id'");
                 }
             } else {
-                $errors[] = "SME profile creation failed: " . mysqli_error($conn);
+                $errors[] = "Registration failed: " . mysqli_error($conn);
             }
         }
     }
-  }
+
+    // ================================
+    // SME REGISTRATION
+    // ================================
+    elseif ($type === 'sme') {
+        $business_name   = trim($_POST['business_name'] ?? '');
+        $subcategory_id  = trim($_POST['subcategory_id'] ?? '');
+        $description     = trim($_POST['description'] ?? '');
+        $area_id         = trim($_POST['area_id'] ?? '');
+        $phone           = trim($_POST['phone'] ?? '');
+        $email           = trim($_POST['email'] ?? '');
+        $password        = trim($_POST['password'] ?? '');
+
+        // Validation
+        if (empty($business_name))  $errors[] = "Business name is required.";
+        if (empty($subcategory_id)) $errors[] = "Please select a business subcategory.";
+        if (empty($description))    $errors[] = "Business description is required.";
+        if (empty($area_id))        $errors[] = "Please select an area.";
+        if (empty($phone))          $errors[] = "Phone number is required.";
+        if (empty($email))          $errors[] = "Email is required.";
+        if (empty($password))       $errors[] = "Password is required.";
+        if (strlen($password) < 8)  $errors[] = "Password must be at least 8 characters.";
+
+        // Check email not already registered
+        if (empty($errors)) {
+            $email_safe = mysqli_real_escape_string($conn, $email);
+            $check      = mysqli_query($conn, "SELECT user_id FROM users WHERE email_address = '$email_safe' LIMIT 1");
+            if (mysqli_num_rows($check) > 0) {
+                $errors[] = "This email is already registered.";
+            }
+        }
+
+        // Document validation
+        if (!isset($_FILES['verification_doc']) || $_FILES['verification_doc']['error'] != 0) {
+            $errors[] = "A verification document is required.";
+        }
+
+        if (empty($errors)) {
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $bname_safe      = mysqli_real_escape_string($conn, $business_name);
+            $bdesc_safe      = mysqli_real_escape_string($conn, $description);
+            $bphone_safe     = mysqli_real_escape_string($conn, $phone);
+            $doc_type        = $_POST['doc_type'] ?? 'Bank_Statement';
+
+            // Step 1: Insert into users
+            $sql = "INSERT INTO users (password_hash, account_status, role, email_address)
+                    VALUES ('$hashed_password', 'pending', 'SME', '$email_safe')";
+
+            if (mysqli_query($conn, $sql)) {
+                $user_id = mysqli_insert_id($conn);
+
+                // Step 2: Insert into sme_profiles
+                $sme_sql = "INSERT INTO sme_profiles 
+                            (user_id, business_name, description, phone, area_id, subcategory_id, approval_status)
+                            VALUES ('$user_id', '$bname_safe', '$bdesc_safe', '$bphone_safe', '$area_id', '$subcategory_id', 'pending')";
+
+                if (mysqli_query($conn, $sme_sql)) {
+
+                    // Step 3: Handle document upload
+                    if (isset($_FILES['verification_doc']) && $_FILES['verification_doc']['error'] == 0) {
+                        $allowed = ['application/pdf', 'image/jpeg', 'image/png'];
+                        if (in_array($_FILES['verification_doc']['type'], $allowed)) {
+                            $doc_name  = time() . "_" . basename($_FILES['verification_doc']['name']);
+                            $doc_path  = "../uploads/verification_documents/" . $doc_name;
+                            move_uploaded_file($_FILES['verification_doc']['tmp_name'], $doc_path);
+
+                            $doc_safe  = mysqli_real_escape_string($conn, $doc_path);
+                            $type_safe = mysqli_real_escape_string($conn, $doc_type);
+                            mysqli_query($conn, "INSERT INTO user_documents (user_id, document_type, file_path)
+                                                VALUES ('$user_id', '$type_safe', '$doc_safe')");
+                        }
+                    }
+
+                    $success = "sme";
+                } else {
+                    $errors[] = "SME profile creation failed: " . mysqli_error($conn);
+                    mysqli_query($conn, "DELETE FROM users WHERE user_id = '$user_id'");
+                }
+            } else {
+                $errors[] = "Registration failed: " . mysqli_error($conn);
+            }
+        }
+    }
+}
 ?>
 
    <div class="register-page-wrapper">
@@ -211,258 +244,225 @@ ini_set('display_errors', 1);
        <div class="register-overlay"></div>
 
       <div class="register-content">
+
       <!-- Toggle Buttons -->
        <div class="user-type-selector">
         <button type="button" onclick="showForm('resident')">Resident</button>
         <button type="button" onclick="showForm('sme')">SME</button>
       </div>
      
-      <!-- Registration Message -->
+      <!-- Registration Error Message -->
        <?php if ($success === 'resident') : ?>
-           <div class="alert-box success-box">
-            <strong>Registration Submitted!</strong>
-            <p>Thank you for registering. Your request is currently pending approval. 
-            You will be notified once your request has been reviewed and a decision has been made.</p>
-            <p><a href="../pages/login.php">Back to Login</a></p>
-           </div>
-      
-      <?php elseif ($success === 'sme') : ?>
-          <div class="alert-box success-box">
-            <strong>Registration Submitted!</strong>
-            <p>Thank you for registering your business. Your request is currently pending approval 
-            by the council. You will be notified once your application has been reviewed and 
-            a decision has been made.</p>
-            <p><a href="../pages/login.php">Back to Login</a></p>
-          </div>
-      <?php endif; ?>
+            <div class="alert-box success-box">
+                <strong>Registration Submitted!</strong>
+                <p>Thank you for registering. Your request is pending approval. You will be notified once a decision has been made.</p>
+                <p><a href="../pages/login.php">Back to Login</a></p>
+            </div>
+        <?php elseif ($success === 'sme') : ?>
+            <div class="alert-box success-box">
+                <strong>Registration Submitted!</strong>
+                <p>Thank you for registering your business. Your application is pending approval by the council. You will be notified once a decision has been made.</p>
+                <p><a href="../pages/login.php">Back to Login</a></p>
+            </div>
+        <?php endif; ?>
 
       <!-- For Form Error Messages -->
        <?php if (!empty($errors)) : ?>
-            <div class="alert-box error-box">
-               <?php echo $errors[0]; ?>
-            </div>
-       <?php endif; ?>
+            <div class="alert-box error-box"><?= $errors[0] ?></div>
+        <?php endif; ?>
 
       <!-- RESIDENT FORM -->
       <form id="resident-form" name="residentForm"
-            action="" method="POST" enctype="multipart/form-data"
-             
-            style="display:block;">
+              action="" method="POST" enctype="multipart/form-data"
+              onsubmit="return validateResident()"
+              style="display:block;">
+
             <input type="hidden" name="form_type" value="resident">
+            <h2>Resident Registration Form</h2>
+            <div id="residentErrorBox" class="alert-box error-box" style="display:none;"></div>
 
-          <h2>Resident Registration Form</h2>
-          <div id="residentErrorBox" class="alert-box error-box" style="display:none;"></div>
- 
-          <div class="resident-given-name">
-            <label>Given Name</label>
-            <input type="text" name="given_name" placeholder="Enter given name">
-        </div>
+            <div class="resident-first-name">
+                <label>First Name</label>
+                <input type="text" name="first_name" placeholder="Enter first name">
+            </div>
 
-        <div class="resident-family-name">
-            <label>Family Name</label>
-            <input type="text" name="family_name" placeholder="Enter family name">
-        </div>
+            <div class="resident-last-name">
+                <label>Last Name</label>
+                <input type="text" name="last_name" placeholder="Enter last name">
+            </div>
 
-        <div class="resident-dob">
-            <label>Date of Birth</label>
-            <input type="text" name="dob" placeholder="YYYY-MM-DD" 
-                   max="<?php echo date('Y-m-d'); ?>">
-        </div>
+            <div class="resident-dob">
+                <label>Date of Birth</label>
+                <input type="text" name="dob" placeholder="YYYY-MM-DD" max="<?= date('Y-m-d') ?>">
+            </div>
 
-        <div class="resident-gender">
-            <label>Gender</label>
-            <select name="gender">
-                <option value="" disabled selected>Select gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-            </select>
-        </div>
+            <div class="resident-gender">
+                <label>Gender</label>
+                <select name="gender">
+                    <option value="" disabled selected>Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Non-binary">Non-binary</option>
+                    <option value="Transgender">Transgender</option>
+                    <option value="Genderqueer">Genderqueer</option>
+                    <option value="Genderfluid">Genderfluid</option>
+                    <option value="Agender">Agender</option>
+                    <option value="Intersex">Intersex</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+            </div>
 
-        <div class="resident-phone">
-            <label>Phone Number</label>
-            <input type="text" name="phone" placeholder="Include country code e.g. +44 7911 123456">
-        </div>
+            <div class="resident-phone">
+                <label>Phone Number</label>
+                <input type="text" name="phone" placeholder="Include country code e.g. +44 7911 123456">
+            </div>
 
-        <div class="resident-email">
-            <label>Email Address</label>
-            <input type="email" name="email" placeholder="Enter email address">
-        </div>
+            <div class="resident-email">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="Enter email address">
+            </div>
 
-        <div class="resident-confirm-email">
-            <label>Confirm Email</label>
-            <input type="email" name="confirm_email" placeholder="Confirm email address">
-        </div>
+            <div class="resident-address">
+                <label>Address</label>
+                <input type="text" name="address" placeholder="Enter your address">
+            </div>
 
-        <div class="resident-address">
-            <label>Address</label>
-            <input type="text" name="address" placeholder="Enter your address">
-        </div>
+            <div class="resident-area">
+                <label>Area</label>
+                <select name="area_id">
+                    <option value="" disabled selected>Select your area</option>
+                    <?php foreach ($areas as $area) : ?>
+                        <option value="<?= $area['area_id'] ?>">
+                            <?= htmlspecialchars($area['area_name']) ?> (<?= $area['postcode'] ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-        <div class="resident-postcode">
-            <label>Postcode</label>
-            <input type="text" name="postcode" placeholder="Enter in capitals e.g. AL10 9AB">
-        </div>
+            <div class="resident-password">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter password (min 8 characters)">
+            </div>
 
-        <div class="resident-area">
-            <label>Area</label>
-            <select name="area_id">
-                <option value="" disabled selected>Select your area</option>
-                <?php
-                $areas_result = mysqli_query($conn, "SELECT * FROM areas");
-                while ($area = mysqli_fetch_assoc($areas_result)) {
-                    echo "<option value='" . $area['area_id'] . "'>" . $area['area_name'] . "</option>";
-                }
-                ?>
-            </select>
-        </div>
+            <div class="resident-confirm-password">
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" placeholder="Confirm your password">
+            </div>
 
-        <div class="resident-password">
-            <label>Password</label>
-            <input type="password" name="password" placeholder="Enter password (min 8 characters)">
-        </div>
+            <div class="resident-doc-type">
+                <label>Verification Document Type</label>
+                <select name="doc_type">
+                    <option value="" disabled selected>Select document type</option>
+                    <option value="Driver_License">Driver License</option>
+                    <option value="Bank_Statement">Bank Statement</option>
+                    <option value="Utility_Bill">Utility Bill</option>
+                </select>
+            </div>
 
-        <div class="resident-confirm-password">
-            <label>Confirm Password</label>
-            <input type="password" name="confirm_password" placeholder="Confirm your password">
-        </div>
+            <div class="resident-doc-upload">
+                <label>Upload Verification Document <small>(PDF, JPG or PNG)</small></label>
+                <input type="file" name="verification_doc" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
 
-        <div class="resident-doc-type">
-            <label>Verification Document Type</label>
-            <select name="doc_type">
-                <option value="" disabled selected>Select document type</option>
-                <option value="ID">ID (Passport, Driving Licence, National ID)</option>
-                <option value="Bank Statement">Bank Statement (address confirmation)</option>
-            </select>
-        </div>
+            <div class="resident-submit">
+                <button type="submit" class="submit-btn">Register</button>
+            </div>
 
-        <div class="resident-doc-upload">
-            <label>Upload Verification Document <small>(PDF, JPG or PNG)</small></label>
-            <input type="file" name="verification_doc" accept=".pdf,.jpg,.jpeg,.png">
-        </div>
-
-        <div class="resident-submit">
-            <button type="submit" class="submit-btn">Register</button>
-        </div>
-
-      </form>
+        </form>
 
       <!-- SME FORM -->
       <form id="sme-form" name="smeForm"
-            action="" method="POST" enctype="multipart/form-data"
-            onsubmit="return validateSME()"
-            style="display:none;">
+              action="" method="POST" enctype="multipart/form-data"
+              onsubmit="return validateSME()"
+              style="display:none;">
+
             <input type="hidden" name="form_type" value="sme">
-
             <h2>SME Registration Form</h2>
+            <div id="smeErrorBox" class="alert-box error-box" style="display:none;"></div>
 
-        <div id="smeErrorBox" class="alert-box error-box" style="display:none;"></div>
+            <div class="sme-business-name">
+                <label>Business Name</label>
+                <input type="text" name="business_name" placeholder="Enter business name">
+            </div>
 
-        <div class="sme-business-name">
-            <label>Business Name</label>
-            <input type="text" name="business_name" placeholder="Enter business name">
-        </div>
-        
-        <div class="sme-reg-number">
-            <label>Business Registration Number</label>
-            <input type="text" name="business_reg_no" placeholder="Enter registration number - BN 123">
-        </div>
+            <div class="sme-subcategory">
+                <label>Business Subcategory</label>
+                <select name="subcategory_id" id="sme-subcategory-select">
+                    <option value="" disabled selected>Select a subcategory</option>
+                    <?php
+                    $current_category = '';
+                    foreach ($subcategories as $sub) :
+                        if ($sub['category_name'] !== $current_category) {
+                            if ($current_category !== '') echo '</optgroup>';
+                            echo '<optgroup label="' . htmlspecialchars($sub['category_name']) . '">';
+                            $current_category = $sub['category_name'];
+                        }
+                    ?>
+                        <option value="<?= $sub['subcategory_id'] ?>">
+                            <?= htmlspecialchars($sub['subcategory_name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                    <?php if ($current_category !== '') echo '</optgroup>'; ?>
+                </select>
+            </div>
 
-        <div class="sme-description">
-            <label>Business Description</label>
-            <textarea name="description" placeholder="Describe your business"></textarea>
-        </div>
+            <div class="sme-description">
+                <label>Business Description</label>
+                <textarea name="description" placeholder="Describe your business"></textarea>
+            </div>
 
-        <div class="sme-category">
-                <label>Business Category</label>
-                <select name="category" id="sme-category-select" onchange="showCategoryDescription()">
-                <option value="" disabled selected>Select a category</option>
-                <?php
-                    $categories_result = mysqli_query($conn, "SELECT * FROM business_categories");
-                    while ($cat = mysqli_fetch_assoc($categories_result)) {
-                     echo "<option value='" . $cat['category_id'] . "' 
-                    data-description='" . htmlspecialchars($cat['description']) . "'>" 
-                     . htmlspecialchars($cat['category_name']) . 
-                    "</option>";}
-                ?>
-                <option value="other">Other (Add New)</option>
-              </select>
-          <!-- Business Categories Description box -->
-          <div id="sme-category-description" class="category-description-box" style="display:none;"></div>
-       </div>
+            <div class="sme-area">
+                <label>Area</label>
+                <select name="area_id">
+                    <option value="" disabled selected>Select your area</option>
+                    <?php foreach ($areas as $area) : ?>
+                        <option value="<?= $area['area_id'] ?>">
+                            <?= htmlspecialchars($area['area_name']) ?> (<?= $area['postcode'] ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-        <div class="sme-new-category" id="newCategoryBox" style="display:none;">
-            <label>New Category Name</label>
-            <input type="text" name="new_category" placeholder="Enter new category name">
-        </div>
+            <div class="sme-phone">
+                <label>Phone Number</label>
+                <input type="text" name="phone" placeholder="Include country code e.g. +44 7911 123456">
+            </div>
 
-        <div class="sme-address">
-            <label>Business Address</label>
-            <input type="text" name="address" placeholder="Enter business address">
-        </div>
+            <div class="sme-email">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="Enter email address">
+            </div>
 
-        <div class="sme-postcode">
-            <label>Postcode</label>
-            <input type="text" name="postcode" placeholder="Enter in capitals e.g. AL10 9AB">
-        </div>
+            <div class="sme-password">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter password (min 8 characters)">
+            </div>
 
-        <div class="sme-area">
-            <label>Area</label>
-            <select name="area_id">
-                <option value="" disabled selected>Select your area</option>
-                <?php
-                $areas_result2 = mysqli_query($conn, "SELECT * FROM areas");
-                while ($area = mysqli_fetch_assoc($areas_result2)) {
-                    echo "<option value='" . $area['area_id'] . "'>" . $area['area_name'] . "</option>";
-                }
-                ?>
-            </select>
-        </div>
+            <div class="sme-confirm-password">
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" placeholder="Confirm your password">
+            </div>
 
-        <div class="sme-phone">
-            <label>Phone Number</label>
-            <input type="text" name="phone" placeholder="Include country code e.g. +44 7911 123456">
-        </div>
+            <div class="sme-doc-type">
+                <label>Verification Document Type</label>
+                <select name="doc_type">
+                    <option value="" disabled selected>Select document type</option>
+                    <option value="Bank_Statement">Bank Statement</option>
+                    <option value="Utility_Bill">Utility Bill</option>
+                </select>
+            </div>
 
-        <div class="sme-email">
-            <label>Email Address</label>
-            <input type="email" name="email" placeholder="Enter email address">
-        </div>
+            <div class="sme-doc-upload">
+                <label>Upload Verification Document <small>(PDF, JPG or PNG)</small></label>
+                <input type="file" name="verification_doc" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
 
-        <div class="sme-confirm-email">
-            <label>Confirm Email</label>
-            <input type="email" name="confirm_email" placeholder="Confirm email address">
-        </div>
+            <div class="sme-submit">
+                <button type="submit" class="submit-btn">Register</button>
+            </div>
 
-        <div class="sme-password">
-            <label>Password</label>
-            <input type="password" name="password" placeholder="Enter password (min 8 characters)">
-        </div>
-
-        <div class="sme-confirm-password">
-            <label>Confirm Password</label>
-            <input type="password" name="confirm_password" placeholder="Confirm your password">
-        </div>
-
-        <div class="sme-doc-type">
-            <label>Verification Document Type</label>
-            <select name="doc_type">
-                <option value="" disabled selected>Select document type</option>
-                <option value="Business Registration Document">Business Registration Document</option>
-                <option value="Bank Statement">Bank Statement</option>
-            </select>
-        </div>
-
-        <div class="sme-doc-upload">
-            <label>Upload Verification Document <small>(PDF, JPG or PNG)</small></label>
-            <input type="file" name="verification_doc" accept=".pdf,.jpg,.jpeg,.png">
-        </div>
-
-        <div class="sme-submit">
-            <button type="submit" class="submit-btn">Register</button>
-        </div>
-
-      </form>
+        </form>
              
       </div>
 
@@ -470,170 +470,69 @@ ini_set('display_errors', 1);
   <?php include "../components/footer.php"; ?>
 
   <script>
-    function showForm(type) {
-        document.getElementById('resident-form').style.display =
-        (type === 'resident') ? 'block' : 'none';
-        document.getElementById('sme-form').style.display =
-        (type === 'sme') ? 'block' : 'none';
-     }
+function showForm(type) {
+    document.getElementById('resident-form').style.display = (type === 'resident') ? 'block' : 'none';
+    document.getElementById('sme-form').style.display      = (type === 'sme') ? 'block' : 'none';
 
-    function toggleNewCategory(select) {
-        var newCategoryBox = document.getElementById('newCategoryBox');
-        newCategoryBox.style.display = (select.value === 'other') ? 'block' : 'none';
-     }
+    document.getElementById('btn-resident').classList.toggle('active', type === 'resident');
+    document.getElementById('btn-sme').classList.toggle('active', type === 'sme');
+}
 
-     function validateResident() {
-        var errorBox = document.getElementById('residentErrorBox');
-        var form = document.forms['residentForm'];
-        errorBox.style.display = 'none';
-        errorBox.innerHTML = '';
+function validateResident() {
+    var errorBox = document.getElementById('residentErrorBox');
+    var form     = document.forms['residentForm'];
+    errorBox.style.display = 'none';
 
-          function showError(msg, field) {
-          errorBox.style.display = 'block';
-          errorBox.innerHTML = msg;
-       
-          if (field) field.focus();
-          return false; }
-
-       var emailRegex = /^[A-Za-z0-9._]+\@[A-Za-z]+\.[A-Za-z]{2,5}$/;
-       var dobRegex   = /^\d{4}-\d{2}-\d{2}$/;
-
-          if (form.given_name.value == '')
-          return showError('Please enter your given name.', form.given_name);
-
-          if (form.family_name.value == '')
-          return showError('Please enter your family name.', form.family_name);
-
-          if (form.dob.value == '')
-          return showError('Please enter your date of birth.', form.dob);
-
-          if (!dobRegex.test(form.dob.value))
-          return showError('Date of birth must be in YYYY-MM-DD format.', form.dob);
-
-          if (form.gender.value == '')
-          return showError('Please select your gender.', form.gender);
-
-          if (form.phone.value == '')
-          return showError('Please enter your phone number.', form.phone);
-
-          if (form.email.value == '')
-          return showError('Please enter your email address.', form.email);
-
-          if (!emailRegex.test(form.email.value))
-          return showError('Please enter a valid email address.', form.email);
-
-          if (form.confirm_email.value != form.email.value)
-          return showError('Email addresses do not match.', form.confirm_email);
-
-          if (form.address.value == '')
-          return showError('Please enter your address.', form.address);
-
-          if (form.postcode.value == '')
-          return showError('Please enter your postcode.', form.postcode);
-
-          if (form.area_id.value == '')
-          return showError('Please select your area.', form.area_id);
-
-          if (form.password.value == '')
-          return showError('Please enter a password.', form.password);
-
-          if (form.password.value.length < 8)
-          return showError('Password must be at least 8 characters.', form.password);
-
-          if (form.confirm_password.value != form.password.value)
-          return showError('Passwords do not match.', form.confirm_password);
-
-          if (form.doc_type.value == '')
-          return showError('Please select a verification document type.', form.doc_type);
-
-          if (form.verification_doc.value == '')
-          return showError('Please upload a verification document.', form.verification_doc);
-
-        return true;
-       }
-
-      function validateSME() {
-         var errorBox = document.getElementById('smeErrorBox');
-         var form = document.forms['smeForm'];
-         errorBox.style.display = 'none';
-         errorBox.innerHTML = '';
-
-              function showError(msg, field) {
-              errorBox.style.display = 'block';
-              errorBox.innerHTML = msg;
-              if (field) field.focus();
-              return false;}
-
-        var emailRegex = /^[A-Za-z0-9._]+\@[A-Za-z]+\.[A-Za-z]{2,5}$/;
-
-           if (form.business_name.value == '')
-           return showError('Please enter your business name.', form.business_name);
-
-           if (form.category.value == '')
-           return showError('Please select a business category.', form.category);
-
-           if (form.category.value === 'other' && form.new_category.value == '')
-           return showError('Please enter a new category name.', form.new_category);
-
-           if (form.business_reg_no.value == '')
-           return showError('Please enter your business registration number.', form.business_reg_no);
-
-           if (form.description.value == '')
-           return showError('Please enter a business description.', form.description);
-
-           if (form.address.value == '')
-           return showError('Please enter your business address.', form.address);
-
-           if (form.postcode.value == '')
-           return showError('Please enter your postcode.', form.postcode);
-
-           if (form.area_id.value == '')
-           return showError('Please select your area.', form.area_id);
-
-           if (form.phone.value == '')
-           return showError('Please enter your phone number.', form.phone);
-
-           if (form.email.value == '')
-           return showError('Please enter your email address.', form.email);
-
-           if (!emailRegex.test(form.email.value))
-           return showError('Please enter a valid email address.', form.email);
-
-          if (form.confirm_email.value != form.email.value)
-          return showError('Email addresses do not match.', form.confirm_email);
-
-          if (form.password.value == '')
-          return showError('Please enter a password.', form.password);
-
-          if (form.password.value.length < 8)
-          return showError('Password must be at least 8 characters.', form.password);
-
-          if (form.confirm_password.value != form.password.value)
-          return showError('Passwords do not match.', form.confirm_password);
-
-         if (form.doc_type.value == '')
-         return showError('Please select a verification document type.', form.doc_type);
-
-         if (form.verification_doc.value == '')
-         return showError('Please upload a verification document.', form.verification_doc);
-
-      return true;
+    function showError(msg, field) {
+        errorBox.style.display = 'block';
+        errorBox.innerHTML     = msg;
+        if (field) field.focus();
+        return false;
     }
-  
-  function showCategoryDescription() {
-    const select      = document.getElementById('sme-category-select');
-    const descBox     = document.getElementById('sme-category-description');
-    const selectedOption = select.options[select.selectedIndex];
-    const description = selectedOption.getAttribute('data-description');
 
-    if (description && description.trim() !== '' && select.value !== 'other') {
-        descBox.style.display = 'block';
-        descBox.innerText = description;
-    } else {
-        descBox.style.display = 'none';
+    if (form.first_name.value == '')      return showError('Please enter your first name.', form.first_name);
+    if (form.last_name.value == '')       return showError('Please enter your last name.', form.last_name);
+    if (form.dob.value == '')             return showError('Please enter your date of birth.', form.dob);
+    if (form.gender.value == '')          return showError('Please select your gender.', form.gender);
+    if (form.phone.value == '')           return showError('Please enter your phone number.', form.phone);
+    if (form.email.value == '')           return showError('Please enter your email address.', form.email);
+    if (form.address.value == '')         return showError('Please enter your address.', form.address);
+    if (form.area_id.value == '')         return showError('Please select your area.', form.area_id);
+    if (form.password.value == '')        return showError('Please enter a password.', form.password);
+    if (form.password.value.length < 8)  return showError('Password must be at least 8 characters.', form.password);
+    if (form.confirm_password.value !== form.password.value) return showError('Passwords do not match.', form.confirm_password);
+    if (form.doc_type.value == '')        return showError('Please select a verification document type.', form.doc_type);
+    if (form.verification_doc.value == '') return showError('Please upload a verification document.', form.verification_doc);
+
+    return true;
+}
+
+function validateSME() {
+    var errorBox = document.getElementById('smeErrorBox');
+    var form     = document.forms['smeForm'];
+    errorBox.style.display = 'none';
+
+    function showError(msg, field) {
+        errorBox.style.display = 'block';
+        errorBox.innerHTML     = msg;
+        if (field) field.focus();
+        return false;
     }
-    }  
 
+    if (form.business_name.value == '')   return showError('Please enter your business name.', form.business_name);
+    if (form.subcategory_id.value == '')  return showError('Please select a business subcategory.', form.subcategory_id);
+    if (form.description.value == '')     return showError('Please enter a business description.', form.description);
+    if (form.area_id.value == '')         return showError('Please select your area.', form.area_id);
+    if (form.phone.value == '')           return showError('Please enter your phone number.', form.phone);
+    if (form.email.value == '')           return showError('Please enter your email address.', form.email);
+    if (form.password.value == '')        return showError('Please enter a password.', form.password);
+    if (form.password.value.length < 8)  return showError('Password must be at least 8 characters.', form.password);
+    if (form.confirm_password.value !== form.password.value) return showError('Passwords do not match.', form.confirm_password);
+    if (form.doc_type.value == '')        return showError('Please select a verification document type.', form.doc_type);
+    if (form.verification_doc.value == '') return showError('Please upload a verification document.', form.verification_doc);
+
+    return true;
+}
   </script>
 
 </body>
