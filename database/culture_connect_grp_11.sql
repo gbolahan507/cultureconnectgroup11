@@ -66,6 +66,9 @@ CREATE TABLE `listings` (
   `item_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+ALTER TABLE `listings`
+ADD COLUMN `caption` VARCHAR(255) NOT NULL AFTER `title`;
+
 -- --------------------------------------------------------
 
 --
@@ -78,6 +81,9 @@ CREATE TABLE `listing_images` (
   `image_url` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `listing_images`
+ADD COLUMN `is_primary` TINYINT(1) DEFAULT 0 AFTER `image_url`;
 
 -- --------------------------------------------------------
 
