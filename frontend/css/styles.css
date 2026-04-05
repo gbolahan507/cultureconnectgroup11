@@ -637,6 +637,21 @@ font-size:13px;
     border-color: #230c33;
 }
 
+#users-search-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #230c33;
+    box-sizing: border-box;
+}
+
+.search-container {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
 /* Type badges */
 .users-type-badge {
     padding: 4px 10px;

@@ -1,25 +1,27 @@
 <?php
-// Start session if not already active
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-$allowedRoles = ['Council Administrator', 'Council_member'];
-// Check if user is logged in AND has the correct role
+
+$allowedRoles = ['Council Administrator', 'Council Member'];
 if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowedRoles)) {
-    // Redirect unauthorized users
     header("Location: ../pages/dashboard.php?page=home");
     exit();
 }
 
 // Handle AJAX status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    ob_clean(); //prevent output corruption
     header('Content-Type: application/json');
-
+        
     if ($_POST['action'] === 'update_status') {
-        $user_ref_no    = (int)$_POST['user_ref_no'];
-        $type           = $_POST['type'];
-        $status         = $_POST['status'];
-        $reject_comment = mysqli_real_escape_string($conn, trim($_POST['reject_comment'] ?? ''));
+        $user_id = (int)$_POST['user_id'];
+        $type    = $_POST['type'];
+        $status  = $_POST['status'];
+        $comment = mysqli_real_escape_string($conn, trim($_POST['reject_comment'] ?? ''));
 
         $valid_statuses = ['pending', 'approved', 'rejected'];
         if (!in_array($status, $valid_statuses)) {
@@ -27,75 +29,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             exit();
         }
 
+        // Always update users.account_status for login access
+        mysqli_query($conn, "UPDATE users SET account_status = '$status' WHERE user_id = '$user_id'");
+
+        // For SME also update sme_profiles.approval_status
         if ($type === 'sme') {
-            $sql = "UPDATE sme_profiles SET approval_status = '$status', reject_comment = '$reject_comment' WHERE user_ref_no = '$user_ref_no'";
-        } else {
-            $sql = "UPDATE resident_profiles SET approval_status = '$status', reject_comment = '$reject_comment' WHERE user_ref_no = '$user_ref_no'";
+            mysqli_query($conn, "UPDATE sme_profiles SET approval_status = '$status' WHERE user_id = '$user_id'");
         }
 
-        if (mysqli_query($conn, $sql)) {
-            echo json_encode(['success' => true, 'message' => 'Status updated successfully.']);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Database error: ' . mysqli_error($conn)]);
-        }
+        // Log decision - only if approved or rejected AND document exists
+        if ($status === 'approved' || $status === 'rejected') {
+          $admin_id   = $_SESSION['user_id'];
+          $doc_result = mysqli_query($conn, "SELECT document_id FROM user_documents WHERE user_id = '$user_id' LIMIT 1");
+          $doc_row    = mysqli_fetch_assoc($doc_result);
+          $doc_id     = $doc_row['document_id'] ?? null;
+
+         if ($doc_id) {
+          mysqli_query($conn, "INSERT INTO user_registration_requests 
+            (user_id, admin_id, decision, comments, document_id)
+            VALUES ('$user_id', '$admin_id', '$status', '$comment', '$doc_id')");
+    }
+}
+
+       // Return success regardless of whether log was created
+        echo json_encode(['success' => true, 'message' => 'Status updated successfully.']);
         exit();
     }
 }
 
-// Fetch users based on status filter
-$statusFilter   = $_GET['status'] ?? 'pending';
-$validStatuses  = ['pending', 'approved', 'rejected'];
+// Status filter
+$statusFilter  = $_GET['status'] ?? 'pending';
+$validStatuses = ['pending', 'approved', 'rejected'];
 if (!in_array($statusFilter, $validStatuses)) $statusFilter = 'pending';
 
 // Fetch SME profiles
 $smeQuery = $conn->prepare("
     SELECT 
-        s.user_ref_no,
+        s.sme_id,
+        u.user_id,
         s.business_name AS name,
         s.created_at AS date_submitted,
         s.approval_status,
-        s.reject_comment,
-        s.business_reg_no,
-        s.business_description,
-        s.address,
-        s.post_code,
+        s.description AS business_description,
         s.phone,
         'sme' AS type,
-        u.email
+        u.email_address AS email,
+        u.account_status
     FROM sme_profiles s
-    JOIN users u ON s.user_ref_no = u.user_ref_no
-    WHERE s.approval_status = ?
+    JOIN users u ON s.user_id = u.user_id
+    WHERE u.account_status = ?
     ORDER BY s.created_at DESC
 ");
 $smeQuery->bind_param("s", $statusFilter);
 $smeQuery->execute();
 $smes = $smeQuery->get_result()->fetch_all(MYSQLI_ASSOC);
 
-// Fetch Resident profiles
+// Fetch Resident/Council profiles
 $resQuery = $conn->prepare("
     SELECT 
-        r.user_ref_no,
-        CONCAT(r.given_name, ' ', r.family_name) AS name,
-        r.profile_created_at AS date_submitted,
-        r.approval_status,
-        r.reject_comment,
-        r.dob,
+        r.profile_id,
+        u.user_id,
+        CONCAT(r.first_name, ' ', r.last_name) AS name,
+        r.created_at AS date_submitted,
+        u.account_status AS approval_status,
+        r.date_of_birth AS dob,
         r.gender,
         r.address,
-        r.post_code,
+        r.postcode AS post_code,
         r.phone,
-        u.email,
-        u.role_id,
-        CASE u.role_id
-            WHEN 1 THEN 'resident'
-            WHEN 3 THEN 'council_member'
-            WHEN 4 THEN 'council_admin'
+        u.email_address AS email,
+        u.role,
+        CASE u.role
+            WHEN 'Resident' THEN 'resident'
+            WHEN 'Council Member' THEN 'council_member'
+            WHEN 'Council Administrator' THEN 'council_admin'
             ELSE 'resident'
         END AS type
     FROM resident_profiles r
-    JOIN users u ON r.user_ref_no = u.user_ref_no
-    WHERE r.approval_status = ?
-    ORDER BY r.profile_created_at DESC
+    JOIN users u ON r.user_id = u.user_id
+    WHERE u.account_status = ?
+    AND u.role != 'SME'
+    ORDER BY r.created_at DESC
 ");
 $resQuery->bind_param("s", $statusFilter);
 $resQuery->execute();
@@ -120,87 +134,93 @@ $users = array_merge($smes, $residents);
 
     <!-- Status Tabs -->
     <div class="status-tabs">
-        <a href="?page=manage-users&status=pending">
-            <button class="tab <?= $statusFilter === 'pending' ? 'active' : '' ?>">Requests</button>
-        </a>
-        <a href="?page=manage-users&status=approved">
-            <button class="tab <?= $statusFilter === 'approved' ? 'active' : '' ?>">Approved</button>
-        </a>
-        <a href="?page=manage-users&status=rejected">
-            <button class="tab <?= $statusFilter === 'rejected' ? 'active' : '' ?>">Rejected</button>
-        </a>
+        <button class="tab <?= $statusFilter === 'pending' ? 'active' : '' ?>"
+                onclick="window.location.href='?page=manage-users&status=pending'">
+            Requests
+        </button>
+        <button class="tab <?= $statusFilter === 'approved' ? 'active' : '' ?>"
+                onclick="window.location.href='?page=manage-users&status=approved'">
+            Approved
+        </button>
+        <button class="tab <?= $statusFilter === 'rejected' ? 'active' : '' ?>"
+                onclick="window.location.href='?page=manage-users&status=rejected'">
+            Rejected
+        </button>
     </div>
 
     <!-- Search -->
     <div class="search-container">
-        <input type="text" id="users-search-input" 
-               placeholder="Search by name, email or type" 
+        <input type="text" id="users-search-input"
+               placeholder="Search by name, email or type"
                onkeyup="filterUsersTable()">
     </div>
 
     <!-- Users Table -->
-    <div class="table-scroll">
-    <table class="users-table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Email</th>
-                <th>Date Submitted</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="users-table-body">
-                <?php if (empty($users)) : ?>
+    <div class="users-table-wrapper">
+        <div class="table-scroll">
+            <table class="users-table">
+                <thead>
                     <tr>
-                        <td colspan="7" style="text-align:center; padding:20px; color:rgba(0,0,0,0.5);">
-                            No <?= $statusFilter ?> users found.
-                        </td>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Email</th>
+                        <th>Date Submitted</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
-                <?php else : ?>
-                    <?php $count = 1; foreach ($users as $user) : ?>
+                </thead>
+                <tbody id="users-table-body">
+                    <?php if (empty($users)) : ?>
                         <tr>
-                            <td><?= $count++ ?></td>
-                            <td><?= htmlspecialchars($user['name']) ?></td>
-                            <td>
-                                <?php
-                                     $typeLabels = [
-                                             'resident'       => 'Resident',
-                                             'sme'            => 'SME',
-                                             'council_member' => 'Council Member',
-                                             'council_admin'  => 'Council Admin' ];
-                                ?>
-                                <span class="users-type-badge users-type-<?= $user['type'] ?>">
-                                       <?= $typeLabels[$user['type']] ?? ucfirst($user['type']) ?>
-                                </span>
-                            </td>
-                            <td><?= htmlspecialchars($user['email']) ?></td>
-                            <td><?= htmlspecialchars(date('d M Y', strtotime($user['date_submitted']))) ?></td>
-                            <td>
-                                <span class="status <?= $user['approval_status'] ?>">
-                                    <?= ucfirst($user['approval_status']) ?>
-                                </span>
-                            </td>
-                            <td>
-                                <button class="view-btn" onclick="openUsersViewModal(<?= htmlspecialchars(json_encode($user)) ?>)">
-                                    View
-                                </button>
-                                <button class="edit-btn" onclick="openUsersStatusModal(
-                                    '<?= $user['user_ref_no'] ?>',
-                                    '<?= $user['type'] ?>',
-                                    '<?= $user['approval_status'] ?>',
-                                    '<?= addslashes($user['name']) ?>'
-                                )">
-                                    Status
-                                </button>
+                            <td colspan="7" style="text-align:center; padding:20px; color:rgba(0,0,0,0.5);">
+                                No <?= $statusFilter ?> users found.
                             </td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-    </table>
+                    <?php else : ?>
+                        <?php $count = 1; foreach ($users as $user) : ?>
+                            <tr>
+                                <td><?= $count++ ?></td>
+                                <td><?= htmlspecialchars($user['name']) ?></td>
+                                <td>
+                                    <?php
+                                    $typeLabels = [
+                                        'resident'       => 'Resident',
+                                        'sme'            => 'SME',
+                                        'council_member' => 'Council Member',
+                                        'council_admin'  => 'Council Admin'
+                                    ];
+                                    ?>
+                                    <span class="users-type-badge users-type-<?= $user['type'] ?>">
+                                        <?= $typeLabels[$user['type']] ?? ucfirst($user['type']) ?>
+                                    </span>
+                                </td>
+                                <td><?= htmlspecialchars($user['email']) ?></td>
+                                <td><?= htmlspecialchars(date('d M Y', strtotime($user['date_submitted']))) ?></td>
+                                <td>
+                                    <span class="status <?= $user['approval_status'] ?>">
+                                        <?= ucfirst($user['approval_status']) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="view-btn" onclick="openUsersViewModal(<?= htmlspecialchars(json_encode($user)) ?>)">
+                                        View
+                                    </button>
+                                    <button class="edit-btn" onclick="openUsersStatusModal(
+                                        '<?= $user['user_id'] ?>',
+                                        '<?= $user['type'] ?>',
+                                        '<?= $user['approval_status'] ?>',
+                                        '<?= addslashes($user['name']) ?>'
+                                    )">
+                                        Status
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 
 </div>
@@ -212,23 +232,22 @@ $users = array_merge($smes, $residents);
             <h3>User Details</h3>
             <span class="users-modal-close-btn" onclick="closeUsersModal('users-view-modal')">&times;</span>
         </div>
-        <div class="users-modal-body" id="users-view-modal-body">
-        </div>
+        <div class="users-modal-body" id="users-view-modal-body"></div>
         <div class="users-modal-footer">
             <button class="users-modal-cancel-btn" onclick="closeUsersModal('users-view-modal')">Close</button>
         </div>
     </div>
 </div>
 
-   <!-- Status Update Modal -->
-  <div id="users-status-modal" class="users-modal-overlay" style="display:none;">
+<!-- Status Update Modal -->
+<div id="users-status-modal" class="users-modal-overlay" style="display:none;">
     <div class="users-modal-box">
         <div class="users-modal-header">
             <h3>Update Status</h3>
             <span class="users-modal-close-btn" onclick="closeUsersModal('users-status-modal')">&times;</span>
         </div>
         <div id="users-status-error" class="alert-box error-box" style="display:none;"></div>
-        <input type="hidden" id="users-status-ref-no">
+        <input type="hidden" id="users-status-user-id">
         <input type="hidden" id="users-status-type">
         <div class="users-modal-body">
             <p id="users-status-name" style="font-weight:600; color:#230c33; margin-bottom:15px;"></p>
@@ -261,26 +280,19 @@ function closeUsersModal(id) {
     document.getElementById(id).style.display = 'none';
 }
 
-// View modal
 function openUsersViewModal(user) {
     const body = document.getElementById('users-view-modal-body');
-    let html = '<table class="users-detail-table">';
+    let html   = '<table class="users-detail-table">';
 
     if (user.type === 'sme') {
         html += `
             <tr><td><strong>Business Name</strong></td><td>${user.name}</td></tr>
             <tr><td><strong>Email</strong></td><td>${user.email}</td></tr>
             <tr><td><strong>Phone</strong></td><td>${user.phone || 'N/A'}</td></tr>
-            <tr><td><strong>Address</strong></td><td>${user.address || 'N/A'}</td></tr>
-            <tr><td><strong>Postcode</strong></td><td>${user.post_code || 'N/A'}</td></tr>
-            <tr><td><strong>Reg Number</strong></td><td>${user.business_reg_no || 'N/A'}</td></tr>
             <tr><td><strong>Description</strong></td><td>${user.business_description || 'N/A'}</td></tr>
             <tr><td><strong>Date Submitted</strong></td><td>${user.date_submitted}</td></tr>
             <tr><td><strong>Status</strong></td><td>${user.approval_status}</td></tr>
         `;
-        if (user.reject_comment) {
-            html += `<tr><td><strong>Rejection Comment</strong></td><td>${user.reject_comment}</td></tr>`;
-        }
     } else {
         html += `
             <tr><td><strong>Full Name</strong></td><td>${user.name}</td></tr>
@@ -293,9 +305,6 @@ function openUsersViewModal(user) {
             <tr><td><strong>Date Submitted</strong></td><td>${user.date_submitted}</td></tr>
             <tr><td><strong>Status</strong></td><td>${user.approval_status}</td></tr>
         `;
-        if (user.reject_comment) {
-            html += `<tr><td><strong>Rejection Comment</strong></td><td>${user.reject_comment}</td></tr>`;
-        }
     }
 
     html += '</table>';
@@ -303,71 +312,65 @@ function openUsersViewModal(user) {
     openUsersModal('users-view-modal');
 }
 
-// Status modal
-function openUsersStatusModal(refNo, type, currentStatus, name) {
-    document.getElementById('users-status-ref-no').value = refNo;
-    document.getElementById('users-status-type').value = type;
-    document.getElementById('users-status-select').value = currentStatus;
+function openUsersStatusModal(userId, type, currentStatus, name) {
+    document.getElementById('users-status-user-id').value  = userId;
+    document.getElementById('users-status-type').value     = type;
+    document.getElementById('users-status-select').value   = currentStatus;
     document.getElementById('users-status-name').innerText = name;
-    document.getElementById('users-reject-comment').value = '';
+    document.getElementById('users-reject-comment').value  = '';
     document.getElementById('users-status-error').style.display = 'none';
     toggleUsersRejectComment();
     openUsersModal('users-status-modal');
 }
 
-// Show/hide reject comment
 function toggleUsersRejectComment() {
-    const status  = document.getElementById('users-status-select').value;
-    const box     = document.getElementById('users-reject-comment-box');
-    box.style.display = (status === 'rejected') ? 'block' : 'none';
+    const status = document.getElementById('users-status-select').value;
+    document.getElementById('users-reject-comment-box').style.display =
+        (status === 'rejected') ? 'block' : 'none';
 }
 
-// Submit status update
 function submitUsersStatus() {
-    const refNo   = document.getElementById('users-status-ref-no').value;
-    const type    = document.getElementById('users-status-type').value;
-    const status  = document.getElementById('users-status-select').value;
-    const comment = document.getElementById('users-reject-comment').value.trim();
+    const userId   = document.getElementById('users-status-user-id').value;
+    const type     = document.getElementById('users-status-type').value;
+    const status   = document.getElementById('users-status-select').value;
+    const comment  = document.getElementById('users-reject-comment').value.trim();
     const errorBox = document.getElementById('users-status-error');
 
     const formData = new FormData();
     formData.append('action', 'update_status');
-    formData.append('user_ref_no', refNo);
+    formData.append('user_id', userId);
     formData.append('type', type);
     formData.append('status', status);
     formData.append('reject_comment', comment);
 
-    fetch('', { method: 'POST', body: formData })
-        .then(res => res.json())
-        .then(data => {
+    fetch('../pages/manage-users.php', { method: 'POST', body: formData })
+        .then(res => res.json()) 
+        .then(data => { 
             if (data.success) {
                 closeUsersModal('users-status-modal');
                 const msg = document.getElementById('users-action-message');
-                msg.className = 'alert-box success-box';
-                msg.innerText = data.message;
+                msg.className   = 'alert-box success-box';
+                msg.innerText   = data.message;
                 msg.style.display = 'block';
                 setTimeout(() => location.reload(), 1500);
             } else {
                 errorBox.style.display = 'block';
-                errorBox.innerText = data.message;
+                errorBox.innerText     = data.message;
             }
         })
-        .catch(() => {
+        .catch(() => { 
             errorBox.style.display = 'block';
-            errorBox.innerText = 'Something went wrong. Please try again.';
+            errorBox.innerText     = 'Something went wrong. Please try again.';
         });
 }
 
-// Search filter
 function filterUsersTable() {
     const input = document.getElementById('users-search-input').value.toLowerCase();
-    const rows  = document.querySelectorAll('#users-table-body tr');
-    rows.forEach(row => {
+    document.querySelectorAll('#users-table-body tr').forEach(row => {
         row.style.display = row.textContent.toLowerCase().includes(input) ? '' : 'none';
     });
 }
 
-// Close modal on outside click
 window.addEventListener('click', (e) => {
     ['users-view-modal', 'users-status-modal'].forEach(id => {
         const modal = document.getElementById(id);

@@ -20,7 +20,6 @@ $errors  = [];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - CultureConnect</title>
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/styles1.css">
 </head>
 <body>
 
@@ -135,6 +134,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     }
 
                     $success = "resident";
+                     // check error
+                     error_log("Registration successful for: " . $email);
+
+
                 } else {
                     $errors[] = "Profile creation failed: " . mysqli_error($conn);
                     // Rollback user insert
@@ -246,10 +249,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <div class="register-content">
 
       <!-- Toggle Buttons -->
-       <div class="user-type-selector">
-        <button type="button" onclick="showForm('resident')">Resident</button>
-        <button type="button" onclick="showForm('sme')">SME</button>
-      </div>
+       <div class="user-type-selector" <?php echo (!empty($success)) ? 'style="display:none;"' : ''; ?>>
+            <button type="button" onclick="showForm('resident')">Resident</button>
+            <button type="button" onclick="showForm('sme')">SME</button>
+        </div>
      
       <!-- Registration Error Message -->
        <?php if ($success === 'resident') : ?>
@@ -275,7 +278,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <form id="resident-form" name="residentForm"
               action="" method="POST" enctype="multipart/form-data"
               onsubmit="return validateResident()"
-              style="display:block;">
+              style="<?php echo ($success === 'resident' || $success === 'sme') ? 'display:none;' : 'display:block;'; ?>">
 
             <input type="hidden" name="form_type" value="resident">
             <h2>Resident Registration Form</h2>
@@ -375,7 +378,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <form id="sme-form" name="smeForm"
               action="" method="POST" enctype="multipart/form-data"
               onsubmit="return validateSME()"
-              style="display:none;">
+              style="<?php echo ($success === 'resident' || $success === 'sme') ? 'display:none;' : 'display:none;'; ?>">
 
             <input type="hidden" name="form_type" value="sme">
             <h2>SME Registration Form</h2>

@@ -287,7 +287,7 @@ function showAreaMessage(message, type) {
 function sendAreaRequest(data, callback) {
     const formData = new FormData();
     for (const key in data) formData.append(key, data[key]);
-    fetch('', { method: 'POST', body: formData })
+    fetch('../pages/manage-area.php', { method: 'POST', body: formData })
         .then(res => res.json())
         .then(callback)
         .catch(() => showAreaMessage('Something went wrong. Please try again.', 'error'));
