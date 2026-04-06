@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 // Handle redirect before any output
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -25,7 +27,8 @@ $post_email = '';
 <body>
 
 <?php 
-// Header brings in $conn and session_start
+// database and Header brings in $conn and session_start
+include '../db_connection.php';
 include '../components/header.php'; 
 
 // Now $conn is available, handle form submission

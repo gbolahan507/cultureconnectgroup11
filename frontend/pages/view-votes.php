@@ -21,6 +21,7 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowed
                 </svg>';
        $title = "SME Votes";
        $subtitle = "View and analyze voting results and trends.";
+       include '../db_connection.php';
        include '../components/section_header.php';
      ?>
 

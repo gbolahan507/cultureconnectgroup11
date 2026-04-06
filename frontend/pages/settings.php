@@ -3,22 +3,21 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-$allowedRoles = ['Council Administrator', 'Council_member', 'Resident', 'SME'];
 
-// Check if user is logged in AND has the correct role
+include '../db_connection.php';
+
+$allowedRoles = ['Council Administrator', 'Council Member', 'Resident', 'SME'];
 if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowedRoles)) {
-    // Redirect unauthorized users
     header("Location: ../pages/dashboard.php?page=home");
     exit();
 }
 
-$user_ref_no = $_SESSION['user_ref_no'];
-$role        = $_SESSION['user_role'];
-$success     = "";
-$errors      = [];
+$user_id = $_SESSION['user_id'];
+$role    = $_SESSION['user_role'];
 
 // Handle AJAX requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    ob_clean();
     header('Content-Type: application/json');
 
     // CHANGE PASSWORD
@@ -42,17 +41,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             exit();
         }
 
-        // Fetch current password from database
-        $result = mysqli_query($conn, "SELECT password FROM users WHERE user_ref_no = '$user_ref_no' LIMIT 1");
+        // Fetch current password
+        $result = mysqli_query($conn, "SELECT password_hash FROM users WHERE user_id = '$user_id' LIMIT 1");
         $user   = mysqli_fetch_assoc($result);
 
-        if (!password_verify($current_password, $user['password'])) {
+        if (!password_verify($current_password, $user['password_hash'])) {
             echo json_encode(['success' => false, 'message' => 'Current password is incorrect.']);
             exit();
         }
 
         $hashed = password_hash($new_password, PASSWORD_DEFAULT);
-        mysqli_query($conn, "UPDATE users SET password = '$hashed' WHERE user_ref_no = '$user_ref_no'");
+        mysqli_query($conn, "UPDATE users SET password_hash = '$hashed' WHERE user_id = '$user_id'");
         echo json_encode(['success' => true, 'message' => 'Password updated successfully.']);
         exit();
     }
@@ -62,23 +61,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $confirm_password = $_POST['confirm_password'] ?? '';
 
         // Fetch current password
-        $result = mysqli_query($conn, "SELECT password FROM users WHERE user_ref_no = '$user_ref_no' LIMIT 1");
+        $result = mysqli_query($conn, "SELECT password_hash FROM users WHERE user_id = '$user_id' LIMIT 1");
         $user   = mysqli_fetch_assoc($result);
 
-        if (!password_verify($confirm_password, $user['password'])) {
+        if (!password_verify($confirm_password, $user['password_hash'])) {
             echo json_encode(['success' => false, 'message' => 'Password is incorrect.']);
             exit();
         }
 
-        // Update approval_status based on role
+        // Set account_status to pending for all roles
+        mysqli_query($conn, "UPDATE users SET account_status = 'pending' WHERE user_id = '$user_id'");
+
+        // Also update sme_profiles approval_status for SME
         if ($role === 'SME') {
-            mysqli_query($conn, "UPDATE sme_profiles SET approval_status = 'pending' WHERE user_ref_no = '$user_ref_no'");
-        } else {
-            // Resident, Council Member
-            mysqli_query($conn, "UPDATE resident_profiles SET approval_status = 'pending' WHERE user_ref_no = '$user_ref_no'");
+            mysqli_query($conn, "UPDATE sme_profiles SET approval_status = 'pending' WHERE user_id = '$user_id'");
         }
 
-        // Destroy session and redirect to login
+        // Destroy session
         session_destroy();
         echo json_encode(['success' => true, 'message' => 'Your account has been deactivated.']);
         exit();
@@ -86,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 }
 
 ?>
-<div class="view-analytics-page">
+<div class="settings-page">
 
 <?php
        $icon = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -95,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 </svg>';
        $title = "Settings";
        $subtitle = "Manage your account and system preferences.";
+       include '../db_connection.php';
        include '../components/section_header.php';
      ?>
 
@@ -195,17 +195,22 @@ function submitChangePassword() {
     formData.append('new_password', newPass);
     formData.append('confirm_password', confirm);
 
-    fetch('', { method: 'POST', body: formData })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('current-password').value = '';
-                document.getElementById('new-password').value = '';
-                document.getElementById('confirm-new-password').value = '';
-                showSettingsMessage(data.message, 'success');
-            } else {
-                errorBox.style.display = 'block';
-                errorBox.innerText = data.message;
+    fetch('../pages/settings.php', { method: 'POST', body: formData })
+        .then(res => res.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.success) {
+                    document.getElementById('current-password').value = '';
+                    document.getElementById('new-password').value = '';
+                    document.getElementById('confirm-new-password').value = '';
+                    showSettingsMessage(data.message, 'success');
+                } else {
+                    errorBox.style.display = 'block';
+                    errorBox.innerText = data.message;
+                }
+            } catch(e) {
+                showSettingsMessage('Something went wrong. Please try again.', 'error');
             }
         })
         .catch(() => showSettingsMessage('Something went wrong. Please try again.', 'error'));
@@ -238,19 +243,24 @@ function submitDeactivate() {
     formData.append('action', 'deactivate');
     formData.append('confirm_password', password);
 
-    fetch('', { method: 'POST', body: formData })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                closeDeactivateModal();
-                showSettingsMessage(data.message, 'success');
-                setTimeout(() => {
-                    window.location.href = '../pages/login.php';
-                }, 2000);
-            } else {
-                closeDeactivateModal();
-                errorBox.style.display = 'block';
-                errorBox.innerText = data.message;
+    fetch('../pages/settings.php', { method: 'POST', body: formData })
+        .then(res => res.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.success) {
+                    closeDeactivateModal();
+                    showSettingsMessage(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = '../pages/login.php';
+                    }, 2000);
+                } else {
+                    closeDeactivateModal();
+                    errorBox.style.display = 'block';
+                    errorBox.innerText = data.message;
+                }
+            } catch(e) {
+                showSettingsMessage('Something went wrong. Please try again.', 'error');
             }
         })
         .catch(() => showSettingsMessage('Something went wrong. Please try again.', 'error'));

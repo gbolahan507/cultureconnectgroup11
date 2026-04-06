@@ -1,10 +1,10 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+include '../db_connection.php';
 
 $allowedRoles = ['Council Administrator', 'Council Member'];
 if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowedRoles)) {
@@ -126,6 +126,7 @@ $users = array_merge($smes, $residents);
         </svg>';
        $title = "Manage Users";
        $subtitle = "Here you can View, Approve or Reject Registration Requests.";
+       include '../db_connection.php';
        include '../components/section_header.php';
      ?> 
 
@@ -344,24 +345,30 @@ function submitUsersStatus() {
     formData.append('reject_comment', comment);
 
     fetch('../pages/manage-users.php', { method: 'POST', body: formData })
-        .then(res => res.json()) 
-        .then(data => { 
+    .then(res => res.text())
+    .then(text => {
+        try {
+            const data = JSON.parse(text);
             if (data.success) {
                 closeUsersModal('users-status-modal');
                 const msg = document.getElementById('users-action-message');
-                msg.className   = 'alert-box success-box';
-                msg.innerText   = data.message;
+                msg.className     = 'alert-box success-box';
+                msg.innerText     = data.message;
                 msg.style.display = 'block';
                 setTimeout(() => location.reload(), 1500);
             } else {
                 errorBox.style.display = 'block';
                 errorBox.innerText     = data.message;
             }
-        })
-        .catch(() => { 
+        } catch(e) {
             errorBox.style.display = 'block';
             errorBox.innerText     = 'Something went wrong. Please try again.';
-        });
+        }
+    })
+    .catch(() => {
+        errorBox.style.display = 'block';
+        errorBox.innerText     = 'Something went wrong. Please try again.';
+    });
 }
 
 function filterUsersTable() {

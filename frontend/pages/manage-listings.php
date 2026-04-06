@@ -21,6 +21,7 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowed
                </svg>';
        $title = "Listings";
        $subtitle = "Review and manage all product and service listings.";
+       include '../db_connection.php';
        include '../components/section_header.php';
      ?>
 

@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -11,12 +14,11 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowed
     exit();
 }
 
-$user_ref_no = $_SESSION['user_ref_no'];
-$role        = $_SESSION['user_role'];
-$role_id     = $_SESSION['role_id'];
+$user_ref_no = $_SESSION['user_id'];
+$role        = $_SESSION['role'];
 
 // Fetch base user details
-$user_result = mysqli_query($conn, "SELECT * FROM users WHERE user_ref_no = '$user_ref_no' LIMIT 1");
+$user_result = mysqli_query($conn, "SELECT * FROM users WHERE user_id = '$user_ref_no' LIMIT 1");
 $user        = mysqli_fetch_assoc($user_result);
 
 // Fetch area name
@@ -35,7 +37,7 @@ if ($role_id == 2) {
     $profile        = mysqli_fetch_assoc($profile_result) ?? [];
 } else {
     // Resident, Council Member, Council Admin
-    $profile_result = mysqli_query($conn, "SELECT * FROM resident_profiles WHERE user_ref_no = '$user_ref_no' LIMIT 1");
+    $profile_result = mysqli_query($conn, "SELECT * FROM resident_profiles WHERE user_id = '$user_ref_no' LIMIT 1");
     $profile        = mysqli_fetch_assoc($profile_result) ?? [];
 }
 
@@ -60,6 +62,7 @@ $status = $profile['approval_status'] ?? 'N/A';
             </svg>';
        $title = "Profile";
        $subtitle = "Your profile details at a glance.";
+       include '../db_connection.php';
        include '../components/section_header.php';
      ?> 
 

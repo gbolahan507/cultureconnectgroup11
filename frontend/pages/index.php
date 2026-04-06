@@ -12,7 +12,10 @@
 
 <body>
 
-<?php include "../components/header.php"; ?>
+<?php 
+include '../db_connection.php';
+include "../components/header.php"; 
+?>
 
 
 <h1>Welcome to CultureConnect</h1>

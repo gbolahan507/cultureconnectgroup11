@@ -45,6 +45,7 @@ if (!in_array($page, $allowedPages)) {
 <?php
     /*
     Import  header component*/
+    include '../db_connection.php';
     include "../components/header.php";
 ?>
 

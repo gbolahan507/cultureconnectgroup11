@@ -130,6 +130,7 @@ while ($row = mysqli_fetch_assoc($sub_result)) {
         </svg>';
        $title = "Add New Listing";
        $subtitle = "Product and Service.";
+       include '../db_connection.php';
        include '../components/section_header.php';
      ?> 
 

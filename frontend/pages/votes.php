@@ -21,6 +21,7 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowed
                  </svg>';
        $title = "My Votes";
        $subtitle = "Votes summary and Trends";
+       include '../db_connection.php';
        include '../components/section_header.php';
      ?>
 

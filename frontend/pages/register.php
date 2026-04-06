@@ -24,6 +24,7 @@ $errors  = [];
 <body>
 
 <?php
+include '../db_connection.php';
 include "../components/header.php";
 
 // Fetch areas

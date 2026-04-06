@@ -1,19 +1,22 @@
 <?php
-// Start session if not already active
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-$allowedRoles = ['Council Administrator', 'Council_member'];
 
-// Check if user is logged in AND has the correct role
+include '../db_connection.php';
+
+$allowedRoles = ['Council Administrator', 'Council Member'];
 if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowedRoles)) {
-    // Redirect unauthorized users
     header("Location: ../pages/dashboard.php?page=home");
     exit();
 }
 
 // Handle AJAX requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    ob_clean();
     header('Content-Type: application/json');
     $action = $_POST['action'];
 
@@ -58,30 +61,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // DELETE AREA
+   // DELETE AREA
     if ($action === 'delete') {
-        $area_id = (int)$_POST['area_id'];
+    $area_id = (int)$_POST['area_id'];
 
-        $check  = mysqli_query($conn, "SELECT COUNT(*) as total FROM users WHERE area_id = '$area_id'");
-        $row    = mysqli_fetch_assoc($check);
-        $check2 = mysqli_query($conn, "SELECT COUNT(*) as total FROM resident_profiles WHERE area_id = '$area_id'");
-        $row2   = mysqli_fetch_assoc($check2);
-        $check3 = mysqli_query($conn, "SELECT COUNT(*) as total FROM sme_profiles WHERE area_id = '$area_id'");
-        $row3   = mysqli_fetch_assoc($check3);
+    // Check resident_profiles
+    $check2 = mysqli_query($conn, "SELECT COUNT(*) as total FROM resident_profiles WHERE area_id = '$area_id'");
+    $row2   = mysqli_fetch_assoc($check2);
 
-        if ($row['total'] > 0 || $row2['total'] > 0 || $row3['total'] > 0) {
-            echo json_encode(['success' => false, 'message' => 'This area cannot be deleted as it has registered users or profiles assigned to it.']);
-            exit();
-        }
+    // Check sme_profiles
+    $check3 = mysqli_query($conn, "SELECT COUNT(*) as total FROM sme_profiles WHERE area_id = '$area_id'");
+    $row3   = mysqli_fetch_assoc($check3);
 
-        $sql = "DELETE FROM areas WHERE area_id = '$area_id'";
-        if (mysqli_query($conn, $sql)) {
-            echo json_encode(['success' => true, 'message' => 'Area deleted successfully.']);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Database error: ' . mysqli_error($conn)]);
-        }
+    if ($row2['total'] > 0 || $row3['total'] > 0) {
+        echo json_encode(['success' => false, 'message' => 'This area cannot be deleted as it has registered users assigned to it.']);
         exit();
     }
+
+    $sql = "DELETE FROM areas WHERE area_id = '$area_id'";
+    if (mysqli_query($conn, $sql)) {
+        echo json_encode(['success' => true, 'message' => 'Area deleted successfully.']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Database error: ' . mysqli_error($conn)]);
+    }
+    exit();
+   } 
+
+    // If no action matched
+    echo json_encode(['success' => false, 'message' => 'Invalid action.']);
+    exit();
 }
 
 // Fetch all areas
@@ -98,6 +106,7 @@ $areas = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC");
             </svg>';
        $title = "Manage Area";
        $subtitle = "Here you can View, Add, Edit, or Remove Areas under the Council's Jurisdiction.";
+       include '../db_connection.php';
        include '../components/section_header.php';
      ?>
 

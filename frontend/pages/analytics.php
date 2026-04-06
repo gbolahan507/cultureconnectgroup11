@@ -21,6 +21,7 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowed
                 </svg>';
        $title = "Analytics";
        $subtitle = "View insights, trends, and performance metrics across the platform.";
+       include '../db_connection.php';
        include '../components/section_header.php';
      ?>
 
