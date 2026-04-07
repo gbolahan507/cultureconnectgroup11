@@ -22,11 +22,11 @@ A platform for residents to browse and vote on cultural products and services in
 
 | Name | Role | Username | password | 
 |------|------|------| ------|
-| Victor Ikekhua| Product Owner | victor@cultureconnect.com | Test1234!|
-| Oyenike Alade | Requirement Engineer, Database Admin, QA | nike@cultureconnect.com | Test1234!|
-| Kenneth Onyeabor | Scrum Master, QA | jake@cultureconnect.com | Test1234!|
-| Josephine Abioye| Frontend Developer, Project Coordinator | josephine@cultureconnect.com | Test1234!|
-| Habeeblahi Hameed | Backend Developer | habeeb@cultureconnect.com | Test1234!|
+| Victor Ikekhua| Product Owner | victor@gmail.com | Test1234!|
+| Oyenike Alade | Requirement Engineer, Database Admin, QA | nike@gmail.com | Test1234!|
+| Kenneth Onyeabor | Scrum Master, QA | jake@gmail.com | Test1234!|
+| Josephine Abioye| Frontend Developer, Project Coordinator | josephine@gmail.com | Test1234!|
+| Habeeblahi Hameed | Backend Developer | habeeb@gmail.com | Test1234!|
 | Admin | Council_Administrator | admin@cultureconnect.com | Test1234!|
 | Council Member | Council_member |Cmember@cultureconnect.com | Test1234!|
 | SME | SME Business | info@harmonywellbeing.com | Test1234!|
