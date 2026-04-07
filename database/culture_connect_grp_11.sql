@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 06, 2026 at 01:05 PM
+-- Generation Time: Apr 07, 2026 at 11:42 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -283,7 +283,10 @@ CREATE TABLE `resident_profiles` (
 INSERT INTO `resident_profiles` (`profile_id`, `user_id`, `first_name`, `last_name`, `date_of_birth`, `gender`, `address`, `phone`, `postcode`, `created_at`, `area_id`) VALUES
 (6, 6, 'Council', 'Admin', '2026-03-02', 'Prefer not to say', 'Hatfield', '+44 7700000000', 'AL10 9NA', '2026-04-04 14:41:33', 1),
 (8, 8, 'Oyenike', 'Alade', '2022-03-13', 'Female', 'Hatfield', '+44 7000000002', 'AL10 0ED', '2026-04-04 19:16:05', 3),
-(9, 9, 'Josephine', 'Abioye', '2025-10-02', 'Female', 'Hatfield', '+44 7000000003', 'AL10 0ED', '2026-04-05 19:44:24', 3);
+(9, 9, 'Josephine', 'Abioye', '2025-10-02', 'Female', 'Hatfield', '+44 7000000003', 'AL10 0ED', '2026-04-05 19:44:24', 3),
+(10, 11, 'Victor', 'Ikekhua', '2019-03-20', 'Male', 'Hatfield', '+44 70000000001', 'AL10 0WB', '2026-04-07 09:16:06', 4),
+(11, 12, 'Kenneth', 'Onyeabor', '2021-10-21', 'Male', 'Hatfield', '+44 7000000004', 'AL10 0JT', '2026-04-07 09:19:30', 5),
+(12, 13, 'Habeeblahi', 'Hameed', '2020-02-19', 'Male', 'Hatfield', '+44 7000000005', 'AL10 9SB', '2026-04-07 09:21:02', 2);
 
 --
 -- Triggers `resident_profiles`
@@ -411,10 +414,12 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`, `role`, `email_address`) VALUES
 (6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-06 10:39:48', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
-(7, '$2y$10$Clz6UuYhy3OwxNXEHXL4suJ6ETglieSSljOWa8hAX7gqryZboXi6S', '2026-04-04 15:27:16', 'pending', 'Resident', 'victor@cultureconnect.com'),
-(8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-04 19:16:05', 'approved', 'Resident', 'nike@cultureconnect.com'),
-(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-06 10:38:40', 'pending', 'Resident', 'josephine@cultureconnect.com'),
-(10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-06 10:56:31', 'approved', 'SME', 'info@harmonywellbeing.com');
+(8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-04 19:16:05', 'approved', 'Resident', 'nike@gmail.com'),
+(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-06 10:38:40', 'pending', 'Resident', 'josephine@gmail.com'),
+(10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-06 10:56:31', 'approved', 'SME', 'info@harmonywellbeing.com'),
+(11, '$2y$10$pEGsw9izjII4FX3gzzaJ4.QSDLc70c6nGub9/1IU78TLgASSZUsf.', '2026-04-07 09:16:06', 'pending', 'Resident', 'victor@gmail.com'),
+(12, '$2y$10$aSQiHxr71NTJT0.ohlXxDezWv08wpyxyjnP1tR9q7tgxhcBsX.Uai', '2026-04-07 09:19:30', 'pending', 'Resident', 'jake@gmail.com'),
+(13, '$2y$10$L680iiTY/OYAE9v./tg99O4N1T/ao6GKU/AnYCR6KNO4jLIimJKHu', '2026-04-07 09:21:02', 'pending', 'Resident', 'habeeb@gmail.com');
 
 -- --------------------------------------------------------
 
@@ -438,7 +443,10 @@ CREATE TABLE `user_documents` (
 INSERT INTO `user_documents` (`document_id`, `user_id`, `document_type`, `file_path`, `verification_status`, `uploaded_at`) VALUES
 (1, 8, 'Bank_Statement', '../uploads/verification_documents/1775330165_bank_statement.pdf', 'pending', '2026-04-04 19:16:05'),
 (2, 9, 'Bank_Statement', '../uploads/verification_documents/1775418264_bank_statement.pdf', 'pending', '2026-04-05 19:44:24'),
-(3, 10, 'Bank_Statement', '../uploads/verification_documents/1775472895_bank_statement.pdf', 'pending', '2026-04-06 10:54:55');
+(3, 10, 'Bank_Statement', '../uploads/verification_documents/1775472895_bank_statement.pdf', 'pending', '2026-04-06 10:54:55'),
+(4, 11, 'Bank_Statement', '../uploads/verification_documents/1775553366_bank_statement.pdf', 'pending', '2026-04-07 09:16:06'),
+(5, 12, 'Bank_Statement', '../uploads/verification_documents/1775553570_bank_statement.pdf', 'pending', '2026-04-07 09:19:30'),
+(6, 13, 'Bank_Statement', '../uploads/verification_documents/1775553662_bank_statement.pdf', 'pending', '2026-04-07 09:21:02');
 
 -- --------------------------------------------------------
 
@@ -748,7 +756,7 @@ ALTER TABLE `product_service_subcategories`
 -- AUTO_INCREMENT for table `resident_profiles`
 --
 ALTER TABLE `resident_profiles`
-  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `sme_profiles`
@@ -760,13 +768,13 @@ ALTER TABLE `sme_profiles`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `user_documents`
 --
 ALTER TABLE `user_documents`
-  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `user_registration_requests`
