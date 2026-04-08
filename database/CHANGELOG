@@ -1,0 +1,39 @@
+# Changelog
+
+## 08 April 2026
+
+### Listings Table Updates
+- Added a `created_by` field to store which user created a listing
+- Added an `approved_by` field to track who approved the listing
+- Updated the `status` field to support a simple workflow:
+  - pending (waiting for approval)
+  - active (approved)
+  - inactive (disabled)
+- Created a trigger to make sure only council admins or council members can approve listings
+- Added foreign keys to link listings properly with users and SMEs
+
+---
+
+### Poll System Updates
+- Added a trigger to restrict poll creation so only council admins and members can create polls
+- Ensured the poll system follows the correct structure:
+  - poll → poll options → poll votes
+- Linked all related tables using foreign keys to avoid invalid data
+
+---
+
+### Views and Reporting
+- Created a view to rank products based on user interest (votes)
+- Created another view to show SMEs, their listings, and related items in one place
+- These help make the data easier to analyse and present
+
+---
+
+### Other Changes
+- Updated the `is_primary` field in listing images to default to 0
+- This ensures each image has a defined value and avoids null issues
+
+---
+
+### Summary
+Overall, these changes improve how the system handles approvals, enforce role restrictions, and make the data more structured and easier to analyse.
