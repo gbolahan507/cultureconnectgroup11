@@ -927,75 +927,296 @@ font-size:13px;
 /* ================================
    Profile Page Styling
 ================================ */
-.profile-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 900px;
-}
-
-.profile-cards-wrapper {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 20px;
-}
-
-.profile-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 20px 25px;
-    border: 1px solid #e00180;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-}
-
-.profile-card h2,
-.profile-card h3 {
-    margin: 0 0 15px 0;
-    color: #230c33;
-    font-size: 16px;
-    font-weight: 700;
-    border-bottom: 2px solid #f0e6f6;
-    padding-bottom: 10px;
-}
-
-.profile-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #f5f5f5;
-    gap: 10px;
-    align-items: center;
-}
-
-.profile-row:last-child {
-    border-bottom: none;
-}
-
-.profile-label {
-    font-weight: 600;
-    color: #555;
-    font-size: 13px;
-    width: 45%;
-    flex-shrink: 0;
-}
-
-.profile-value {
-    color: #222;
-    font-size: 13px;
-    text-align: right;
-    word-break: break-word;
-}
-
-.profile-settings-link {
-    color: #bf2ab9;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.profile-settings-link:hover {
-    text-decoration: underline;
-}
+/* Theme variables scoped to this page */
+    .prf-wrapper {
+        --prf-orchid:  #bf2ab9;
+        --prf-fuchsia: #e00180;
+        --prf-violet:  #230c33;
+        --prf-white:   #ffffff;
+        --prf-grey:    #e5e5e5;
+ 
+        padding: 0 1.5rem 2rem;
+    }
+ 
+    .prf-cards-wrapper {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 1.25rem;
+        margin-top: 1.5rem;
+    }
+ 
+    /*  Card  */
+    .prf-card {
+        background: var(--prf-white);
+        border: 1px solid var(--prf-grey);
+        border-radius: 10px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 1px 4px rgba(35,12,51,.07);
+    }
+ 
+    .prf-card-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--prf-violet);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        margin: 0 0 1rem;
+        padding-bottom: 0.65rem;
+        border-bottom: 2px solid var(--prf-grey);
+    }
+ 
+    .prf-card-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        padding-bottom: 0.65rem;
+        border-bottom: 2px solid var(--prf-grey);
+    }
+ 
+    .prf-card-title-row .prf-card-title {
+        margin: 0;
+        padding: 0;
+        border: none;
+    }
+ 
+    /*  Row  */
+    .prf-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 0.55rem 0;
+        border-bottom: 1px solid #f5f5f5;
+        font-size: 0.875rem;
+    }
+ 
+    .prf-row:last-child { border-bottom: none; }
+ 
+    .prf-label {
+        color: #6b7280;
+        font-weight: 500;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+ 
+    .prf-value {
+        color: var(--prf-violet);
+        font-weight: 400;
+        text-align: right;
+        word-break: break-word;
+    }
+ 
+    .prf-value--wrap {
+        text-align: left;
+        line-height: 1.5;
+    }
+ 
+    /*  Edit button  */
+    .prf-edit-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--prf-fuchsia);
+        background: rgba(224,1,128,.08);
+        border: 1px solid rgba(224,1,128,.25);
+        border-radius: 6px;
+        padding: 0.3rem 0.75rem;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+    }
+ 
+    .prf-edit-btn:hover {
+        background: rgba(224,1,128,.15);
+        border-color: rgba(224,1,128,.45);
+    }
+ 
+    /*  Status badges  */
+    .prf-badge {
+        display: inline-block;
+        padding: 0.2rem 0.7rem;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+ 
+    .prf-badge--approved { background: #d1fae5; color: #065f46; }
+    .prf-badge--pending  { background: #fef3c7; color: #92400e; }
+    .prf-badge--rejected { background: #fee2e2; color: #991b1b; }
+ 
+    /*  Settings link */
+    .prf-settings-link {
+        color: var(--prf-fuchsia);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+ 
+    .prf-settings-link:hover { text-decoration: underline; }
+ 
+    /*  Modal overlay */
+    .prf-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(35,12,51,0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+    }
+ 
+    .prf-modal-box {
+        background: var(--prf-white);
+        border-radius: 12px;
+        width: 100%;
+        max-width: 440px;
+        box-shadow: 0 20px 60px rgba(35,12,51,.25);
+        overflow: hidden;
+    }
+ 
+    .prf-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.1rem 1.5rem;
+        border-bottom: 1px solid var(--prf-grey);
+        background: linear-gradient(135deg, var(--prf-violet), #3d1557);
+    }
+ 
+    .prf-modal-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--prf-white);
+    }
+ 
+    .prf-modal-close {
+        background: none;
+        border: none;
+        font-size: 1.4rem;
+        color: rgba(255,255,255,0.7);
+        cursor: pointer;
+        padding: 0.1rem 0.3rem;
+        border-radius: 4px;
+        line-height: 1;
+        transition: color 0.15s;
+    }
+ 
+    .prf-modal-close:hover { color: var(--prf-white); }
+ 
+    .prf-modal-body {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+ 
+    .prf-modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--prf-grey);
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+    }
+ 
+    /* Form  */
+    .prf-form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+ 
+    .prf-form-group label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--prf-violet);
+    }
+ 
+    .prf-required { color: var(--prf-fuchsia); }
+ 
+    .prf-input {
+        width: 100%;
+        padding: 0.55rem 0.75rem;
+        border: 1px solid var(--prf-grey);
+        border-radius: 7px;
+        font-size: 0.875rem;
+        color: var(--prf-violet);
+        box-sizing: border-box;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+ 
+    .prf-input:focus {
+        outline: none;
+        border-color: var(--prf-orchid);
+        box-shadow: 0 0 0 3px rgba(191,42,185,.15);
+    }
+ 
+    /* Alert */
+    .prf-alert {
+        padding: 0.65rem 0.9rem;
+        border-radius: 7px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+ 
+    .prf-alert--success { background: #d1fae5; color: #065f46; }
+    .prf-alert--error   { background: #fee2e2; color: #991b1b; }
+ 
+    /* Buttons */
+    .prf-btn-primary {
+        background: linear-gradient(135deg, var(--prf-orchid), var(--prf-fuchsia));
+        color: var(--prf-white);
+        border: none;
+        padding: 0.55rem 1.25rem;
+        border-radius: 7px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.15s;
+    }
+ 
+    .prf-btn-primary:hover:not(:disabled) { opacity: 0.88; }
+    .prf-btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+ 
+    .prf-btn-secondary {
+        background: var(--prf-grey);
+        color: var(--prf-violet);
+        border: 1px solid #ccc;
+        padding: 0.55rem 1.25rem;
+        border-radius: 7px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+ 
+    .prf-btn-secondary:hover { background: #d5d5d5; }
+ 
+   
+    .prf-toast {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        box-shadow: 0 4px 20px rgba(35,12,51,.2);
+        opacity: 0;
+        transform: translateY(8px);
+        transition: opacity 0.25s, transform 0.25s;
+        z-index: 2000;
+    }
+ 
+    .prf-toast--show     { opacity: 1; transform: translateY(0); }
+    .prf-toast--success  { background: #d1fae5; color: #065f46; }
+    .prf-toast--error    { background: #fee2e2; color: #991b1b; }
+ 
+    /*  Responsive */
+    @media (max-width: 640px) {
+        .prf-cards-wrapper  { grid-template-columns: 1fr; }
+        .prf-row            { flex-direction: column; gap: 0.2rem; }
+        .prf-value          { text-align: left; }
+    }
 
 /* ================================
    ADD PRODUCT PAGE STYLING
