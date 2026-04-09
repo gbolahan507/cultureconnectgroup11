@@ -29,7 +29,16 @@ A platform for residents to browse and vote on cultural products and services in
 | Habeeblahi Hameed | Backend Developer | habeeb@gmail.com | Test1234!|
 | Admin | Council_Administrator | admin@cultureconnect.com | Test1234!|
 | Council Member | Council_member |Cmember@cultureconnect.com | Test1234!|
-| SME | SME Business | info@harmonywellbeing.com | Test1234!|
+| Harmony Wellbeing | SME Business | info@harmonywellbeing.com | Test1234!|
+| Brushstroke Studio | SME Business | hello@brushstrokestudio.com | Test1234!|
+| Hatfield Theatre Collective| SME Business | info@hatfieldtheatre.com | Test1234!|
+| Hertfordshire Heritage Tours | SME Business | tours@hertheritagetours.com | Test1234!|
+| PixelCraft Media| SME Business | studio@pixelcraftmedia.com | Test1234!|
+| Hatfield Handmade Co. | SME Business | shop@hatfieldhandmade.com| Test1234!|
+| Hertford Ink Publishing | SME Business | press@hertfordink.com | Test1234!|
+
+
+
 
 
 ## Getting Started
