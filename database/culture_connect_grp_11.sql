@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 08, 2026 at 02:56 PM
+-- Generation Time: Apr 09, 2026 at 05:08 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -69,6 +69,13 @@ CREATE TABLE `listings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Dumping data for table `listings`
+--
+
+INSERT INTO `listings` (`listing_id`, `sme_id`, `title`, `caption`, `description`, `price`, `status`, `created_at`, `updated_at`, `item_id`, `approved_by`) VALUES
+(7, 11, 'Painting & Sculpture for Beginners', 'Explore your creativity with hands-on painting and sculpture sessions', 'Join our friendly beginner-friendly painting and sculpture classes held weekly at Brushstroke Studio. Whether you prefer watercolours, acrylics or working with clay, our experienced tutors guide you through every step. All materials provided. Suitable for ages 16 and above.', 25.00, 'active', '2026-04-09 10:36:45', '2026-04-09 12:48:14', 1, 6);
+
+--
 -- Triggers `listings`
 --
 DELIMITER $$
@@ -108,6 +115,14 @@ CREATE TABLE `listing_images` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `listing_images`
+--
+
+INSERT INTO `listing_images` (`image_id`, `listing_id`, `image_url`, `is_primary`, `created_at`) VALUES
+(3, 7, '1775731005_Brushstroke Studio beginners\' classes promotion.png', 1, '2026-04-09 10:36:45'),
+(4, 7, '17757310050_Creative expression in the community studio.png', 0, '2026-04-09 10:36:45');
+
 -- --------------------------------------------------------
 
 --
@@ -122,6 +137,13 @@ CREATE TABLE `listing_requests` (
   `comment` text NOT NULL,
   `decided_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `listing_requests`
+--
+
+INSERT INTO `listing_requests` (`approval_id`, `listing_id`, `user_id`, `decision`, `comment`, `decided_at`) VALUES
+(3, 7, 6, 'approved', 'Approved', '2026-04-09 12:48:14');
 
 -- --------------------------------------------------------
 
@@ -453,7 +475,13 @@ CREATE TABLE `sme_profiles` (
 --
 
 INSERT INTO `sme_profiles` (`sme_id`, `business_name`, `approval_status`, `created_at`, `area_id`, `description`, `phone`, `user_id`, `subcategory_id`) VALUES
-(3, 'Harmony Wellbeing Centre', 'pending', '2026-04-06 09:54:55', 1, 'Harmony Wellbeing Centre is a community-focused organisation dedicated to improving the mental, physical, and emotional wellbeing of local residents. We offer a range of therapeutic services including art therapy, music therapy, mindfulness workshops, and community support groups. Our mission is to foster a sense of belonging and cultural connection through inclusive and accessible wellbeing programmes tailored to the diverse needs of our community.', '+44 7700 900123', 10, 3);
+(3, 'Harmony Wellbeing Centre', 'approved', '2026-04-06 09:54:55', 1, 'Harmony Wellbeing Centre is a community-focused organisation dedicated to improving the mental, physical, and emotional wellbeing of local residents. We offer a range of therapeutic services including art therapy, music therapy, mindfulness workshops, and community support groups. Our mission is to foster a sense of belonging and cultural connection through inclusive and accessible wellbeing programmes tailored to the diverse needs of our community.', '+44 7700 900123', 10, 3),
+(11, 'Brushstroke Studio', 'approved', '2026-04-09 09:36:23', 1, 'Brushstroke Studio is a vibrant creative hub in Hertfordshire offering art classes, music lessons, and movement workshops for all ages. We believe creativity is for everyone and provide a welcoming space for beginners and experienced artists alike.', '+44 7700 100001', 24, 1),
+(12, 'Hatfield Theatre Collective', 'approved', '2026-04-09 09:37:51', 2, 'Hatfield Theatre Collective is a community-driven performing arts organisation staging live theatre, concerts and open mic nights. We celebrate local talent and bring the community together through the power of performance.', '+44 7700 100002', 25, 2),
+(13, 'Hertfordshire Heritage Tours', 'approved', '2026-04-09 09:40:06', 3, 'Hertfordshire Heritage Tours offers immersive guided cultural walks and museum programmes that bring local history to life. Our expert guides lead residents and visitors through the rich cultural landscape of Hertfordshire.', '+44 7700 100003', 26, 3),
+(14, 'PixelCraft Media', 'approved', '2026-04-09 09:41:59', 4, 'PixelCraft Media is a full-service creative agency specialising in photography, videography, graphic design and brand identity. We help local businesses and cultural organisations tell their stories through compelling visual content.', '+44 7700 100004', 27, 4),
+(15, 'Hatfield Handmade Co.', 'approved', '2026-04-09 09:43:32', 5, 'Hatfield Handmade Co. is a collective of local artisans producing original artwork, handcrafted ceramics, cultural merchandise and artisan stationery. Every piece is made by hand and rooted in the cultural identity of Hertfordshire.', '+44 7700 100005', 28, 5),
+(16, 'Hertford Ink Publishing', 'approved', '2026-04-09 09:45:03', 6, 'Hertford Ink Publishing is an independent publisher celebrating local voices through poetry collections, community zines, magazines and creative writing resources. We champion literary culture and support emerging writers across Hertfordshire.', '+44 7700 100006', 29, 6);
 
 -- --------------------------------------------------------
 
@@ -490,14 +518,20 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`, `role`, `email_address`) VALUES
-(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-08 10:37:44', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
+(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-09 12:47:51', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
 (8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-04 18:16:05', 'approved', 'Resident', 'nike@gmail.com'),
-(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-06 09:38:40', 'pending', 'Resident', 'josephine@gmail.com'),
+(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-09 13:27:03', 'approved', 'Resident', 'josephine@gmail.com'),
 (10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-08 11:47:21', 'approved', 'SME', 'info@harmonywellbeing.com'),
 (11, '$2y$10$pEGsw9izjII4FX3gzzaJ4.QSDLc70c6nGub9/1IU78TLgASSZUsf.', '2026-04-07 08:16:06', 'approved', 'Resident', 'victor@gmail.com'),
 (12, '$2y$10$aSQiHxr71NTJT0.ohlXxDezWv08wpyxyjnP1tR9q7tgxhcBsX.Uai', '2026-04-07 08:19:30', 'approved', 'Resident', 'jake@gmail.com'),
 (13, '$2y$10$L680iiTY/OYAE9v./tg99O4N1T/ao6GKU/AnYCR6KNO4jLIimJKHu', '2026-04-08 11:28:32', 'approved', 'Resident', 'habeeb@gmail.com'),
-(23, '$2y$10$UDiUYY47oKHijEltMpEDRusNoO93tFpEhQ389rybJJHXwzuNwcMiG', '2026-04-08 11:37:39', 'approved', 'Council Member', 'Cmember@cultureconnect.com');
+(23, '$2y$10$UDiUYY47oKHijEltMpEDRusNoO93tFpEhQ389rybJJHXwzuNwcMiG', '2026-04-08 11:37:39', 'approved', 'Council Member', 'Cmember@cultureconnect.com'),
+(24, '$2y$10$ViJxAEtd.j9tpIUKfzKPw.5pPGEFm4c5JlfxBXha4GgFbGeWXTzvC', '2026-04-09 13:50:27', 'approved', 'SME', 'hello@brushstrokestudio.com'),
+(25, '$2y$10$eLhuVYx4TBSMRuld/k4THuwZ1XC2EhQG4fUCshbrKOlnRdgqz5Hva', '2026-04-09 09:37:51', 'approved', 'SME', 'info@hatfieldtheatre.com'),
+(26, '$2y$10$AUciDVzSGaUL7jdXeUdkM.DhFyvuMxkxFa1J8xurcFsZV8qHyg14m', '2026-04-09 09:40:06', 'approved', 'SME', 'tours@hertheritagetours.com'),
+(27, '$2y$10$.dWO5U3z4wW4FGMV32g3COS5QZbspNds4t8z853sYSp1ErZcuvvOO', '2026-04-09 09:41:59', 'approved', 'SME', 'studio@pixelcraftmedia.com'),
+(28, '$2y$10$LT2xJjdlHYINbJNC5PaEuup2dqUpNQMvIxct0ueW3FJRfYgObhWtK', '2026-04-09 09:43:32', 'approved', 'SME', 'shop@hatfieldhandmade.com'),
+(29, '$2y$10$HrsNx52kvUjSBIemM/6gcuaWiVz5LhBgpQMJz0pf4LxY4W1cPPC5m', '2026-04-09 09:45:03', 'approved', 'SME', 'press@hertfordink.com');
 
 -- --------------------------------------------------------
 
@@ -525,7 +559,13 @@ INSERT INTO `user_documents` (`document_id`, `user_id`, `document_type`, `file_p
 (4, 11, 'Bank_Statement', '../uploads/verification_documents/1775553366_bank_statement.pdf', 'pending', '2026-04-07 08:16:06'),
 (5, 12, 'Bank_Statement', '../uploads/verification_documents/1775553570_bank_statement.pdf', 'pending', '2026-04-07 08:19:30'),
 (6, 13, 'Bank_Statement', '../uploads/verification_documents/1775553662_bank_statement.pdf', 'pending', '2026-04-07 08:21:02'),
-(7, 23, 'Bank_Statement', '../uploads/verification_documents/1775647905_bank_statement.pdf', 'pending', '2026-04-08 11:31:45');
+(7, 23, 'Bank_Statement', '../uploads/verification_documents/1775647905_bank_statement.pdf', 'pending', '2026-04-08 11:31:45'),
+(8, 24, 'Bank_Statement', '../uploads/verification_documents/1775727383_bank_statement.pdf', 'pending', '2026-04-09 09:36:23'),
+(9, 25, 'Bank_Statement', '../uploads/verification_documents/1775727471_bank_statement.pdf', 'pending', '2026-04-09 09:37:51'),
+(10, 26, 'Bank_Statement', '../uploads/verification_documents/1775727606_bank_statement.pdf', 'pending', '2026-04-09 09:40:06'),
+(11, 27, 'Bank_Statement', '../uploads/verification_documents/1775727719_bank_statement.pdf', 'pending', '2026-04-09 09:41:59'),
+(12, 28, 'Bank_Statement', '../uploads/verification_documents/1775727812_bank_statement.pdf', 'pending', '2026-04-09 09:43:32'),
+(13, 29, 'Bank_Statement', '../uploads/verification_documents/1775727903_bank_statement.pdf', 'pending', '2026-04-09 09:45:03');
 
 -- --------------------------------------------------------
 
@@ -556,7 +596,14 @@ INSERT INTO `user_registration_requests` (`review_id`, `user_id`, `admin_id`, `d
 (6, 13, 6, 'approved', '', '2026-04-08 10:40:22', 6),
 (7, 12, 23, 'approved', '', '2026-04-08 11:46:05', 5),
 (8, 11, 23, 'rejected', 'testing', '2026-04-08 11:46:25', 4),
-(9, 11, 23, 'approved', '', '2026-04-08 11:46:39', 4);
+(9, 11, 23, 'approved', '', '2026-04-08 11:46:39', 4),
+(10, 29, 6, 'approved', '', '2026-04-09 09:53:17', 13),
+(11, 28, 6, 'approved', '', '2026-04-09 09:53:22', 12),
+(12, 27, 6, 'approved', '', '2026-04-09 09:53:28', 11),
+(13, 26, 6, 'approved', '', '2026-04-09 09:53:35', 10),
+(14, 25, 6, 'approved', '', '2026-04-09 09:53:40', 9),
+(15, 24, 6, 'approved', '', '2026-04-09 09:53:47', 8),
+(16, 9, 6, 'approved', '', '2026-04-09 09:53:55', 2);
 
 -- --------------------------------------------------------
 
@@ -786,19 +833,19 @@ ALTER TABLE `areas`
 -- AUTO_INCREMENT for table `listings`
 --
 ALTER TABLE `listings`
-  MODIFY `listing_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `listing_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `listing_images`
 --
 ALTER TABLE `listing_images`
-  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `listing_requests`
 --
 ALTER TABLE `listing_requests`
-  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `orders`
@@ -864,25 +911,25 @@ ALTER TABLE `resident_profiles`
 -- AUTO_INCREMENT for table `sme_profiles`
 --
 ALTER TABLE `sme_profiles`
-  MODIFY `sme_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `sme_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `user_documents`
 --
 ALTER TABLE `user_documents`
-  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `user_registration_requests`
 --
 ALTER TABLE `user_registration_requests`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Constraints for dumped tables

@@ -44,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $errors[] = "Primary image must be JPG, PNG, GIF or WEBP format.";
         } else {
             $primary_image = time() . "_" . basename($_FILES['primary_image']['name']);
-            $upload_path   = "../uploads/listing_images/" . $primary_image;
+            $upload_path   = "../uploads/listings_images/" . $primary_image;
             move_uploaded_file($_FILES['primary_image']['tmp_name'], $upload_path);
         }
     }
@@ -83,7 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
  
                     if ($error == 0 && in_array($file_type, $allowed_types)) {
                         $add_image_name  = time() . $key . "_" . basename($_FILES['additional_images']['name'][$key]);
-                        $add_upload_path = "../uploads/listing_images/" . $add_image_name;
+                        $add_upload_path = "../uploads/listings_images/" . $add_image_name;
                         move_uploaded_file($tmp_name, $add_upload_path);
  
                         $add_image_safe = mysqli_real_escape_string($conn, $add_image_name);

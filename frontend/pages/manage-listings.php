@@ -285,7 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
  
         if ($del->execute()) {
             // Remove physical file
-            $file_path = "../uploads/listing_images/" . $img_row['image_url'];
+            $file_path = "../uploads/listings_images/" . $img_row['image_url'];
             if (file_exists($file_path)) unlink($file_path);
  
             // If deleted image was primary, promote the next image
@@ -362,7 +362,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             if (!in_array($file_type, $allowed_types)) { $errors[] = "$file_name is not a supported format (JPG, PNG, GIF, WEBP)."; continue; }
  
             $new_name    = time() . $key . '_' . basename($file_name);
-            $upload_path = "../uploads/listing_images/" . $new_name;
+            $upload_path = "../uploads/listings_images/" . $new_name;
  
             if (move_uploaded_file($tmp_name, $upload_path)) {
                 $ins = $conn->prepare("INSERT INTO listing_images (listing_id, image_url, is_primary) VALUES (?, ?, 0)");
@@ -558,7 +558,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
  
         if ($del->execute()) {
             foreach ($image_files as $filename) {
-                $fp = "../uploads/listing_images/" . $filename;
+                $fp = "../uploads/listings_images/" . $filename;
                 if (file_exists($fp)) unlink($fp);
             }
             echo json_encode(['success' => true, 'message' => 'Listing deleted successfully.']);
@@ -598,6 +598,9 @@ if ($ml_role === 'SME') {
     ");
     while ($row = mysqli_fetch_assoc($items_result)) $ml_all_items[] = $row;
 }  
+
+// TEMPORARY — remove after fixing
+echo "<!-- DEBUG role: [" . $_SESSION['user_role'] . "] is_council: " . ($ml_is_council ? 'true' : 'false') . " -->";
 
 ?>
 <div class="ml-page">
@@ -658,65 +661,12 @@ if ($ml_role === 'SME') {
         <?php if ($ml_role === 'SME') : ?>
         <a href="dashboard.php?page=add-product" class="ml-add-btn">Add Your First Listing</a>
         <?php endif; ?>
-    </div>div>
+    </div>
 
  
 </div>
 
-<!--EDIT LISTING MODAL-->
-<div id="ml-edit-modal" class="ml-modal-overlay" style="display:none;">
-    <div class="ml-modal-box">
-        <div class="ml-modal-header">
-            <h3>Edit Listing</h3>
-            <span class="ml-modal-close-btn" onclick="mlCloseEditModal()">&times;</span>
-        </div>
-        <div class="ml-modal-body">
-            <div id="ml-edit-alert" class="ml-alert" style="display:none;"></div>
-            <input type="hidden" id="ml-edit-id">
- 
-            <div class="ml-modal-field">
-                <label for="ml-edit-title">Title <span class="ml-required">*</span></label>
-                <input type="text" id="ml-edit-title" class="ml-input" placeholder="Listing title">
-            </div>
-            <div class="ml-modal-field">
-                <label for="ml-edit-caption">Caption <small>(short preview text)</small></label>
-                <input type="text" id="ml-edit-caption" class="ml-input" placeholder="Short caption">
-            </div>
-            <div class="ml-modal-field">
-                <label for="ml-edit-description">Full Description <span class="ml-required">*</span></label>
-                <textarea id="ml-edit-description" class="ml-input ml-textarea" placeholder="Full description" rows="4"></textarea>
-            </div>
-            <div class="ml-modal-field">
-                <label for="ml-edit-price">Price (£) <span class="ml-required">*</span></label>
-                <input type="number" id="ml-edit-price" class="ml-input" placeholder="0.00" step="0.01" min="0">
-            </div>
-        </div>
-        <div class="ml-modal-footer">
-            <button class="ml-modal-cancel-btn" onclick="mlCloseEditModal()">Cancel</button>
-            <button class="ml-modal-submit-btn" id="ml-edit-save-btn" onclick="mlSaveListing()">Save Changes</button>
-        </div>
-    </div>
-</div>
- 
- 
-<!--VIEW LISTING MODAL-->
-<div id="ml-view-modal" class="ml-modal-overlay" style="display:none;">
-    <div class="ml-modal-box">
-        <div class="ml-modal-header">
-            <h3>Listing Details</h3>
-            <span class="ml-modal-close-btn" onclick="mlCloseViewModal()">&times;</span>
-        </div>
-        <div class="ml-modal-body">
-            <div id="ml-view-image-wrap" class="ml-view-image-wrap"></div>
-            <table class="ml-detail-table">
-                <tbody id="ml-view-body"></tbody>
-            </table>
-        </div>
-        <div class="ml-modal-footer">
-            <button class="ml-modal-cancel-btn" onclick="mlCloseViewModal()">Close</button>
-        </div>
-    </div>
-</div>
+
 
 <!-- VIEW MODAL-->
 <div id="ml-view-modal" class="ml-modal-overlay" style="display:none;">
@@ -1087,7 +1037,7 @@ if ($ml_role === 'SME') {
     // CAROUSEL
     function mlCarouselRender() {
         const total = mlCarouselImages.length;
-        document.getElementById('ml-carousel-img').src = '../uploads/listing_images/' + mlCarouselImages[mlCarouselIndex];
+        document.getElementById('ml-carousel-img').src = '../uploads/listings_images/' + mlCarouselImages[mlCarouselIndex];
         document.getElementById('ml-carousel-prev').style.display = document.getElementById('ml-carousel-next').style.display = total > 1 ? 'flex' : 'none';
         document.getElementById('ml-carousel-counter').textContent = total > 1 ? `${mlCarouselIndex + 1} / ${total}` : '';
         const dots = document.getElementById('ml-carousel-dots');
@@ -1203,7 +1153,7 @@ if ($ml_role === 'SME') {
                 card.dataset.imgId = img.image_id;
                 card.innerHTML = `
                     <div class="ml-img-card-thumb">
-                        <img src="../uploads/listing_images/${mlEsc(img.image_url)}" alt="Listing image"
+                        <img src="../uploads/listings_images/${mlEsc(img.image_url)}" alt="Listing image"
                              onerror="this.src=''; this.parentElement.classList.add('ml-img-card-thumb--broken')">
                         ${img.is_primary ? '<span class="ml-img-primary-badge"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.536.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.769-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" /></svg> Primary</span>' : ''}
                     </div>

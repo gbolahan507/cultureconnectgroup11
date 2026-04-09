@@ -1,0 +1,526 @@
+<?php
+// ============================================================
+// SESSION + DB
+// ============================================================
+if (session_status() === PHP_SESSION_NONE) session_start();
+require_once '../db_connection.php';
+ 
+// ── AJAX HANDLER ─────────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    while (ob_get_level()) ob_end_clean();
+    header('Content-Type: application/json');
+ 
+    // ── Add to Cart ───────────────────────────────────────────
+    if ($_POST['action'] === 'add_to_cart') {
+        $listing_id = intval($_POST['listing_id'] ?? 0);
+        $quantity   = max(1, intval($_POST['quantity'] ?? 1));
+ 
+        if (!$listing_id) {
+            echo json_encode(['success' => false, 'message' => 'Invalid listing.']);
+            exit();
+        }
+ 
+        $stmt = $conn->prepare("
+            SELECT l.listing_id, l.title, l.price,
+                   sp.business_name,
+                   li.image_url AS primary_image
+            FROM listings l
+            JOIN sme_profiles sp        ON l.sme_id     = sp.sme_id
+            LEFT JOIN listing_images li ON l.listing_id = li.listing_id AND li.is_primary = 1
+            WHERE l.listing_id = ? AND l.status = 'active'
+            LIMIT 1
+        ");
+        $stmt->bind_param("i", $listing_id);
+        $stmt->execute();
+        $listing = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+ 
+        if (!$listing) {
+            echo json_encode(['success' => false, 'message' => 'Listing not found or not active.']);
+            exit();
+        }
+ 
+        if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
+ 
+        $found = false;
+        foreach ($_SESSION['cart'] as &$item) {
+            if ($item['listing_id'] === $listing_id) {
+                $item['quantity'] += $quantity;
+                $found = true;
+                break;
+            }
+        }
+        unset($item);
+ 
+        if (!$found) {
+            $_SESSION['cart'][] = [
+                'listing_id'    => $listing_id,
+                'title'         => $listing['title'],
+                'business_name' => $listing['business_name'],
+                'price'         => floatval($listing['price']),
+                'quantity'      => $quantity,
+                'image'         => $listing['primary_image'] ?? ''
+            ];
+        }
+ 
+        $cart_count = array_sum(array_column($_SESSION['cart'], 'quantity'));
+        echo json_encode(['success' => true, 'message' => 'Added to cart.', 'cart_count' => $cart_count]);
+        exit();
+    }
+ 
+    echo json_encode(['success' => false, 'message' => 'Unknown action.']);
+    exit();
+}
+ 
+// ============================================================
+// PAGE SETUP
+// ============================================================
+$listing_id = intval($_GET['listing_id'] ?? 0);
+ 
+if (!$listing_id) {
+    header('Location: ../pages/browse.php');
+    exit();
+}
+ 
+// Fetch listing
+$stmt = $conn->prepare("
+    SELECT l.listing_id, l.title, l.caption, l.description, l.price,
+           l.status, l.created_at,
+           ps.item_name,
+           pss.subcategory_name,
+           pc.category_name,
+           sp.business_name, sp.description AS business_description,
+           sp.phone AS business_phone,
+           u.email_address AS business_email,
+           a.area_name, a.description AS area_description
+    FROM listings l
+    JOIN product_service ps                ON l.item_id        = ps.item_id
+    JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
+    JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
+    JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
+    JOIN users u                           ON sp.user_id        = u.user_id
+    JOIN areas a                           ON sp.area_id        = a.area_id
+    WHERE l.listing_id = ? AND l.status = 'active'
+    LIMIT 1
+");
+$stmt->bind_param("i", $listing_id);
+$stmt->execute();
+$listing = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+ 
+if (!$listing) {
+    header('Location: ../pages/browse.php');
+    exit();
+}
+ 
+// Fetch all images — primary first
+$img_stmt = $conn->prepare("
+    SELECT image_url, is_primary
+    FROM listing_images
+    WHERE listing_id = ?
+    ORDER BY is_primary DESC, image_id ASC
+");
+$img_stmt->bind_param("i", $listing_id);
+$img_stmt->execute();
+$img_result = $img_stmt->get_result();
+$images     = [];
+while ($img = $img_result->fetch_assoc()) $images[] = $img['image_url'];
+$img_stmt->close();
+ 
+// Fetch related listings from same business
+$rel_stmt = $conn->prepare("
+    SELECT l.listing_id, l.title, l.price,
+           pc.category_name,
+           li.image_url AS primary_image
+    FROM listings l
+    JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
+    JOIN product_service ps                ON l.item_id          = ps.item_id
+    JOIN product_service_subcategories pss ON ps.subcategory_id  = pss.subcategory_id
+    JOIN product_service_categories pc     ON pss.category_id    = pc.category_id
+    LEFT JOIN listing_images li            ON l.listing_id       = li.listing_id AND li.is_primary = 1
+    WHERE sp.business_name = ? AND l.listing_id != ? AND l.status = 'active'
+    LIMIT 3
+");
+$rel_stmt->bind_param("si", $listing['business_name'], $listing_id);
+$rel_stmt->execute();
+$rel_result = $rel_stmt->get_result();
+$related    = [];
+while ($row = $rel_result->fetch_assoc()) $related[] = $row;
+$rel_stmt->close();
+ 
+function ld_safe(string $val): string {
+    return htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
+}
+ 
+$cart_count   = isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0;
+$is_logged_in = isset($_SESSION['user_id']);
+$price        = floatval($listing['price']);
+$price_tier   = $price <= 20 ? 'Affordable' : ($price <= 50 ? 'Moderate' : 'Premium');
+$cat_type     = $listing['category_name'] === 'Product' ? 'Product' : 'Service';
+$btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= ld_safe($listing['title']) ?> — CultureConnect</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="ld-page-wrap">
+ 
+<?php include '../components/header.php'; ?>
+ 
+<!-- ── Sub-nav bar ───────────────────────────────────────────── -->
+<div class="ld-subnav">
+    <div class="ld-subnav-inner">
+        <!-- Breadcrumb -->
+        <nav class="ld-breadcrumb">
+            <a href="../pages/browse.php">Browse</a>
+            <span>›</span>
+            <span><?= ld_safe($listing['category_name']) ?></span>
+            <span>›</span>
+            <span><?= ld_safe($listing['subcategory_name']) ?></span>
+            <span>›</span>
+            <span class="ld-breadcrumb-current"><?= ld_safe($listing['title']) ?></span>
+        </nav>
+ 
+        <!-- Cart button -->
+        <a href="../pages/cart.php" class="ld-cart-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+            </svg>
+            Cart
+            <span class="ld-cart-badge" id="ld-cart-badge"><?= $cart_count > 0 ? $cart_count : '' ?></span>
+        </a>
+    </div>
+</div>
+ 
+<!-- ── Main container ────────────────────────────────────────── -->
+<div class="ld-container">
+    <div class="ld-main-grid">
+ 
+        <!-- ── Left: Images ──────────────────────────────────── -->
+        <div class="ld-left">
+ 
+            <!-- Carousel -->
+            <div class="ld-carousel">
+                <?php if (!empty($images)) : ?>
+                <div class="ld-carousel-stage" id="ld-stage">
+                    <img id="ld-main-img"
+                         src="../uploads/listings_images/<?= ld_safe($images[0]) ?>"
+                         alt="<?= ld_safe($listing['title']) ?>"
+                         class="ld-carousel-img">
+ 
+                    <?php if (count($images) > 1) : ?>
+                    <button class="ld-carousel-arrow ld-carousel-arrow--prev" onclick="ldPrev()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="18" height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                        </svg>
+                    </button>
+                    <button class="ld-carousel-arrow ld-carousel-arrow--next" onclick="ldNext()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="18" height="18">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </button>
+                    <div class="ld-carousel-dots" id="ld-dots"></div>
+                    <div class="ld-carousel-counter" id="ld-counter">1 / <?= count($images) ?></div>
+                    <?php endif; ?>
+                </div>
+ 
+                <!-- Thumbnails -->
+                <?php if (count($images) > 1) : ?>
+                <div class="ld-thumbs" id="ld-thumbs">
+                    <?php foreach ($images as $i => $img) : ?>
+                    <div class="ld-thumb <?= $i === 0 ? 'ld-thumb--active' : '' ?>"
+                         id="ld-thumb-<?= $i ?>"
+                         onclick="ldGoTo(<?= $i ?>)">
+                        <img src="../uploads/listings_images/<?= ld_safe($img) ?>" alt="Image <?= $i + 1 ?>">
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
+ 
+                <?php else : ?>
+                <div class="ld-carousel-placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" width="52" height="52">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                    </svg>
+                    <p>No images available</p>
+                </div>
+                <?php endif; ?>
+            </div>
+ 
+            <!-- Description card -->
+            <div class="ld-info-card" style="margin-top: 20px;">
+                <p class="ld-section-title">About This Listing</p>
+                <p class="ld-description"><?= ld_safe($listing['description']) ?></p>
+            </div>
+ 
+        </div><!-- /.ld-left -->
+ 
+        <!-- ── Right: Info panel ─────────────────────────────── -->
+        <div class="ld-right">
+ 
+            <!-- Main info card -->
+            <div class="ld-info-card">
+                <!-- Badges -->
+                <div class="ld-badges">
+                    <span class="ld-badge ld-badge--category"><?= ld_safe($listing['category_name']) ?></span>
+                    <span class="ld-badge ld-badge--sub"><?= ld_safe($listing['subcategory_name']) ?></span>
+                    <span class="ld-badge ld-badge--item"><?= ld_safe($listing['item_name']) ?></span>
+                </div>
+ 
+                <p class="ld-business-label"><?= ld_safe($listing['business_name']) ?></p>
+                <h1 class="ld-title"><?= ld_safe($listing['title']) ?></h1>
+                <p class="ld-caption"><?= ld_safe($listing['caption']) ?></p>
+ 
+                <div class="ld-price-row">
+                    <span class="ld-price">£<?= number_format($price, 2) ?></span>
+                    <span class="ld-price-tier ld-price-tier--<?= strtolower($price_tier) ?>"><?= $price_tier ?></span>
+                </div>
+ 
+                <p class="ld-area-tag">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="14" height="14">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                    </svg>
+                    <?= ld_safe($listing['area_name']) ?>
+                </p>
+ 
+                <!-- Quantity + Add to cart -->
+                <div class="ld-order-box">
+                    <div class="ld-qty-wrap">
+                        <label class="ld-qty-label" for="ld-qty">Quantity</label>
+                        <div class="ld-qty-controls">
+                            <button class="ld-qty-btn" onclick="ldChangeQty(-1)">−</button>
+                            <input type="number" id="ld-qty" class="ld-qty-input" value="1" min="1" max="99">
+                            <button class="ld-qty-btn" onclick="ldChangeQty(1)">+</button>
+                        </div>
+                    </div>
+ 
+                    <button class="ld-add-cart-btn" id="ld-add-cart-btn" onclick="ldAddToCart()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                        </svg>
+                        Add to Cart
+                    </button>
+ 
+                    <a href="../pages/cart.php" class="ld-checkout-btn">
+                        <?= $btn_label ?> — £<span id="ld-total"><?= number_format($price, 2) ?></span>
+                    </a>
+                </div>
+ 
+                <p class="ld-payment-note">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="14" height="14">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                    </svg>
+                    Payment is confirmed on booking. The business will contact you shortly after your order is placed.
+                </p>
+            </div>
+ 
+            <!-- Business info card -->
+            <div class="ld-info-card">
+                <p class="ld-section-title">About the Business</p>
+                <p class="ld-business-name-lg"><?= ld_safe($listing['business_name']) ?></p>
+ 
+                <?php if (!empty($listing['business_description'])) : ?>
+                <p class="ld-business-desc"><?= ld_safe($listing['business_description']) ?></p>
+                <?php endif; ?>
+ 
+                <?php if (!empty($listing['business_phone'])) : ?>
+                <div class="ld-contact-row">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="15" height="15">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 6v.75Z" />
+                    </svg>
+                    <a href="tel:<?= ld_safe($listing['business_phone']) ?>"><?= ld_safe($listing['business_phone']) ?></a>
+                </div>
+                <?php endif; ?>
+ 
+                <?php if (!empty($listing['business_email'])) : ?>
+                <div class="ld-contact-row">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="15" height="15">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                    </svg>
+                    <a href="mailto:<?= ld_safe($listing['business_email']) ?>"><?= ld_safe($listing['business_email']) ?></a>
+                </div>
+                <?php endif; ?>
+            </div>
+ 
+            <!-- Area card -->
+            <div class="ld-info-card">
+                <p class="ld-section-title">Location</p>
+                <p class="ld-business-name-lg"><?= ld_safe($listing['area_name']) ?></p>
+                <?php if (!empty($listing['area_description'])) : ?>
+                <p class="ld-business-desc"><?= ld_safe($listing['area_description']) ?></p>
+                <?php endif; ?>
+            </div>
+ 
+        </div><!-- /.ld-right -->
+    </div><!-- /.ld-main-grid -->
+ 
+    <!-- Related listings -->
+    <?php if (!empty($related)) : ?>
+    <div class="ld-related-section">
+        <h2 class="ld-related-title">More from <?= ld_safe($listing['business_name']) ?></h2>
+        <div class="ld-related-grid">
+            <?php foreach ($related as $r) : ?>
+            <a href="listing-detail.php?listing_id=<?= intval($r['listing_id']) ?>" class="ld-related-card">
+                <div class="ld-related-img-wrap">
+                    <?php if (!empty($r['primary_image'])) : ?>
+                    <img src="../uploads/listings_images/<?= ld_safe($r['primary_image']) ?>"
+                         alt="<?= ld_safe($r['title']) ?>"
+                         onerror="this.parentElement.classList.add('ld-related-img-wrap--broken')">
+                    <?php endif; ?>
+                </div>
+                <div class="ld-related-body">
+                    <p class="ld-related-cat"><?= ld_safe($r['category_name']) ?></p>
+                    <p class="ld-related-title-text"><?= ld_safe($r['title']) ?></p>
+                    <p class="ld-related-price">£<?= number_format(floatval($r['price']), 2) ?></p>
+                </div>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+ 
+</div><!-- /.ld-container -->
+ 
+<?php include '../components/footer.php'; ?>
+ 
+<script>
+    const LD_IMAGES   = <?= json_encode($images) ?>;
+    const LD_PRICE    = <?= $price ?>;
+    const LD_IS_LOGGED = <?= $is_logged_in ? 'true' : 'false' ?>;
+    let ldIndex = 0;
+ 
+    // ── Build carousel dots ───────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        const dotsEl = document.getElementById('ld-dots');
+        if (!dotsEl || LD_IMAGES.length <= 1) return;
+ 
+        LD_IMAGES.forEach((_, i) => {
+            const btn       = document.createElement('button');
+            btn.className   = 'ld-carousel-dot' + (i === 0 ? ' ld-carousel-dot--active' : '');
+            btn.onclick     = () => ldGoTo(i);
+            dotsEl.appendChild(btn);
+        });
+ 
+        ldUpdateTotal();
+    });
+ 
+    // ── Carousel navigation ───────────────────────────────────
+    function ldGoTo(index) {
+        if (!LD_IMAGES.length) return;
+        ldIndex = index;
+ 
+        const imgEl = document.getElementById('ld-main-img');
+        if (imgEl) imgEl.src = '../uploads/listings_images/' + LD_IMAGES[index];
+ 
+        const counter = document.getElementById('ld-counter');
+        if (counter) counter.textContent = `${index + 1} / ${LD_IMAGES.length}`;
+ 
+        document.querySelectorAll('.ld-carousel-dot').forEach((d, i) => {
+            d.classList.toggle('ld-carousel-dot--active', i === index);
+        });
+ 
+        document.querySelectorAll('.ld-thumb').forEach((t, i) => {
+            t.classList.toggle('ld-thumb--active', i === index);
+        });
+    }
+ 
+    function ldPrev() { ldGoTo((ldIndex - 1 + LD_IMAGES.length) % LD_IMAGES.length); }
+    function ldNext() { ldGoTo((ldIndex + 1) % LD_IMAGES.length); }
+ 
+    // ── Quantity controls ─────────────────────────────────────
+    function ldChangeQty(delta) {
+        const input = document.getElementById('ld-qty');
+        let val     = parseInt(input.value) + delta;
+        if (val < 1)  val = 1;
+        if (val > 99) val = 99;
+        input.value = val;
+        ldUpdateTotal();
+    }
+ 
+    document.addEventListener('DOMContentLoaded', () => {
+        const qtyInput = document.getElementById('ld-qty');
+        if (qtyInput) {
+            qtyInput.addEventListener('input', ldUpdateTotal);
+        }
+    });
+ 
+    function ldUpdateTotal() {
+        const qty   = parseInt(document.getElementById('ld-qty')?.value ?? 1);
+        const total = (LD_PRICE * qty).toFixed(2);
+        const el    = document.getElementById('ld-total');
+        if (el) el.textContent = total;
+    }
+ 
+    // ── Add to Cart ───────────────────────────────────────────
+    function ldAddToCart() {
+        const qty     = parseInt(document.getElementById('ld-qty').value ?? 1);
+        const btn     = document.getElementById('ld-add-cart-btn');
+        const listing_id = <?= $listing_id ?>;
+ 
+        btn.disabled    = true;
+        btn.textContent = 'Adding…';
+ 
+        const fd = new FormData();
+        fd.append('action',     'add_to_cart');
+        fd.append('listing_id', listing_id);
+        fd.append('quantity',   qty);
+ 
+        fetch('../pages/listing-detail.php?listing_id=' + listing_id, { method: 'POST', body: fd })
+            .then(r => r.text())
+            .then(text => {
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        // Update badge
+                        const badge = document.getElementById('ld-cart-badge');
+                        if (badge) {
+                            badge.textContent = data.cart_count;
+                            badge.classList.add('ld-cart-badge--bump');
+                            setTimeout(() => badge.classList.remove('ld-cart-badge--bump'), 300);
+                        }
+                        ldShowToast('Added to cart!', 'success');
+                        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg> Added!`;
+                        setTimeout(() => {
+                            btn.disabled  = false;
+                            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" /></svg> Add to Cart`;
+                        }, 2000);
+                    } else {
+                        ldShowToast(data.message || 'Failed to add.', 'error');
+                        btn.disabled    = false;
+                        btn.textContent = 'Add to Cart';
+                    }
+                } catch(e) {
+                    ldShowToast('Error. Please try again.', 'error');
+                    btn.disabled    = false;
+                    btn.textContent = 'Add to Cart';
+                }
+            });
+    }
+ 
+    // ── Toast ─────────────────────────────────────────────────
+    function ldShowToast(message, type) {
+        const existing = document.getElementById('ld-toast');
+        if (existing) existing.remove();
+ 
+        const toast = document.createElement('div');
+        toast.id          = 'ld-toast';
+        toast.className   = `ld-toast ld-toast--${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+ 
+        setTimeout(() => toast.classList.add('ld-toast--show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('ld-toast--show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
+</script>
+ 
+</body>
+</html>

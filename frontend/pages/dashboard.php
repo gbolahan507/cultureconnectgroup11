@@ -12,9 +12,12 @@ $page = $_GET['page'] ?? 'home';
 $allowedPages = [
     'home',
     'analytics',
+    'cart',
     'manage-area',
     'manage-users',
+    'manage-orders',
     'manage-council',
+    'my-orders',
     'review-products',
     'reports',
     'profile',
