@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 09, 2026 at 05:08 PM
+-- Generation Time: Apr 10, 2026 at 01:56 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -73,7 +73,24 @@ CREATE TABLE `listings` (
 --
 
 INSERT INTO `listings` (`listing_id`, `sme_id`, `title`, `caption`, `description`, `price`, `status`, `created_at`, `updated_at`, `item_id`, `approved_by`) VALUES
-(7, 11, 'Painting & Sculpture for Beginners', 'Explore your creativity with hands-on painting and sculpture sessions', 'Join our friendly beginner-friendly painting and sculpture classes held weekly at Brushstroke Studio. Whether you prefer watercolours, acrylics or working with clay, our experienced tutors guide you through every step. All materials provided. Suitable for ages 16 and above.', 25.00, 'active', '2026-04-09 10:36:45', '2026-04-09 12:48:14', 1, 6);
+(7, 11, 'Painting & Sculpture for Beginners', 'Explore your creativity with hands-on painting and sculpture sessions', 'Join our friendly beginner-friendly painting and sculpture classes held weekly at Brushstroke Studio. Whether you prefer watercolours, acrylics or working with clay, our experienced tutors guide you through every step. All materials provided. Suitable for ages 16 and above.', 25.00, 'active', '2026-04-09 10:36:45', '2026-04-09 12:48:14', 1, 6),
+(8, 11, 'Guitar & Piano Lessons for All Levels', 'One-to-one and group music lessons tailored to your pace', 'Our music lessons cover guitar and piano for complete beginners through to improvers. Sessions are available one-to-one or in small groups. Our tutors are experienced performers who make learning music enjoyable and accessible for everyone in the Hertfordshire community.', 30.00, 'active', '2026-04-09 19:52:31', '2026-04-09 20:43:35', 2, 6),
+(9, 11, 'Movement & Dance Expression Workshop', 'A creative movement workshop blending dance with artistic expression', 'This unique workshop combines movement, dance and visual art to help participants express themselves freely. No dance experience is required. Sessions run for 90 minutes and are open to adults of all fitness levels. A fantastic way to connect with your body and your community.', 20.00, 'active', '2026-04-09 19:55:06', '2026-04-09 20:43:21', 1, 6),
+(10, 11, 'Creative Arts for Kids — Ages 6 to 12', 'A fun and imaginative art class designed specially for children aged 6 to 12', 'Creative Arts for Kids is a weekly after-school and weekend art class designed to spark imagination and build confidence in children aged 6 to 12. Sessions cover painting, drawing, collage, and simple sculpture using child-safe materials. Our friendly tutors create a warm, encouraging environment where every child can express themselves freely. No experience needed — just curiosity and enthusiasm! Parents are welcome to stay and watch. All materials are provided and sessions run for 60 minutes.', 15.00, 'active', '2026-04-09 19:57:41', '2026-04-09 20:43:09', 1, 6),
+(11, 12, 'Community Stage — Live Theatre Night', 'Original community theatre performed by local Hertfordshire talent', 'Experience the magic of live theatre performed by members of our local community. Each production is written and directed by Hertfordshire residents and explores themes of culture, identity and belonging. Shows run on selected Friday and Saturday evenings. Book early to avoid disappointment.', 15.00, 'active', '2026-04-09 20:01:47', '2026-04-09 20:42:58', 3, 6),
+(12, 12, 'Open Mic Night — Local Voices', 'A relaxed open mic evening celebrating local musicians and spoken word artists', 'Our monthly open mic nights are a celebration of local musical and spoken word talent. Whether you want to perform or simply enjoy the show, everyone is welcome. Doors open at 6:30pm with performances from 7pm. No booking required for audience members.', 10.00, 'active', '2026-04-09 20:06:32', '2026-04-09 20:42:53', 4, 6),
+(13, 12, 'Youth Drama Showcase', 'A showcase of short plays written and performed by young Hertfordshire residents', 'Our Youth Drama Showcase gives young people aged 13 to 18 a platform to perform their own original short plays. The event runs twice a year and is free to watch. This listing covers workshop participation which includes rehearsal sessions, script development and the final performance.', 18.00, 'active', '2026-04-09 20:09:00', '2026-04-09 20:42:41', 3, 6),
+(14, 13, 'Hertfordshire Historic Town Walk', 'A guided walk through the cultural and historical highlights of Hertfordshire', 'Join our expert guide for a 2-hour walking tour through the most historically significant sites in Hertfordshire. Learn about the area\'s rich cultural heritage, architecture and local stories that shaped the community. Tours depart every Saturday at 10am. Suitable for all ages.', 12.00, 'active', '2026-04-09 20:14:13', '2026-04-09 20:42:29', 5, 6),
+(15, 13, 'Gallery Discovery Programme', 'Curated gallery visits and interactive cultural programs for the community', 'Our Gallery Discovery Programme offers curated visits to local museums and galleries with expert commentary. Each session includes an interactive element where participants can engage with exhibits, ask questions and learn about the cultural significance of the artworks and artefacts on display.', 8.00, 'active', '2026-04-09 20:16:47', '2026-04-09 20:42:19', 6, 6),
+(16, 14, 'Event Photography & Videography Package', 'Professional photography and videography for community events and cultural occasions', 'PixelCraft Media offers full event photography and videography coverage for community gatherings, cultural festivals, performances and private events. Our package includes a pre-event consultation, full-day coverage, edited photo gallery delivery within 7 days and a highlight video reel.', 150.00, 'active', '2026-04-09 20:19:47', '2026-04-09 20:42:09', 7, 6),
+(17, 14, 'Graphic Design & Marketing Materials', 'Custom graphic design for flyers, posters, social media and digital campaigns', 'Our graphic design service covers everything from event flyers and posters to social media graphics and full digital marketing campaigns. We work with local businesses, community groups and cultural organisations to create visually compelling materials that represent their identity and message.', 120.00, 'active', '2026-04-09 20:22:13', '2026-04-09 20:41:59', 8, 6),
+(18, 14, 'Brand Identity Design Package', 'Full brand identity design including logo, colour palette and style guide', 'Our brand identity package is designed for new and growing businesses that need a strong visual identity. We deliver a custom logo, colour palette, typography selection and a brand style guide. Ideal for SMEs in the cultural and creative sector looking to establish a professional presence.', 200.00, 'active', '2026-04-09 20:24:24', '2026-04-09 20:41:48', 8, 6),
+(19, 15, 'Original Hertfordshire Landscape Water colour', 'Hand-painted original water colour depicting iconic Hertfordshire landscapes', 'Each piece in this collection is an original hand-painted watercolour by our resident artist, capturing the natural beauty of the Hertfordshire landscape. Paintings are mounted and ready to frame. No two pieces are identical. Sizes range from A4 to A2. Please contact us to view available pieces before purchasing.', 45.00, 'active', '2026-04-09 20:26:59', '2026-04-09 20:41:37', 9, 6),
+(20, 15, 'Hand-Thrown Ceramic Pottery Collection', 'Unique hand-thrown ceramic bowls, mugs and vases made in Hertfordshire', 'Our hand-thrown ceramic collection features bowls, mugs, plates and vases crafted individually by our resident potter. Each piece is glazed using natural pigments and fired in our studio kiln. Items are food safe and dishwasher friendly. Perfect as gifts or statement pieces for your home.', 35.00, 'active', '2026-04-09 20:29:14', '2026-04-09 20:41:29', 10, 6),
+(21, 15, 'Limited Edition Hertfordshire Cultural Festival Poster', 'Collectible limited edition art print celebrating Hertfordshire\'s cultural calendar', 'These limited edition posters are designed exclusively by local artists to commemorate Hertfordshire\'s annual cultural festival. Each poster is A2 size, printed on 300gsm heavyweight paper with archival ink. Only 100 prints are produced per edition. Numbered and signed by the artist.', 18.00, 'active', '2026-04-09 20:31:52', '2026-04-09 20:41:19', 13, 6),
+(22, 15, 'Handmade Leather & Recycled Paper Journal', 'Beautifully crafted artisan journals made from leather and recycled paper', 'Our artisan journals feature hand-stitched recycled paper pages bound in a soft leather cover sourced from local suppliers. Each journal is unique and comes in A5 size with 120 pages. Ideal for sketching, writing, journaling or as a thoughtful gift for creative individuals.', 22.00, 'active', '2026-04-09 20:34:13', '2026-04-09 20:41:10', 14, 6),
+(23, 16, 'Hertfordshire Voices — Community Poetry Collection', 'An independently published anthology of poetry written by Hertfordshire residents', 'Hertfordshire Voices is our flagship poetry anthology featuring works from over 30 local writers. The collection explores themes of community, identity, nature and belonging through poetry in a variety of styles. Paperback, 180 pages. A portion of every sale supports our community writing workshops.', 12.00, 'active', '2026-04-09 20:37:24', '2026-04-09 20:40:57', 11, 6),
+(24, 16, 'The Hertford Quarterly — Community Zine', 'A quarterly zine featuring local art, writing, interviews and cultural commentary', 'The Hertford Quarterly is our independently produced community zine published four times a year. Each issue is packed with original short stories, poetry, local artist interviews, photography and cultural commentary from Hertfordshire residents. A5 format, 48 pages, full colour. Subscribe or buy individual issues.', 8.00, 'active', '2026-04-09 20:39:15', '2026-04-09 23:30:17', 12, 6);
 
 --
 -- Triggers `listings`
@@ -121,7 +138,36 @@ CREATE TABLE `listing_images` (
 
 INSERT INTO `listing_images` (`image_id`, `listing_id`, `image_url`, `is_primary`, `created_at`) VALUES
 (3, 7, '1775731005_Brushstroke Studio beginners\' classes promotion.png', 1, '2026-04-09 10:36:45'),
-(4, 7, '17757310050_Creative expression in the community studio.png', 0, '2026-04-09 10:36:45');
+(4, 7, '17757310050_Creative expression in the community studio.png', 0, '2026-04-09 10:36:45'),
+(5, 8, '1775764351_guitar-lessons-1.jpg', 1, '2026-04-09 19:52:31'),
+(6, 8, '17757643510_group-guitar-lessons.jpg', 0, '2026-04-09 19:52:31'),
+(7, 8, '17757643511_adults-guitar-classes.jpeg', 0, '2026-04-09 19:52:31'),
+(8, 9, '1775764506_Sara-Contemporary-Dance.jpg', 1, '2026-04-09 19:55:06'),
+(9, 9, '17757645060_image_processing20250516-30-e0rut0.jpg', 0, '2026-04-09 19:55:06'),
+(10, 10, '1775764661_1421fd7082c16ea5d468d2c6c5fc65dc5c1d0266.png', 1, '2026-04-09 19:57:41'),
+(11, 10, '17757646610_images.jpeg', 0, '2026-04-09 19:57:41'),
+(12, 11, '1775764907_images-2.jpeg', 1, '2026-04-09 20:01:47'),
+(13, 11, '17757649070_06092021-Four-Four-07799-1.jpg', 0, '2026-04-09 20:01:47'),
+(14, 12, '1775765192_open-Mic-night-The-Preston-Gate-e1728641015614.png', 1, '2026-04-09 20:06:32'),
+(15, 13, '1775765340_youth-theatre-showcase-1920x947.jpg', 1, '2026-04-09 20:09:00'),
+(16, 13, '17757653400_1765540190354.jpeg', 0, '2026-04-09 20:09:00'),
+(17, 14, '1775765653_6628d755dc796-HD.jpg', 1, '2026-04-09 20:14:13'),
+(18, 14, '17757656530_sherborne-abbey.webp', 0, '2026-04-09 20:14:13'),
+(19, 15, '1775765807_12920RAQIB_SHAW_BALLADS_EAST_WEST_LS_DSC_0015.webp', 1, '2026-04-09 20:16:47'),
+(20, 15, '17757658070_Members-Discovery-Raqib-Shaw-Square.webp', 0, '2026-04-09 20:16:47'),
+(21, 16, '1775765987_Corporate-Event-Videography-London-UK.jpg.webp', 1, '2026-04-09 20:19:47'),
+(22, 17, '1775766133_Graphic-Design_Marketing-Materials-1727226418806.png', 1, '2026-04-09 20:22:13'),
+(23, 18, '1775766264_Brand-Identity-Image.png', 1, '2026-04-09 20:24:24'),
+(24, 19, '1775766419_il_570xN.3233756463_j1tb.jpg', 1, '2026-04-09 20:26:59'),
+(25, 20, '1775766554_chris-jenkins-pottery-collection.jpg', 1, '2026-04-09 20:29:15'),
+(26, 20, '17757665550_DSCF6206.jpg', 0, '2026-04-09 20:29:15'),
+(27, 21, '1775766712_MJF-Affiches-Ed-Limitee_01-1500-x-1500-01.jpg', 1, '2026-04-09 20:31:52'),
+(28, 22, '1775766853_Leather_530x@2x.webp', 1, '2026-04-09 20:34:13'),
+(29, 22, '17757668530_il_570xN.2881606934_bsl0.jpg.webp', 0, '2026-04-09 20:34:13'),
+(30, 23, '1775767044_465feede-e7e7-4b8c-868b-d333bc277f6f_1_201_a.jpg', 1, '2026-04-09 20:37:24'),
+(31, 23, '17757670440_images-3.jpeg', 0, '2026-04-09 20:37:24'),
+(32, 24, '1775767155_images-4.jpeg', 1, '2026-04-09 20:39:15'),
+(33, 24, '17757671550_images-5.jpeg', 0, '2026-04-09 20:39:15');
 
 -- --------------------------------------------------------
 
@@ -143,7 +189,25 @@ CREATE TABLE `listing_requests` (
 --
 
 INSERT INTO `listing_requests` (`approval_id`, `listing_id`, `user_id`, `decision`, `comment`, `decided_at`) VALUES
-(3, 7, 6, 'approved', 'Approved', '2026-04-09 12:48:14');
+(3, 7, 6, 'approved', 'Approved', '2026-04-09 12:48:14'),
+(4, 24, 6, 'approved', '', '2026-04-09 20:40:38'),
+(5, 23, 6, 'approved', 'approved', '2026-04-09 20:40:57'),
+(6, 22, 6, 'approved', 'approved', '2026-04-09 20:41:10'),
+(7, 21, 6, 'approved', 'approved', '2026-04-09 20:41:19'),
+(8, 20, 6, 'approved', 'approved', '2026-04-09 20:41:29'),
+(9, 19, 6, 'approved', 'approved', '2026-04-09 20:41:37'),
+(10, 18, 6, 'approved', 'approved', '2026-04-09 20:41:48'),
+(11, 17, 6, 'approved', 'approved', '2026-04-09 20:41:59'),
+(12, 16, 6, 'approved', 'approved', '2026-04-09 20:42:09'),
+(13, 15, 6, 'approved', 'approved', '2026-04-09 20:42:19'),
+(14, 14, 6, 'approved', 'approved', '2026-04-09 20:42:29'),
+(15, 13, 6, 'approved', 'approved', '2026-04-09 20:42:41'),
+(16, 12, 6, 'approved', 'approved', '2026-04-09 20:42:53'),
+(17, 11, 6, 'approved', '', '2026-04-09 20:42:58'),
+(18, 10, 6, 'approved', 'approved', '2026-04-09 20:43:09'),
+(19, 9, 6, 'approved', 'approved', '2026-04-09 20:43:21'),
+(20, 8, 6, 'approved', 'approved', '2026-04-09 20:43:35'),
+(21, 24, 6, 'approved', '', '2026-04-09 23:30:17');
 
 -- --------------------------------------------------------
 
@@ -518,20 +582,20 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`, `role`, `email_address`) VALUES
-(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-09 12:47:51', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
+(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-09 22:47:15', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
 (8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-04 18:16:05', 'approved', 'Resident', 'nike@gmail.com'),
-(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-09 13:27:03', 'approved', 'Resident', 'josephine@gmail.com'),
+(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-09 22:27:48', 'approved', 'Resident', 'josephine@gmail.com'),
 (10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-08 11:47:21', 'approved', 'SME', 'info@harmonywellbeing.com'),
 (11, '$2y$10$pEGsw9izjII4FX3gzzaJ4.QSDLc70c6nGub9/1IU78TLgASSZUsf.', '2026-04-07 08:16:06', 'approved', 'Resident', 'victor@gmail.com'),
 (12, '$2y$10$aSQiHxr71NTJT0.ohlXxDezWv08wpyxyjnP1tR9q7tgxhcBsX.Uai', '2026-04-07 08:19:30', 'approved', 'Resident', 'jake@gmail.com'),
 (13, '$2y$10$L680iiTY/OYAE9v./tg99O4N1T/ao6GKU/AnYCR6KNO4jLIimJKHu', '2026-04-08 11:28:32', 'approved', 'Resident', 'habeeb@gmail.com'),
 (23, '$2y$10$UDiUYY47oKHijEltMpEDRusNoO93tFpEhQ389rybJJHXwzuNwcMiG', '2026-04-08 11:37:39', 'approved', 'Council Member', 'Cmember@cultureconnect.com'),
-(24, '$2y$10$ViJxAEtd.j9tpIUKfzKPw.5pPGEFm4c5JlfxBXha4GgFbGeWXTzvC', '2026-04-09 13:50:27', 'approved', 'SME', 'hello@brushstrokestudio.com'),
-(25, '$2y$10$eLhuVYx4TBSMRuld/k4THuwZ1XC2EhQG4fUCshbrKOlnRdgqz5Hva', '2026-04-09 09:37:51', 'approved', 'SME', 'info@hatfieldtheatre.com'),
-(26, '$2y$10$AUciDVzSGaUL7jdXeUdkM.DhFyvuMxkxFa1J8xurcFsZV8qHyg14m', '2026-04-09 09:40:06', 'approved', 'SME', 'tours@hertheritagetours.com'),
-(27, '$2y$10$.dWO5U3z4wW4FGMV32g3COS5QZbspNds4t8z853sYSp1ErZcuvvOO', '2026-04-09 09:41:59', 'approved', 'SME', 'studio@pixelcraftmedia.com'),
-(28, '$2y$10$LT2xJjdlHYINbJNC5PaEuup2dqUpNQMvIxct0ueW3FJRfYgObhWtK', '2026-04-09 09:43:32', 'approved', 'SME', 'shop@hatfieldhandmade.com'),
-(29, '$2y$10$HrsNx52kvUjSBIemM/6gcuaWiVz5LhBgpQMJz0pf4LxY4W1cPPC5m', '2026-04-09 09:45:03', 'approved', 'SME', 'press@hertfordink.com');
+(24, '$2y$10$ViJxAEtd.j9tpIUKfzKPw.5pPGEFm4c5JlfxBXha4GgFbGeWXTzvC', '2026-04-09 22:28:44', 'approved', 'SME', 'hello@brushstrokestudio.com'),
+(25, '$2y$10$eLhuVYx4TBSMRuld/k4THuwZ1XC2EhQG4fUCshbrKOlnRdgqz5Hva', '2026-04-09 19:58:45', 'approved', 'SME', 'info@hatfieldtheatre.com'),
+(26, '$2y$10$AUciDVzSGaUL7jdXeUdkM.DhFyvuMxkxFa1J8xurcFsZV8qHyg14m', '2026-04-09 20:10:10', 'approved', 'SME', 'tours@hertheritagetours.com'),
+(27, '$2y$10$.dWO5U3z4wW4FGMV32g3COS5QZbspNds4t8z853sYSp1ErZcuvvOO', '2026-04-09 20:17:47', 'approved', 'SME', 'studio@pixelcraftmedia.com'),
+(28, '$2y$10$LT2xJjdlHYINbJNC5PaEuup2dqUpNQMvIxct0ueW3FJRfYgObhWtK', '2026-04-09 20:25:00', 'approved', 'SME', 'shop@hatfieldhandmade.com'),
+(29, '$2y$10$HrsNx52kvUjSBIemM/6gcuaWiVz5LhBgpQMJz0pf4LxY4W1cPPC5m', '2026-04-09 20:35:19', 'approved', 'SME', 'press@hertfordink.com');
 
 -- --------------------------------------------------------
 
@@ -833,19 +897,19 @@ ALTER TABLE `areas`
 -- AUTO_INCREMENT for table `listings`
 --
 ALTER TABLE `listings`
-  MODIFY `listing_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `listing_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `listing_images`
 --
 ALTER TABLE `listing_images`
-  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT for table `listing_requests`
 --
 ALTER TABLE `listing_requests`
-  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `orders`

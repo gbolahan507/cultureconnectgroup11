@@ -216,6 +216,9 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Reside
  
 <script>
     let moCurrentTab    = 'all';
+    let moAllOrders   = [];
+    let moPageNum     = 1;
+    const MO_PER_PAGE = 6;
     let moCancelOrderId = null;
  
     document.addEventListener('DOMContentLoaded', () => moLoad('all'));
@@ -228,42 +231,116 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Reside
     }
  
     function moLoad(status) {
-        const loading = document.getElementById('mo-loading');
-        const wrapper = document.getElementById('mo-table-wrapper');
-        const empty   = document.getElementById('mo-empty');
-        const count   = document.getElementById('mo-count-label');
- 
-        loading.style.display = 'flex';
-        wrapper.style.display = 'none';
-        empty.style.display   = 'none';
-        count.textContent     = '';
- 
-        const fd = new FormData();
-        fd.append('action', 'get_orders');
-        fd.append('status', status);
- 
-        fetch('../pages/my-orders.php', { method: 'POST', body: fd })
-            .then(r => r.text())
-            .then(text => {
-                try {
-                    const data = JSON.parse(text);
-                    loading.style.display = 'none';
- 
-                    if (data.success && data.orders.length > 0) {
-                        count.textContent = `${data.orders.length} order${data.orders.length !== 1 ? 's' : ''} found`;
-                        const tbody = document.getElementById('mo-table-body');
-                        tbody.innerHTML = '';
-                        data.orders.forEach(o => tbody.appendChild(moBuildRow(o)));
-                        wrapper.style.display = 'block';
-                    } else {
-                        const msgs = { all: 'You have no orders yet.', processing: 'No orders currently processing.', completed: 'No completed orders.', cancelled: 'No cancelled orders.' };
-                        document.getElementById('mo-empty-msg').textContent = msgs[status] || 'No orders found.';
-                        empty.style.display = 'flex';
-                    }
-                } catch(e) { loading.style.display = 'none'; empty.style.display = 'flex'; }
-            })
-            .catch(() => { loading.style.display = 'none'; empty.style.display = 'flex'; });
+    const loading = document.getElementById('mo-loading');
+    const wrapper = document.getElementById('mo-table-wrapper');
+    const empty   = document.getElementById('mo-empty');
+    const count   = document.getElementById('mo-count-label');
+
+    moPageNum = 1;
+    loading.style.display = 'flex';
+    wrapper.style.display = 'none';
+    empty.style.display   = 'none';
+    count.textContent     = '';
+
+    const fd = new FormData();
+    fd.append('action', 'get_orders');
+    fd.append('status', status);
+
+    fetch('../pages/my-orders.php', { method: 'POST', body: fd })
+        .then(r => r.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                loading.style.display = 'none';
+
+                if (data.success && data.orders.length > 0) {
+                    moAllOrders = data.orders;
+                    moRenderPage();
+                } else {
+                    moAllOrders = [];
+                    const msgs = {
+                        all:        'You have no orders yet.',
+                        processing: 'No orders currently processing.',
+                        completed:  'No completed orders.',
+                        cancelled:  'No cancelled orders.'
+                    };
+                    document.getElementById('mo-empty-msg').textContent = msgs[status] || 'No orders found.';
+                    empty.style.display = 'flex';
+                    moRemovePagination();
+                }
+            } catch(e) { loading.style.display = 'none'; empty.style.display = 'flex'; }
+        })
+        .catch(() => { loading.style.display = 'none'; empty.style.display = 'flex'; });
+}
+
+function moRenderPage() {
+    const wrapper = document.getElementById('mo-table-wrapper');
+    const count   = document.getElementById('mo-count-label');
+    const total   = moAllOrders.length;
+    const totalPages = Math.ceil(total / MO_PER_PAGE);
+    const start   = (moPageNum - 1) * MO_PER_PAGE;
+    const paged   = moAllOrders.slice(start, start + MO_PER_PAGE);
+
+    count.textContent = `${total} order${total !== 1 ? 's' : ''} found`;
+    const tbody = document.getElementById('mo-table-body');
+    tbody.innerHTML = '';
+    paged.forEach(o => tbody.appendChild(moBuildRow(o)));
+    wrapper.style.display = 'block';
+
+    moRenderPagination(totalPages);
+}
+
+function moRenderPagination(totalPages) {
+    moRemovePagination();
+    if (totalPages <= 1) return;
+
+    const wrapper = document.getElementById('mo-table-wrapper');
+    const pag     = document.createElement('div');
+    pag.id        = 'mo-pagination';
+    pag.className = 'mo-pagination';
+
+    const info       = document.createElement('span');
+    info.className   = 'mo-page-info';
+    const start      = (moPageNum - 1) * MO_PER_PAGE + 1;
+    const end        = Math.min(moPageNum * MO_PER_PAGE, moAllOrders.length);
+    info.textContent = `Showing ${start}–${end} of ${moAllOrders.length}`;
+    pag.appendChild(info);
+
+    const btns = document.createElement('div');
+    btns.className = 'mo-page-btns';
+
+    if (moPageNum > 1) {
+        const prev     = document.createElement('button');
+        prev.className = 'mo-page-btn';
+        prev.textContent = '« Prev';
+        prev.onclick   = () => { moPageNum--; moRenderPage(); };
+        btns.appendChild(prev);
     }
+
+    for (let p = 1; p <= totalPages; p++) {
+        const btn = document.createElement('button');
+        btn.className   = 'mo-page-btn' + (p === moPageNum ? ' mo-page-btn--active' : '');
+        btn.textContent = p;
+        btn.onclick     = ((pg) => () => { moPageNum = pg; moRenderPage(); })(p);
+        btns.appendChild(btn);
+    }
+
+    if (moPageNum < totalPages) {
+        const next     = document.createElement('button');
+        next.className = 'mo-page-btn';
+        next.textContent = 'Next »';
+        next.onclick   = () => { moPageNum++; moRenderPage(); };
+        btns.appendChild(next);
+    }
+
+    pag.appendChild(btns);
+    wrapper.after(pag);
+}
+
+   function moRemovePagination() {
+      const existing = document.getElementById('mo-pagination');
+      if (existing) existing.remove();
+}
  
     function moBuildRow(o) {
         const tr       = document.createElement('tr');

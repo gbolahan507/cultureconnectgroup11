@@ -62,17 +62,19 @@ $statusFilter  = $_GET['status'] ?? 'pending';
 $validStatuses = ['pending', 'approved', 'rejected'];
 if (!in_array($statusFilter, $validStatuses)) $statusFilter = 'pending';
 
+// Pagination setup
+$users_per_page = 8;
+$user_page      = max(1, intval($_GET['user_page'] ?? 1));
+
 // Fetch SME profiles
 $smeQuery = $conn->prepare("
     SELECT 
-        s.sme_id,
-        u.user_id,
+        s.sme_id, u.user_id,
         s.business_name AS name,
         s.created_at AS date_submitted,
         s.approval_status,
         s.description AS business_description,
-        s.phone,
-        'sme' AS type,
+        s.phone, 'sme' AS type,
         u.email_address AS email,
         u.account_status
     FROM sme_profiles s
@@ -87,36 +89,38 @@ $smes = $smeQuery->get_result()->fetch_all(MYSQLI_ASSOC);
 // Fetch Resident/Council profiles
 $resQuery = $conn->prepare("
     SELECT 
-        r.profile_id,
-        u.user_id,
+        r.profile_id, u.user_id,
         CONCAT(r.first_name, ' ', r.last_name) AS name,
         r.created_at AS date_submitted,
         u.account_status AS approval_status,
         r.date_of_birth AS dob,
-        r.gender,
-        r.address,
+        r.gender, r.address,
         r.postcode AS post_code,
         r.phone,
         u.email_address AS email,
         u.role,
         CASE u.role
-            WHEN 'Resident' THEN 'resident'
-            WHEN 'Council Member' THEN 'council_member'
+            WHEN 'Resident'              THEN 'resident'
+            WHEN 'Council Member'        THEN 'council_member'
             WHEN 'Council Administrator' THEN 'council_admin'
             ELSE 'resident'
         END AS type
     FROM resident_profiles r
     JOIN users u ON r.user_id = u.user_id
-    WHERE u.account_status = ?
-    AND u.role != 'SME'
+    WHERE u.account_status = ? AND u.role != 'SME'
     ORDER BY r.created_at DESC
 ");
 $resQuery->bind_param("s", $statusFilter);
 $resQuery->execute();
 $residents = $resQuery->get_result()->fetch_all(MYSQLI_ASSOC);
 
-// Merge both
-$users = array_merge($smes, $residents);
+// Merge and paginate
+$all_users   = array_merge($smes, $residents);
+$total_users = count($all_users);
+$total_pages = max(1, ceil($total_users / $users_per_page));
+$user_page   = min($user_page, $total_pages);
+$offset      = ($user_page - 1) * $users_per_page;
+$users       = array_slice($all_users, $offset, $users_per_page);
 ?>
 
 <div class="manage-users-page">
@@ -158,71 +162,99 @@ $users = array_merge($smes, $residents);
 
     <!-- Users Table -->
     <div class="users-table-wrapper">
-        <div class="table-scroll">
-            <table class="users-table">
-                <thead>
+    <div class="table-scroll">
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Email</th>
+                    <th>Date Submitted</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="users-table-body">
+                <?php if (empty($users)) : ?>
                     <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Email</th>
-                        <th>Date Submitted</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <td colspan="7" style="text-align:center; padding:20px; color:rgba(0,0,0,0.5);">
+                            No <?= $statusFilter ?> users found.
+                        </td>
                     </tr>
-                </thead>
-                <tbody id="users-table-body">
-                    <?php if (empty($users)) : ?>
+                <?php else : ?>
+                    <?php $count = $offset + 1; foreach ($users as $user) : ?>
                         <tr>
-                            <td colspan="7" style="text-align:center; padding:20px; color:rgba(0,0,0,0.5);">
-                                No <?= $statusFilter ?> users found.
+                            <td><?= $count++ ?></td>
+                            <td><?= htmlspecialchars($user['name']) ?></td>
+                            <td>
+                                <?php
+                                $typeLabels = [
+                                    'resident'       => 'Resident',
+                                    'sme'            => 'SME',
+                                    'council_member' => 'Council Member',
+                                    'council_admin'  => 'Council Admin'
+                                ];
+                                ?>
+                                <span class="users-type-badge users-type-<?= $user['type'] ?>">
+                                    <?= $typeLabels[$user['type']] ?? ucfirst($user['type']) ?>
+                                </span>
+                            </td>
+                            <td><?= htmlspecialchars($user['email']) ?></td>
+                            <td><?= htmlspecialchars(date('d M Y', strtotime($user['date_submitted']))) ?></td>
+                            <td>
+                                <span class="status <?= $user['approval_status'] ?>">
+                                    <?= ucfirst($user['approval_status']) ?>
+                                </span>
+                            </td>
+                            <td>
+                                <button class="view-btn" onclick="openUsersViewModal(<?= htmlspecialchars(json_encode($user)) ?>)">
+                                    View
+                                </button>
+                                <button class="edit-btn" onclick="openUsersStatusModal(
+                                    '<?= $user['user_id'] ?>',
+                                    '<?= $user['type'] ?>',
+                                    '<?= $user['approval_status'] ?>',
+                                    '<?= addslashes($user['name']) ?>'
+                                )">
+                                    Status
+                                </button>
                             </td>
                         </tr>
-                    <?php else : ?>
-                        <?php $count = 1; foreach ($users as $user) : ?>
-                            <tr>
-                                <td><?= $count++ ?></td>
-                                <td><?= htmlspecialchars($user['name']) ?></td>
-                                <td>
-                                    <?php
-                                    $typeLabels = [
-                                        'resident'       => 'Resident',
-                                        'sme'            => 'SME',
-                                        'council_member' => 'Council Member',
-                                        'council_admin'  => 'Council Admin'
-                                    ];
-                                    ?>
-                                    <span class="users-type-badge users-type-<?= $user['type'] ?>">
-                                        <?= $typeLabels[$user['type']] ?? ucfirst($user['type']) ?>
-                                    </span>
-                                </td>
-                                <td><?= htmlspecialchars($user['email']) ?></td>
-                                <td><?= htmlspecialchars(date('d M Y', strtotime($user['date_submitted']))) ?></td>
-                                <td>
-                                    <span class="status <?= $user['approval_status'] ?>">
-                                        <?= ucfirst($user['approval_status']) ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="view-btn" onclick="openUsersViewModal(<?= htmlspecialchars(json_encode($user)) ?>)">
-                                        View
-                                    </button>
-                                    <button class="edit-btn" onclick="openUsersStatusModal(
-                                        '<?= $user['user_id'] ?>',
-                                        '<?= $user['type'] ?>',
-                                        '<?= $user['approval_status'] ?>',
-                                        '<?= addslashes($user['name']) ?>'
-                                    )">
-                                        Status
-                                    </button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <?php if ($total_pages > 1) : ?>
+    <div class="users-pagination">
+        <span class="users-page-info">
+            Showing <?= $offset + 1 ?>–<?= min($offset + $users_per_page, $total_users) ?> of <?= $total_users ?> users
+        </span>
+        <div class="users-page-btns">
+            <?php if ($user_page > 1) : ?>
+            <a href="dashboard.php?page=manage-users&status=<?= $statusFilter ?>&user_page=<?= $user_page - 1 ?>"
+               class="users-page-btn">&laquo; Prev</a>
+            <?php endif; ?>
+
+            <?php for ($p = 1; $p <= $total_pages; $p++) : ?>
+            <a href="dashboard.php?page=manage-users&status=<?= $statusFilter ?>&user_page=<?= $p ?>"
+               class="users-page-btn <?= $p === $user_page ? 'users-page-btn--active' : '' ?>">
+                <?= $p ?>
+            </a>
+            <?php endfor; ?>
+
+            <?php if ($user_page < $total_pages) : ?>
+            <a href="dashboard.php?page=manage-users&status=<?= $statusFilter ?>&user_page=<?= $user_page + 1 ?>"
+               class="users-page-btn">Next &raquo;</a>
+            <?php endif; ?>
         </div>
     </div>
+    <?php endif; ?>
+
+</div>
 
 </div>
 
@@ -355,7 +387,10 @@ function submitUsersStatus() {
                 msg.className     = 'alert-box success-box';
                 msg.innerText     = data.message;
                 msg.style.display = 'block';
-                setTimeout(() => location.reload(), 1500);
+                setTimeout(() => {const url = new URL(window.location.href);
+                                  const status   = url.searchParams.get('status')    || 'pending';
+                                  const userPage = url.searchParams.get('user_page') || 1;
+                                window.location.href = `dashboard.php?page=manage-users&status=${status}&user_page=${userPage}`;}, 1500);
             } else {
                 errorBox.style.display = 'block';
                 errorBox.innerText     = data.message;

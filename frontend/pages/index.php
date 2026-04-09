@@ -109,7 +109,7 @@ function ix_safe(string $val): string {
     <div class="ix-hero-inner">
         <div class="ix-hero-text">
             <?php if ($is_logged_in && $user_name) : ?>
-            <p class="ix-hero-welcome">Welcome back, <?= ix_safe($user_name) ?> 👋</p>
+            <p class="ix-hero-welcome">Welcome back, <?= ix_safe($user_name) ?> </p>
             <?php endif; ?>
             <h1 class="ix-hero-title">Discover Hertfordshire's Cultural Community</h1>
             <p class="ix-hero-subtitle">Explore local products, services and cultural events from businesses and residents across Hertfordshire.</p>

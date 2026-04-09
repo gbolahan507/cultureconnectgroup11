@@ -308,6 +308,9 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'SME') {
 
 <script>
     let mgoCurrentTab    = 'all';
+    let mgoAllOrders  = [];
+    let mgoPageNum    = 1;
+    const MGO_PER_PAGE = 8;
     let mgoActionOrderId = null;
  
     document.addEventListener('DOMContentLoaded', () => {
@@ -342,42 +345,116 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'SME') {
     }
  
     function mgoLoad(status) {
-        const loading = document.getElementById('mgo-loading');
-        const wrapper = document.getElementById('mgo-table-wrapper');
-        const empty   = document.getElementById('mgo-empty');
-        const count   = document.getElementById('mgo-count-label');
- 
-        loading.style.display = 'flex';
-        wrapper.style.display = 'none';
-        empty.style.display   = 'none';
-        count.textContent     = '';
- 
-        const fd = new FormData();
-        fd.append('action', 'get_orders');
-        fd.append('status', status);
- 
-        fetch('../pages/manage-orders.php', { method: 'POST', body: fd })
-            .then(r => r.text())
-            .then(text => {
-                try {
-                    const data = JSON.parse(text);
-                    loading.style.display = 'none';
- 
-                    if (data.success && data.orders.length > 0) {
-                        count.textContent = `${data.orders.length} order${data.orders.length !== 1 ? 's' : ''} found`;
-                        const tbody = document.getElementById('mgo-table-body');
-                        tbody.innerHTML = '';
-                        data.orders.forEach(o => tbody.appendChild(mgoBuildRow(o)));
-                        wrapper.style.display = 'block';
-                    } else {
-                        const msgs = { all: 'No orders yet. Orders will appear here when customers make bookings.', processing: 'No orders currently processing.', completed: 'No completed orders.', cancelled: 'No cancelled orders.' };
-                        document.getElementById('mgo-empty-msg').textContent = msgs[status] || 'No orders found.';
-                        empty.style.display = 'flex';
-                    }
-                } catch(e) { loading.style.display = 'none'; empty.style.display = 'flex'; }
-            })
-            .catch(() => { loading.style.display = 'none'; empty.style.display = 'flex'; });
+    const loading = document.getElementById('mgo-loading');
+    const wrapper = document.getElementById('mgo-table-wrapper');
+    const empty   = document.getElementById('mgo-empty');
+    const count   = document.getElementById('mgo-count-label');
+
+    mgoPageNum = 1;
+    loading.style.display = 'flex';
+    wrapper.style.display = 'none';
+    empty.style.display   = 'none';
+    count.textContent     = '';
+
+    const fd = new FormData();
+    fd.append('action', 'get_orders');
+    fd.append('status', status);
+
+    fetch('../pages/manage-orders.php', { method: 'POST', body: fd })
+        .then(r => r.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                loading.style.display = 'none';
+
+                if (data.success && data.orders.length > 0) {
+                    mgoAllOrders = data.orders;
+                    mgoRenderPage();
+                } else {
+                    mgoAllOrders = [];
+                    const msgs = {
+                        all:        'No orders yet. Orders will appear here when customers make bookings.',
+                        processing: 'No orders currently processing.',
+                        completed:  'No completed orders.',
+                        cancelled:  'No cancelled orders.'
+                    };
+                    document.getElementById('mgo-empty-msg').textContent = msgs[status] || 'No orders found.';
+                    empty.style.display = 'flex';
+                    mgoRemovePagination();
+                }
+            } catch(e) { loading.style.display = 'none'; empty.style.display = 'flex'; }
+        })
+        .catch(() => { loading.style.display = 'none'; empty.style.display = 'flex'; });
+}
+
+function mgoRenderPage() {
+    const wrapper = document.getElementById('mgo-table-wrapper');
+    const count   = document.getElementById('mgo-count-label');
+    const total   = mgoAllOrders.length;
+    const totalPages = Math.ceil(total / MGO_PER_PAGE);
+    const start   = (mgoPageNum - 1) * MGO_PER_PAGE;
+    const paged   = mgoAllOrders.slice(start, start + MGO_PER_PAGE);
+
+    count.textContent = `${total} order${total !== 1 ? 's' : ''} found`;
+    const tbody = document.getElementById('mgo-table-body');
+    tbody.innerHTML = '';
+    paged.forEach(o => tbody.appendChild(mgoBuildRow(o)));
+    wrapper.style.display = 'block';
+
+    mgoRenderPagination(totalPages);
+}
+
+function mgoRenderPagination(totalPages) {
+    mgoRemovePagination();
+    if (totalPages <= 1) return;
+
+    const wrapper = document.getElementById('mgo-table-wrapper');
+    const pag     = document.createElement('div');
+    pag.id        = 'mgo-pagination';
+    pag.className = 'mgo-pagination';
+
+    const info       = document.createElement('span');
+    info.className   = 'mgo-page-info';
+    const start      = (mgoPageNum - 1) * MGO_PER_PAGE + 1;
+    const end        = Math.min(mgoPageNum * MGO_PER_PAGE, mgoAllOrders.length);
+    info.textContent = `Showing ${start}–${end} of ${mgoAllOrders.length}`;
+    pag.appendChild(info);
+
+    const btns = document.createElement('div');
+    btns.className = 'mgo-page-btns';
+
+    if (mgoPageNum > 1) {
+        const prev     = document.createElement('button');
+        prev.className = 'mgo-page-btn';
+        prev.textContent = '« Prev';
+        prev.onclick   = () => { mgoPageNum--; mgoRenderPage(); };
+        btns.appendChild(prev);
     }
+
+    for (let p = 1; p <= totalPages; p++) {
+        const btn = document.createElement('button');
+        btn.className   = 'mgo-page-btn' + (p === mgoPageNum ? ' mgo-page-btn--active' : '');
+        btn.textContent = p;
+        btn.onclick     = ((pg) => () => { mgoPageNum = pg; mgoRenderPage(); })(p);
+        btns.appendChild(btn);
+    }
+
+    if (mgoPageNum < totalPages) {
+        const next     = document.createElement('button');
+        next.className = 'mgo-page-btn';
+        next.textContent = 'Next »';
+        next.onclick   = () => { mgoPageNum++; mgoRenderPage(); };
+        btns.appendChild(next);
+    }
+
+    pag.appendChild(btns);
+    wrapper.after(pag);
+}
+
+    function mgoRemovePagination() {
+         const existing = document.getElementById('mgo-pagination');
+         if (existing) existing.remove();
+}
  
     function mgoBuildRow(o) {
         const tr       = document.createElement('tr');

@@ -17,15 +17,14 @@ $allowedPages = [
     'manage-users',
     'manage-orders',
     'manage-council',
+    'manage-votes',
     'my-orders',
     'review-products',
     'reports',
     'profile',
-    'activity',
     'votes',
     'add-product',
     'manage-listings',
-    'view-votes',
     'settings'
 ];
 

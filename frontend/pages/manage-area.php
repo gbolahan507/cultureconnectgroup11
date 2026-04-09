@@ -92,9 +92,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     exit();
 }
 
-// Fetch all areas
-$areas = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC");
+     // Pagination setup
+          $areas_per_page = 6;
+          $area_page      = max(1, intval($_GET['area_page'] ?? 1));
+          $total_areas    = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM areas"))['n'];
+          $total_pages    = max(1, ceil($total_areas / $areas_per_page));
+          $area_page      = min($area_page, $total_pages);
+          $offset         = ($area_page - 1) * $areas_per_page;
 
+          $areas = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC LIMIT $areas_per_page OFFSET $offset");
 ?>
 
 <div class="manage-area-page">
@@ -125,42 +131,71 @@ $areas = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC");
 
     <!-- Area Table -->
     <div class="area-table-wrapper">
-        <table class="area-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Area Name</th>
-                    <th>Description</th>
-                    <th>Postcode</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="area-table-body">
-                <?php
-                $count = 1;
-                while ($area = mysqli_fetch_assoc($areas)) : ?>
-                <tr>
-                    <td><?php echo $count++; ?></td>
-                    <td><?php echo htmlspecialchars($area['area_name']); ?></td>
-                        <td><?php echo htmlspecialchars($area['description']); ?></td>
-                        <td><?php echo htmlspecialchars($area['postcode']); ?></td>
-                        <td>
-                        <button class="edit-btn" onclick="openAreaEditModal(
-                                 <?php echo $area['area_id']; ?>,
-                                '<?php echo addslashes($area['area_name']); ?>',
-                                '<?php echo addslashes($area['description']); ?>',
-                                '<?php echo addslashes($area['postcode']); ?>'
-                        )">Edit</button>
-                        <button class="delete-btn" onclick="openAreaDeleteModal(
-                                <?php echo $area['area_id']; ?>,
-                               '<?php echo addslashes($area['area_name']); ?>'
-                        )">Delete</button>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+    <table class="area-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Area Name</th>
+                <th>Description</th>
+                <th>Postcode</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="area-table-body">
+            <?php
+            $count = $offset + 1;
+            while ($area = mysqli_fetch_assoc($areas)) : ?>
+            <tr>
+                <td><?php echo $count++; ?></td>
+                <td><?php echo htmlspecialchars($area['area_name']); ?></td>
+                <td><?php echo htmlspecialchars($area['description']); ?></td>
+                <td><?php echo htmlspecialchars($area['postcode']); ?></td>
+                <td>
+                    <button class="edit-btn" onclick="openAreaEditModal(
+                             <?php echo $area['area_id']; ?>,
+                            '<?php echo addslashes($area['area_name']); ?>',
+                            '<?php echo addslashes($area['description']); ?>',
+                            '<?php echo addslashes($area['postcode']); ?>'
+                    )">Edit</button>
+                    <button class="delete-btn" onclick="openAreaDeleteModal(
+                            <?php echo $area['area_id']; ?>,
+                           '<?php echo addslashes($area['area_name']); ?>'
+                    )">Delete</button>
+                </td>
+            </tr>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+<?php if ($total_pages > 1) : ?>
+<div class="area-pagination">
+    <span class="area-page-info">
+        Showing <?= $offset + 1 ?>–<?= min($offset + $areas_per_page, $total_areas) ?> of <?= $total_areas ?> areas
+    </span>
+    <div class="area-page-btns">
+        <?php if ($area_page > 1) : ?>
+        <a href="dashboard.php?page=manage-area&area_page=<?= $area_page - 1 ?>" class="area-page-btn">
+            &laquo; Prev
+        </a>
+        <?php endif; ?>
+
+        <?php for ($p = 1; $p <= $total_pages; $p++) : ?>
+        <a href="dashboard.php?page=manage-area&area_page=<?= $p ?>"
+           class="area-page-btn <?= $p === $area_page ? 'area-page-btn--active' : '' ?>">
+            <?= $p ?>
+        </a>
+        <?php endfor; ?>
+
+        <?php if ($area_page < $total_pages) : ?>
+        <a href="dashboard.php?page=manage-area&area_page=<?= $area_page + 1 ?>" class="area-page-btn">
+            Next &raquo;
+        </a>
+        <?php endif; ?>
     </div>
+</div>
+<?php endif; ?>
 </div>
 
 <!-- Add Area Modal Form -->
@@ -316,7 +351,8 @@ function submitAreaAdd() {
         if (res.success) {
             closeAreaModal('area-add-modal');
             showAreaMessage(res.message, 'success');
-            setTimeout(() => location.reload(), 1500);
+            setTimeout(() => {const url = new URL(window.location.href);
+            window.location.href = 'dashboard.php?page=manage-area&area_page=' + (url.searchParams.get('area_page') || 1);}, 1500);
         } else {
             errorBox.style.display = 'block';
             errorBox.innerText = res.message;
@@ -339,7 +375,8 @@ function submitAreaEdit() {
         if (res.success) {
             closeAreaModal('area-edit-modal');
             showAreaMessage(res.message, 'success');
-            setTimeout(() => location.reload(), 1500);
+            setTimeout(() => {const url = new URL(window.location.href);
+            window.location.href = 'dashboard.php?page=manage-area&area_page=' + (url.searchParams.get('area_page') || 1);}, 1500);
         } else {
             errorBox.style.display = 'block';
             errorBox.innerText = res.message;
@@ -352,7 +389,8 @@ function submitAreaDelete() {
     sendAreaRequest({ action: 'delete', area_id: id }, (res) => {
         closeAreaModal('area-delete-modal');
         showAreaMessage(res.message, res.success ? 'success' : 'error');
-        if (res.success) setTimeout(() => location.reload(), 1500);
+        if (res.success) setTimeout(() => {const url = new URL(window.location.href);
+         window.location.href = 'dashboard.php?page=manage-area&area_page=' + (url.searchParams.get('area_page') || 1);}, 1500);
     });
 }
 

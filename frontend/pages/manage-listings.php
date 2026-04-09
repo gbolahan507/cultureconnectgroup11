@@ -599,9 +599,6 @@ if ($ml_role === 'SME') {
     while ($row = mysqli_fetch_assoc($items_result)) $ml_all_items[] = $row;
 }  
 
-// TEMPORARY — remove after fixing
-echo "<!-- DEBUG role: [" . $_SESSION['user_role'] . "] is_council: " . ($ml_is_council ? 'true' : 'false') . " -->";
-
 ?>
 <div class="ml-page">
 
@@ -879,11 +876,14 @@ echo "<!-- DEBUG role: [" . $_SESSION['user_role'] . "] is_council: " . ($ml_is_
  
  <!--JAVASCRIPT-->
 <script>
- const ML_IS_COUNCIL  = <?= $ml_is_council ? 'true' : 'false' ?>;
+    const ML_IS_COUNCIL  = <?= $ml_is_council ? 'true' : 'false' ?>;
     const ML_ROLE        = '<?= htmlspecialchars($ml_role) ?>';
     const ML_ALL_ITEMS   = <?= json_encode($ml_all_items) ?>;
  
     let mlCurrentStatus   = 'all';
+    let mlCurrentPage  = 1;
+    const ML_PER_PAGE  = 8;
+    let mlAllListings  = [];
     let mlViewListingId   = null;
     let mlDeleteListingId = null;
     let mlImagesListingId = null;
@@ -902,74 +902,148 @@ echo "<!-- DEBUG role: [" . $_SESSION['user_role'] . "] is_council: " . ($ml_is_
  
     // Load listings
     function mlLoadListings(status) {
-        const tbody      = document.getElementById('ml-table-body');
-        const emptyState = document.getElementById('ml-empty-state');
-        const countLabel = document.getElementById('ml-count-label');
- 
-        emptyState.style.display = 'none';
-        tbody.innerHTML = `<tr><td colspan="8" class="ml-loading-row"><div class="ml-spinner"></div> Loading listings…</td></tr>`;
- 
-        const formData = new FormData();
-        formData.append('action', 'get_listings');
-        formData.append('status', status);
- 
-        fetch('../pages/manage-listings.php', { method: 'POST', body: formData })
-            .then(res => res.text())
-            .then(text => {
-                try {
-                    const data = JSON.parse(text);
-                    tbody.innerHTML = '';
-                    if (data.success && data.listings.length > 0) {
-                        countLabel.textContent = `${data.listings.length} listing${data.listings.length !== 1 ? 's' : ''} found`;
-                        data.listings.forEach((l, i) => tbody.appendChild(mlBuildRow(l, i + 1)));
-                    } else {
-                        countLabel.textContent = '';
-                        const messages = { all: ML_IS_COUNCIL ? 'No listings found.' : 'You have no listings yet.', active: 'No active listings.', pending: 'No listings awaiting approval.', inactive: 'No inactive listings.' };
-                        document.getElementById('ml-empty-msg').textContent = messages[status] || 'No listings found.';
-                        emptyState.style.display = 'flex';
-                    }
-                } catch (e) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="ml-error-row">Failed to load listings. Please refresh.</td></tr>';
+    const tbody      = document.getElementById('ml-table-body');
+    const emptyState = document.getElementById('ml-empty-state');
+    const countLabel = document.getElementById('ml-count-label');
+
+    mlCurrentPage = 1;
+    emptyState.style.display = 'none';
+    tbody.innerHTML = `<tr><td colspan="8" class="ml-loading-row"><div class="ml-spinner"></div> Loading listings…</td></tr>`;
+
+    const formData = new FormData();
+    formData.append('action', 'get_listings');
+    formData.append('status', status);
+
+    fetch('../pages/manage-listings.php', { method: 'POST', body: formData })
+        .then(res => res.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                tbody.innerHTML = '';
+                if (data.success && data.listings.length > 0) {
+                    mlAllListings = data.listings;
+                    mlRenderPage();
+                } else {
+                    mlAllListings = [];
+                    countLabel.textContent = '';
+                    const messages = {
+                        all:      ML_IS_COUNCIL ? 'No listings found.' : 'You have no listings yet.',
+                        active:   'No active listings.',
+                        pending:  'No listings awaiting approval.',
+                        inactive: 'No inactive listings.'
+                    };
+                    document.getElementById('ml-empty-msg').textContent = messages[status] || 'No listings found.';
+                    emptyState.style.display = 'flex';
+                    mlRemovePagination();
                 }
-            })
-            .catch(() => { tbody.innerHTML = '<tr><td colspan="8" class="ml-error-row">Network error.</td></tr>'; });
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="8" class="ml-error-row">Failed to load listings. Please refresh.</td></tr>';
+            }
+        })
+        .catch(() => { tbody.innerHTML = '<tr><td colspan="8" class="ml-error-row">Network error.</td></tr>'; });
     }
+
  
     // Build table row
-    function mlBuildRow(l, index) {
-        const tr         = document.createElement('tr');
-        const badgeClass = { active: 'ml-badge--active', pending: 'ml-badge--pending', inactive: 'ml-badge--inactive' }[l.status] || '';
-        const price      = '£' + parseFloat(l.price).toFixed(2);
-        const created    = new Date(l.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
- 
-        let actions = `<button class="ml-view-btn" onclick="mlOpenView(${l.listing_id})">View</button>`;
- 
-        if (ML_ROLE === 'SME') {
-            // Images button always available for SME
-            actions += `<button class="ml-images-btn" onclick="mlOpenImages(${l.listing_id})">Images</button>`;
- 
-            if (l.status === 'pending' || l.status === 'inactive') {
-                actions += `<button class="ml-edit-btn"   onclick="mlOpenEdit(${l.listing_id})">Edit</button>`;
-                actions += `<button class="ml-delete-btn" onclick="mlOpenDelete(${l.listing_id}, '${mlEsc(l.title)}')">Delete</button>`;
-            } else if (l.status === 'active') {
-                actions += `<button class="ml-unpublish-btn" onclick="mlUnpublish(${l.listing_id}, this)">Unpublish</button>`;
-            }
-        } else {
-            actions += `<button class="ml-delete-btn" onclick="mlOpenDelete(${l.listing_id}, '${mlEsc(l.title)}')">Delete</button>`;
-        }
- 
-        tr.innerHTML = `
-            <td>${index}</td>
-            <td class="ml-title-cell">${mlEsc(l.title)}</td>
-            <td class="ml-business-cell">${mlEsc(l.business_name ?? '—')}</td>
-            <td><span class="ml-category-text">${mlEsc(l.category_name)}</span><br><small class="ml-item-text">${mlEsc(l.item_name)}</small></td>
-            <td class="ml-price-cell">${price}</td>
-            <td><span class="ml-badge ${badgeClass}">${mlEsc(l.status.charAt(0).toUpperCase() + l.status.slice(1))}</span></td>
-            <td>${created}</td>
-            <td class="ml-actions-cell">${actions}</td>
-        `;
-        return tr;
+    function mlRenderPage() {
+    const tbody      = document.getElementById('ml-table-body');
+    const countLabel = document.getElementById('ml-count-label');
+    const total      = mlAllListings.length;
+    const totalPages = Math.ceil(total / ML_PER_PAGE);
+    const start      = (mlCurrentPage - 1) * ML_PER_PAGE;
+    const paged      = mlAllListings.slice(start, start + ML_PER_PAGE);
+
+    countLabel.textContent = `${total} listing${total !== 1 ? 's' : ''} found`;
+    tbody.innerHTML = '';
+    paged.forEach((l, i) => tbody.appendChild(mlBuildRow(l, start + i + 1)));
+
+    mlRenderPagination(totalPages);
+}
+
+function mlRenderPagination(totalPages) {
+    mlRemovePagination();
+    if (totalPages <= 1) return;
+
+    const wrapper = document.querySelector('.ml-table-wrapper');
+    const pag     = document.createElement('div');
+    pag.id        = 'ml-pagination';
+    pag.className = 'ml-pagination';
+
+    const info = document.createElement('span');
+    info.className   = 'ml-page-info';
+    const start      = (mlCurrentPage - 1) * ML_PER_PAGE + 1;
+    const end        = Math.min(mlCurrentPage * ML_PER_PAGE, mlAllListings.length);
+    info.textContent = `Showing ${start}–${end} of ${mlAllListings.length}`;
+    pag.appendChild(info);
+
+    const btns = document.createElement('div');
+    btns.className = 'ml-page-btns';
+
+    if (mlCurrentPage > 1) {
+        const prev = document.createElement('button');
+        prev.className   = 'ml-page-btn';
+        prev.textContent = '« Prev';
+        prev.onclick     = () => { mlCurrentPage--; mlRenderPage(); };
+        btns.appendChild(prev);
     }
+
+    for (let p = 1; p <= totalPages; p++) {
+        const btn = document.createElement('button');
+        btn.className   = 'ml-page-btn' + (p === mlCurrentPage ? ' ml-page-btn--active' : '');
+        btn.textContent = p;
+        btn.onclick     = ((pg) => () => { mlCurrentPage = pg; mlRenderPage(); })(p);
+        btns.appendChild(btn);
+    }
+
+    if (mlCurrentPage < totalPages) {
+        const next = document.createElement('button');
+        next.className   = 'ml-page-btn';
+        next.textContent = 'Next »';
+        next.onclick     = () => { mlCurrentPage++; mlRenderPage(); };
+        btns.appendChild(next);
+    }
+
+    pag.appendChild(btns);
+    wrapper.after(pag);
+}
+
+function mlRemovePagination() {
+    const existing = document.getElementById('ml-pagination');
+    if (existing) existing.remove();
+}
+
+function mlBuildRow(l, index) {
+    const tr         = document.createElement('tr');
+    const badgeClass = { active: 'ml-badge--active', pending: 'ml-badge--pending', inactive: 'ml-badge--inactive' }[l.status] || '';
+    const price      = '£' + parseFloat(l.price).toFixed(2);
+    const created    = new Date(l.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    let actions = `<button class="ml-view-btn" onclick="mlOpenView(${l.listing_id})">View</button>`;
+
+    if (ML_ROLE === 'SME') {
+        actions += `<button class="ml-images-btn" onclick="mlOpenImages(${l.listing_id})">Images</button>`;
+        if (l.status === 'pending' || l.status === 'inactive') {
+            actions += `<button class="ml-edit-btn" onclick="mlOpenEdit(${l.listing_id})">Edit</button>`;
+            actions += `<button class="ml-delete-btn" onclick="mlOpenDelete(${l.listing_id}, '${mlEsc(l.title)}')">Delete</button>`;
+        } else if (l.status === 'active') {
+            actions += `<button class="ml-unpublish-btn" onclick="mlUnpublish(${l.listing_id}, this)">Unpublish</button>`;
+        }
+    } else {
+        actions += `<button class="ml-delete-btn" onclick="mlOpenDelete(${l.listing_id}, '${mlEsc(l.title)}')">Delete</button>`;
+    }
+
+    tr.innerHTML = `
+        <td>${index}</td>
+        <td class="ml-title-cell">${mlEsc(l.title)}</td>
+        <td class="ml-business-cell">${mlEsc(l.business_name ?? '—')}</td>
+        <td><span class="ml-category-text">${mlEsc(l.category_name)}</span><br><small class="ml-item-text">${mlEsc(l.item_name)}</small></td>
+        <td class="ml-price-cell">${price}</td>
+        <td><span class="ml-badge ${badgeClass}">${mlEsc(l.status.charAt(0).toUpperCase() + l.status.slice(1))}</span></td>
+        <td>${created}</td>
+        <td class="ml-actions-cell">${actions}</td>
+    `;
+    return tr;
+}
  
     // VIEW MODAL
     function mlOpenView(listing_id) {
