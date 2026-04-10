@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 10, 2026 at 01:56 AM
+-- Generation Time: Apr 10, 2026 at 01:06 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -342,7 +342,13 @@ INSERT INTO `product_service` (`item_id`, `subcategory_id`, `item_name`, `descri
 (11, 6, 'Independently Published Books', 'Fiction and poetry'),
 (12, 6, 'Zines & Magazines', 'Creative publications'),
 (13, 7, 'Limited Edition Posters', 'Event artwork'),
-(14, 7, 'Artisan Stationery', 'Handmade notebooks');
+(14, 7, 'Artisan Stationery', 'Handmade notebooks'),
+(15, 8, 'Cultural Recipe Book', 'A collection of traditional recipes from Hertfordshire cultural communities.'),
+(16, 8, 'Artisan Cultural Spice Kit', 'Curated set of spices used in traditional cultural cooking.'),
+(17, 8, 'Cultural Snack Box', 'A selection of traditional snacks and treats from various cultural backgrounds.'),
+(18, 9, 'Podcast Production Session', 'Professional podcast recording and editing session for community voices.'),
+(19, 9, 'Community Newsletter Design', 'Design and layout of a community newsletter or digital publication.'),
+(20, 9, 'Cultural Documentary Filming', 'Short documentary filming and editing service for community events.');
 
 -- --------------------------------------------------------
 
@@ -401,7 +407,9 @@ INSERT INTO `product_service_subcategories` (`subcategory_id`, `category_id`, `s
 (4, 1, 'Creative Services'),
 (5, 2, 'Art & Handmade Goods'),
 (6, 2, 'Literary & Media Products'),
-(7, 2, 'Cultural Merchandise');
+(7, 2, 'Cultural Merchandise'),
+(8, 2, 'Cultural Food & Drink'),
+(9, 1, 'Community Media');
 
 -- --------------------------------------------------------
 
@@ -434,7 +442,18 @@ INSERT INTO `resident_profiles` (`profile_id`, `user_id`, `first_name`, `last_na
 (10, 11, 'Victor', 'Ikekhua', '2019-03-20', 'Male', 'Hatfield', '+44 70000000001', 'AL10 0WB', '2026-04-07 08:16:06', 4),
 (11, 12, 'Kenneth', 'Onyeabor', '2021-10-21', 'Male', 'Hatfield', '+44 7000000004', 'AL10 0JT', '2026-04-07 08:19:30', 5),
 (12, 13, 'Habeeblahi', 'Hameed', '2020-02-19', 'Male', 'Hatfield', '+44 7000000005', 'AL10 9SB', '2026-04-07 08:21:02', 2),
-(13, 23, 'Council', 'Member', '2026-02-23', 'Other', 'Hatfield', '+44 7000000006', 'AL10 9NA', '2026-04-08 11:31:45', 1);
+(13, 23, 'Council', 'Member', '2026-02-23', 'Other', 'Hatfield', '+44 7000000006', 'AL10 9NA', '2026-04-08 11:31:45', 1),
+(14, 30, 'Marcus', 'Osei', '1990-03-15', 'Male', '12 Oak Street, Hatfield', '+44 7700 100010', 'AL10 9NA', '2026-04-10 10:25:47', 1),
+(15, 31, 'Aisha', 'Patel', '1995-07-22', 'Female', '45 Elm Avenue, Hatfield', '+44 7700 100011', 'AL10 9SB', '2026-04-10 10:27:46', 2),
+(16, 32, 'Daniel', 'Mensah', '1988-11-30', 'Male', '8 Birch Road, Hatfield', '+44 7700 100012', 'AL10 0ED', '2026-04-10 10:29:29', 3),
+(17, 33, 'Fatima', 'Ali', '1992-05-18', 'Female', '23 Cedar Lane, Hatfield', '+44 7700 100013', 'AL10 0WB', '2026-04-10 10:31:31', 4),
+(18, 34, 'James', 'Adeyemi', '1985-04-09', 'Male', '67 Maple Close, Hatfield', '+44 7700 100014', 'AL10 0JT', '2026-04-10 10:33:34', 5),
+(19, 35, 'Priya', 'Sharma', '1998-01-14', 'Female', '31 Willow Way, Hatfield', '+44 7700 100015', 'AL10 8HG', '2026-04-10 10:35:33', 6),
+(20, 36, 'Sarah', 'Nkrumah', '1993-12-08', 'Female', '14 Pine Street, Hatfield', '+44 7700 100016', 'AL10 9NA', '2026-04-10 10:36:58', 1),
+(21, 37, 'David', 'Kofi', '1987-06-25', 'Male', '55 Ash Grove, Hatfield', '+44 7700 100017', 'AL10 9SB', '2026-04-10 10:38:53', 2),
+(22, 38, 'Tariq', 'Hussain', '1997-06-14', 'Male', '9 Hazel Court, Hatfield', '+44 7700 200001', 'AL10 9NA', '2026-04-10 10:45:08', 1),
+(23, 39, 'Siobhan', 'Oconnor', '1993-11-28', 'Female', '27 Poplar Drive, Hatfield', '+44 7700 200002', 'AL10 0ED', '2026-04-10 10:46:55', 3),
+(24, 40, 'Samuel', 'Tally', '2001-03-05', 'Male', '43 Sycamore Road, Hatfield', '+44 7700 200003', 'AL10 0WB', '2026-04-10 10:49:09', 4);
 
 --
 -- Triggers `resident_profiles`
@@ -545,7 +564,10 @@ INSERT INTO `sme_profiles` (`sme_id`, `business_name`, `approval_status`, `creat
 (13, 'Hertfordshire Heritage Tours', 'approved', '2026-04-09 09:40:06', 3, 'Hertfordshire Heritage Tours offers immersive guided cultural walks and museum programmes that bring local history to life. Our expert guides lead residents and visitors through the rich cultural landscape of Hertfordshire.', '+44 7700 100003', 26, 3),
 (14, 'PixelCraft Media', 'approved', '2026-04-09 09:41:59', 4, 'PixelCraft Media is a full-service creative agency specialising in photography, videography, graphic design and brand identity. We help local businesses and cultural organisations tell their stories through compelling visual content.', '+44 7700 100004', 27, 4),
 (15, 'Hatfield Handmade Co.', 'approved', '2026-04-09 09:43:32', 5, 'Hatfield Handmade Co. is a collective of local artisans producing original artwork, handcrafted ceramics, cultural merchandise and artisan stationery. Every piece is made by hand and rooted in the cultural identity of Hertfordshire.', '+44 7700 100005', 28, 5),
-(16, 'Hertford Ink Publishing', 'approved', '2026-04-09 09:45:03', 6, 'Hertford Ink Publishing is an independent publisher celebrating local voices through poetry collections, community zines, magazines and creative writing resources. We champion literary culture and support emerging writers across Hertfordshire.', '+44 7700 100006', 29, 6);
+(16, 'Hertford Ink Publishing', 'approved', '2026-04-09 09:45:03', 6, 'Hertford Ink Publishing is an independent publisher celebrating local voices through poetry collections, community zines, magazines and creative writing resources. We champion literary culture and support emerging writers across Hertfordshire.', '+44 7700 100006', 29, 6),
+(17, 'African Heritage Crafts', 'pending', '2026-04-10 10:52:08', 1, 'Handmade African arts, crafts and cultural artefacts celebrating the rich heritage of African communities in Hertfordshire.', '+44 7700 300001', 41, 7),
+(18, 'Herts Music School', 'pending', '2026-04-10 10:54:48', 6, 'Music lessons and workshops covering traditional cultural instruments and contemporary styles for all ages.', '+44 7700 300002', 42, 1),
+(19, 'Community Film Herts', 'pending', '2026-04-10 10:57:07', 2, 'A community-led film production group creating short documentaries and films that celebrate Hertfordshire cultural life.', '+44 7700 300003', 43, 9);
 
 -- --------------------------------------------------------
 
@@ -582,9 +604,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`, `role`, `email_address`) VALUES
-(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-09 22:47:15', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
+(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-10 10:40:45', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
 (8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-04 18:16:05', 'approved', 'Resident', 'nike@gmail.com'),
-(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-09 22:27:48', 'approved', 'Resident', 'josephine@gmail.com'),
+(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-10 10:01:09', 'approved', 'Resident', 'josephine@gmail.com'),
 (10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-08 11:47:21', 'approved', 'SME', 'info@harmonywellbeing.com'),
 (11, '$2y$10$pEGsw9izjII4FX3gzzaJ4.QSDLc70c6nGub9/1IU78TLgASSZUsf.', '2026-04-07 08:16:06', 'approved', 'Resident', 'victor@gmail.com'),
 (12, '$2y$10$aSQiHxr71NTJT0.ohlXxDezWv08wpyxyjnP1tR9q7tgxhcBsX.Uai', '2026-04-07 08:19:30', 'approved', 'Resident', 'jake@gmail.com'),
@@ -595,7 +617,21 @@ INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`,
 (26, '$2y$10$AUciDVzSGaUL7jdXeUdkM.DhFyvuMxkxFa1J8xurcFsZV8qHyg14m', '2026-04-09 20:10:10', 'approved', 'SME', 'tours@hertheritagetours.com'),
 (27, '$2y$10$.dWO5U3z4wW4FGMV32g3COS5QZbspNds4t8z853sYSp1ErZcuvvOO', '2026-04-09 20:17:47', 'approved', 'SME', 'studio@pixelcraftmedia.com'),
 (28, '$2y$10$LT2xJjdlHYINbJNC5PaEuup2dqUpNQMvIxct0ueW3FJRfYgObhWtK', '2026-04-09 20:25:00', 'approved', 'SME', 'shop@hatfieldhandmade.com'),
-(29, '$2y$10$HrsNx52kvUjSBIemM/6gcuaWiVz5LhBgpQMJz0pf4LxY4W1cPPC5m', '2026-04-09 20:35:19', 'approved', 'SME', 'press@hertfordink.com');
+(29, '$2y$10$HrsNx52kvUjSBIemM/6gcuaWiVz5LhBgpQMJz0pf4LxY4W1cPPC5m', '2026-04-09 20:35:19', 'approved', 'SME', 'press@hertfordink.com'),
+(30, '$2y$10$sCH/qU1xp9OQjvBqIRP1FuasIU/k/tRQ5N5JV3wSQtVllyC68uQ.q', '2026-04-10 10:25:47', 'approved', 'Resident', 'marcus.osei@gmail.com'),
+(31, '$2y$10$GSRl4qkAShFvWuyWsmdcyeB8OrG230vd7jUf9tCrV2vnbp8WlpIp6', '2026-04-10 10:27:46', 'approved', 'Resident', 'aisha.patel@gmail.com'),
+(32, '$2y$10$35HzVBsn/LVPwMcI8XATwuhxDN/FaK.pa2ukr3nuS5ZBekQ0.09S.', '2026-04-10 10:29:29', 'rejected', 'Resident', 'daniel.mensah@gmail.com'),
+(33, '$2y$10$/myEQxh6qX8hmvTsl.WEAel6s3SJrAe356dW3XO3cf71hAQsnfAwu', '2026-04-10 10:31:31', 'approved', 'Resident', 'fatima.ali@gmail.com'),
+(34, '$2y$10$nz.w8p6IC/kDyXnGilKz8.PMMYUUFaIR1090MA2KvcvPYOhbgTgZS', '2026-04-10 10:33:34', 'approved', 'Resident', 'james.adeyemi@gmail.com'),
+(35, '$2y$10$XpD6gNkKqGcC44.J1Z7Rs.kai6q6JkjmSEFH.zgHlNoam7EvfHGlC', '2026-04-10 10:35:33', 'approved', 'Resident', 'priya.sharma@gmail.com'),
+(36, '$2y$10$ywh2.r3LbuUVd/VzOQ/6wej1RKXB.EcUVpGFE0H4ToW2KfGAHfmvi', '2026-04-10 10:36:58', 'approved', 'Resident', 'sarah.nkrumah@gmail.com'),
+(37, '$2y$10$cu9oDMLdhSIgMNc1rdFB2.dTIOaAlut0tK2ksA2ReCG.3BriB2bla', '2026-04-10 10:38:53', 'approved', 'Resident', 'david.kofi@gmail.com'),
+(38, '$2y$10$t1KGemGc.6azqpROkQ/YmOT24z5XhhjDM5csnmACFRieI.zkEKbka', '2026-04-10 10:45:08', 'pending', 'Resident', 'tariq.hussain@gmail.com'),
+(39, '$2y$10$HufOb6B1aOSL2XRrwCV7Ze7NxNE1LX1oduX1pzbGIPlwNxJ1WHE9S', '2026-04-10 10:46:55', 'pending', 'Resident', 'siobhan.oconnor@gmail.com'),
+(40, '$2y$10$x1vCCutsYAkIALta/IzB/OwuVjieM6HfMTtUV/BLNot5kjkgfRCwm', '2026-04-10 10:49:09', 'pending', 'Resident', 'samuel.tally@gmail.com'),
+(41, '$2y$10$1N6upPakt9SvA2705zNUF.tx5VF5hfjzlabv4BXhFgb7C1/6jcXNy', '2026-04-10 10:52:08', 'pending', 'SME', 'info@africanheritagecrafts.co.uk'),
+(42, '$2y$10$yzbl51n2Sa4whe2ggwRicuhjxExcYsKm3DoGNfDfIlClcVsYbZ6v6', '2026-04-10 10:54:48', 'pending', 'SME', 'hello@hertsmusicschool.co.uk'),
+(43, '$2y$10$EdYx3Tr2i3A.w0ayszXgDu/KgyWJbGdyzBns8BLuenmvpInRtm1xu', '2026-04-10 10:57:07', 'pending', 'SME', 'contact@communityfilmherts.co.uk');
 
 -- --------------------------------------------------------
 
@@ -629,7 +665,21 @@ INSERT INTO `user_documents` (`document_id`, `user_id`, `document_type`, `file_p
 (10, 26, 'Bank_Statement', '../uploads/verification_documents/1775727606_bank_statement.pdf', 'pending', '2026-04-09 09:40:06'),
 (11, 27, 'Bank_Statement', '../uploads/verification_documents/1775727719_bank_statement.pdf', 'pending', '2026-04-09 09:41:59'),
 (12, 28, 'Bank_Statement', '../uploads/verification_documents/1775727812_bank_statement.pdf', 'pending', '2026-04-09 09:43:32'),
-(13, 29, 'Bank_Statement', '../uploads/verification_documents/1775727903_bank_statement.pdf', 'pending', '2026-04-09 09:45:03');
+(13, 29, 'Bank_Statement', '../uploads/verification_documents/1775727903_bank_statement.pdf', 'pending', '2026-04-09 09:45:03'),
+(14, 30, 'Bank_Statement', '../uploads/verification_documents/1775816747_bank_statement.pdf', 'pending', '2026-04-10 10:25:47'),
+(15, 31, 'Bank_Statement', '../uploads/verification_documents/1775816866_bank_statement.pdf', 'pending', '2026-04-10 10:27:46'),
+(16, 32, 'Bank_Statement', '../uploads/verification_documents/1775816969_bank_statement.pdf', 'pending', '2026-04-10 10:29:29'),
+(17, 33, 'Bank_Statement', '../uploads/verification_documents/1775817091_bank_statement.pdf', 'pending', '2026-04-10 10:31:31'),
+(18, 34, 'Bank_Statement', '../uploads/verification_documents/1775817214_bank_statement.pdf', 'pending', '2026-04-10 10:33:34'),
+(19, 35, 'Bank_Statement', '../uploads/verification_documents/1775817333_bank_statement.pdf', 'pending', '2026-04-10 10:35:33'),
+(20, 36, 'Bank_Statement', '../uploads/verification_documents/1775817418_bank_statement.pdf', 'pending', '2026-04-10 10:36:58'),
+(21, 37, 'Bank_Statement', '../uploads/verification_documents/1775817533_bank_statement.pdf', 'pending', '2026-04-10 10:38:53'),
+(22, 38, 'Driver_License', '../uploads/verification_documents/1775817908_bank_statement.pdf', 'pending', '2026-04-10 10:45:08'),
+(23, 39, 'Utility_Bill', '../uploads/verification_documents/1775818015_bank_statement.pdf', 'pending', '2026-04-10 10:46:55'),
+(24, 40, 'Bank_Statement', '../uploads/verification_documents/1775818149_bank_statement.pdf', 'pending', '2026-04-10 10:49:09'),
+(25, 41, 'Bank_Statement', '../uploads/verification_documents/1775818328_bank_statement.pdf', 'pending', '2026-04-10 10:52:08'),
+(26, 42, 'Utility_Bill', '../uploads/verification_documents/1775818488_bank_statement.pdf', 'pending', '2026-04-10 10:54:48'),
+(27, 43, 'Bank_Statement', '../uploads/verification_documents/1775818627_bank_statement.pdf', 'pending', '2026-04-10 10:57:07');
 
 -- --------------------------------------------------------
 
@@ -667,7 +717,15 @@ INSERT INTO `user_registration_requests` (`review_id`, `user_id`, `admin_id`, `d
 (13, 26, 6, 'approved', '', '2026-04-09 09:53:35', 10),
 (14, 25, 6, 'approved', '', '2026-04-09 09:53:40', 9),
 (15, 24, 6, 'approved', '', '2026-04-09 09:53:47', 8),
-(16, 9, 6, 'approved', '', '2026-04-09 09:53:55', 2);
+(16, 9, 6, 'approved', '', '2026-04-09 09:53:55', 2),
+(17, 37, 6, 'approved', '', '2026-04-10 10:40:58', 21),
+(18, 36, 6, 'approved', '', '2026-04-10 10:41:07', 20),
+(19, 32, 6, 'rejected', 'Submitted a stale bank statement.', '2026-04-10 10:41:45', 16),
+(20, 35, 6, 'approved', '', '2026-04-10 10:41:52', 19),
+(21, 34, 6, 'approved', '', '2026-04-10 10:41:59', 18),
+(22, 33, 6, 'approved', '', '2026-04-10 10:42:05', 17),
+(23, 31, 6, 'approved', '', '2026-04-10 10:42:13', 15),
+(24, 30, 6, 'approved', '', '2026-04-10 10:42:20', 14);
 
 -- --------------------------------------------------------
 
@@ -915,7 +973,7 @@ ALTER TABLE `listing_requests`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `order_item`
@@ -945,7 +1003,7 @@ ALTER TABLE `poll_votes`
 -- AUTO_INCREMENT for table `product_service`
 --
 ALTER TABLE `product_service`
-  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `product_service_categories`
@@ -963,37 +1021,37 @@ ALTER TABLE `product_service_reviews`
 -- AUTO_INCREMENT for table `product_service_subcategories`
 --
 ALTER TABLE `product_service_subcategories`
-  MODIFY `subcategory_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `subcategory_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `resident_profiles`
 --
 ALTER TABLE `resident_profiles`
-  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `sme_profiles`
 --
 ALTER TABLE `sme_profiles`
-  MODIFY `sme_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `sme_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `user_documents`
 --
 ALTER TABLE `user_documents`
-  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `user_registration_requests`
 --
 ALTER TABLE `user_registration_requests`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- Constraints for dumped tables
