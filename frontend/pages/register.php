@@ -75,7 +75,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (empty($email))       $errors[] = "Email is required.";
         if (empty($password))    $errors[] = "Password is required.";
         if (strlen($password) < 8) $errors[] = "Password must be at least 8 characters.";
-        if (empty($dob))         $errors[] = "Date of birth is required.";
+        
+        if (empty($dob)) { $errors[] = "Date of birth is required.";
+            } else { $dobDate  = new DateTime($dob);
+                     $today    = new DateTime();
+                     $age      = $today->diff($dobDate)->y;
+        if ($age < 16) $errors[] = "You must be at least 16 years old to register.";}
+        
         if (empty($gender))      $errors[] = "Please select a gender.";
         if (empty($phone))       $errors[] = "Phone number is required.";
         if (empty($address))     $errors[] = "Address is required.";
@@ -251,8 +257,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
       <!-- Toggle Buttons -->
        <div class="user-type-selector" <?php echo (!empty($success)) ? 'style="display:none;"' : ''; ?>>
-            <button type="button" onclick="showForm('resident')">Resident</button>
-            <button type="button" onclick="showForm('sme')">SME</button>
+            <button type="button" id="btn-resident" onclick="showForm('resident')">Resident</button>
+            <button type="button" id="btn-sme" onclick="showForm('sme')">SME</button>
         </div>
      
       <!-- Registration Error Message -->
@@ -297,7 +303,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <div class="resident-dob">
                 <label>Date of Birth</label>
-                <input type="text" name="dob" placeholder="YYYY-MM-DD" max="<?= date('Y-m-d') ?>">
+                <input type="date" name="dob" placeholder="YYYY-MM-DD" max="<?= date('Y-m-d', strtotime('-16 years')) ?>">
             </div>
 
             <div class="resident-gender">
@@ -496,7 +502,15 @@ function validateResident() {
 
     if (form.first_name.value == '')      return showError('Please enter your first name.', form.first_name);
     if (form.last_name.value == '')       return showError('Please enter your last name.', form.last_name);
-    if (form.dob.value == '')             return showError('Please enter your date of birth.', form.dob);
+    
+    if (form.dob.value == '') return showError('Please enter your date of birth.', form.dob);
+            const dob    = new Date(form.dob.value);
+            const today  = new Date();
+            let age      = today.getFullYear() - dob.getFullYear();
+            const month  = today.getMonth() - dob.getMonth();
+    if (month < 0 || (month === 0 && today.getDate() < dob.getDate())) age--;
+    if (age < 16) return showError('You must be at least 16 years old to register.', form.dob);
+    
     if (form.gender.value == '')          return showError('Please select your gender.', form.gender);
     if (form.phone.value == '')           return showError('Please enter your phone number.', form.phone);
     if (form.email.value == '')           return showError('Please enter your email address.', form.email);
@@ -537,6 +551,9 @@ function validateSME() {
 
     return true;
 }
+
+     // Set resident as default active tab on page load
+     document.addEventListener('DOMContentLoaded', () => showForm('resident'));
   </script>
 
 </body>

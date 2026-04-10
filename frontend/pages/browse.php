@@ -456,7 +456,7 @@ $is_logged_in = isset($_SESSION['user_id']);
                 <h3 class="br-card-title" onclick="brGoTo(${l.listing_id})">${brEsc(l.title)}</h3>
                 <p class="br-card-caption">${brEsc(l.caption ?? '')}</p>
                 <div class="br-cultural-benefit">
-                    <strong>Subcategory:</strong> ${brEsc(l.subcategory_name)}
+                          ${brEsc(l.subcategory_name)}
                 </div>
                 <div class="br-card-footer">
                     <span class="br-card-price">£${price.toFixed(2)}</span>

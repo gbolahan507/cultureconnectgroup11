@@ -12,20 +12,20 @@ $page = $_GET['page'] ?? 'home';
 $allowedPages = [
     'home',
     'analytics',
+    'add-product',
     'cart',
     'manage-area',
     'manage-users',
     'manage-orders',
-    'manage-council',
+    'manage-listings',
     'manage-votes',
     'my-orders',
+    'my-votes',
     'review-products',
     'reports',
     'profile',
-    'votes',
-    'add-product',
-    'manage-listings',
-    'settings'
+    'settings',
+    'view-votes'
 ];
 
 if (!in_array($page, $allowedPages)) {

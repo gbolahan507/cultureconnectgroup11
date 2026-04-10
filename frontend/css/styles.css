@@ -182,11 +182,12 @@ gap: 2px;
 display:flex;
 width: 100%;
 max-width: 100%;
-margin-top: 0;
-margin-bottom: 0;
+margin: 0;
 margin: 0;
 gap: 0;
 box-sizing: border-box;
+align-items: flex-start;
+background: linear-gradient(to right, #eeeeee 120px, #f5f5f5 120px);
 }
 
 /* side bar section */
@@ -201,7 +202,12 @@ min-height:500px;
 display: flex;
 flex-direction: column;
 justify-content: space-evenly;
-
+position: sticky;
+top: 0;
+height: 100vh;
+overflow-y: auto;
+align-self: flex-start;
+z-index: 1;
 }
 
 .sidebar ul{
@@ -1017,8 +1023,10 @@ font-size:13px;
         --prf-violet:  #230c33;
         --prf-white:   #ffffff;
         --prf-grey:    #e5e5e5;
- 
+
         padding: 0 1.5rem 2rem;
+        max-width: 860px;
+        margin: 0 auto;
     }
  
     .prf-cards-wrapper {
@@ -1026,6 +1034,7 @@ font-size:13px;
         grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
         gap: 1.25rem;
         margin-top: 1.5rem;
+        max-width: 100%;
     }
  
     /*  Card  */
@@ -1641,6 +1650,7 @@ font-size:13px;
 .resident-doc-type, .resident-doc-upload,
 .resident-submit,
 .sme-business-name, .sme-category,
+.sme-subcategory,
 .sme-new-category, .sme-reg-number,
 .sme-description, .sme-address,
 .sme-postcode, .sme-area,
