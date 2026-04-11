@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 10, 2026 at 03:14 PM
+-- Generation Time: Apr 11, 2026 at 02:10 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -137,7 +137,7 @@ CREATE TABLE `listing_images` (
 --
 
 INSERT INTO `listing_images` (`image_id`, `listing_id`, `image_url`, `is_primary`, `created_at`) VALUES
-(3, 7, '1775731005_Brushstroke Studio beginners' classes promotion.png', 1, '2026-04-09 09:36:45'),
+(3, 7, '1775731005_Brushstroke Studio beginners\' classes promotion.png', 1, '2026-04-09 09:36:45'),
 (4, 7, '17757310050_Creative expression in the community studio.png', 0, '2026-04-09 09:36:45'),
 (5, 8, '1775764351_guitar-lessons-1.jpg', 1, '2026-04-09 18:52:31'),
 (6, 8, '17757643510_group-guitar-lessons.jpg', 0, '2026-04-09 18:52:31'),
