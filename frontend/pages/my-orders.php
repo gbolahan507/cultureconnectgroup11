@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $user_id = $_SESSION['user_id'] ?? null;
     if (!$user_id) { echo json_encode(['success' => false, 'message' => 'Not authenticated.']); exit(); }
  
-    //  Get Orders 
+    // Get Orders
     if ($_POST['action'] === 'get_orders') {
         $status_filter = $_POST['status'] ?? 'all';
  
@@ -43,7 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $orders = [];
         while ($row = $result->fetch_assoc()) $orders[] = $row;
         $stmt->close();
- 
         echo json_encode(['success' => true, 'orders' => $orders]);
         exit();
     }
@@ -79,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $items_stmt->bind_param("i", $order_id);
         $items_stmt->execute();
         $items_result = $items_stmt->get_result();
-        $items        = [];
+        $items = [];
         while ($row = $items_result->fetch_assoc()) $items[] = $row;
         $items_stmt->close();
  
@@ -87,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
  
-    //  Cancel Order 
+    // Cancel Order
     if ($_POST['action'] === 'cancel_order') {
         $order_id = intval($_POST['order_id'] ?? 0);
  
@@ -114,6 +113,95 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
  
+    // Get Order Items for Review Modal
+    if ($_POST['action'] === 'get_order_items_for_review') {
+        $order_id = intval($_POST['order_id'] ?? 0);
+ 
+        $check = $conn->prepare("SELECT order_id FROM orders WHERE order_id = ? AND user_id = ? AND status = 'completed'");
+        $check->bind_param("ii", $order_id, $user_id);
+        $check->execute();
+        $order = $check->get_result()->fetch_assoc();
+        $check->close();
+ 
+        if (!$order) { echo json_encode(['success' => false, 'message' => 'Order not found.']); exit(); }
+ 
+        $stmt = $conn->prepare("
+            SELECT oi.listing_id, l.title, oi.price, oi.quantity,
+                   sp.business_name,
+                   li.image_url AS primary_image,
+                   CASE WHEN r.review_id IS NOT NULL THEN 1 ELSE 0 END AS already_reviewed,
+                   r.rating  AS existing_rating,
+                   r.comment AS existing_comment
+            FROM order_items oi
+            JOIN listings l                     ON oi.listing_id = l.listing_id
+            JOIN sme_profiles sp                ON l.sme_id      = sp.sme_id
+            LEFT JOIN listing_images li         ON l.listing_id  = li.listing_id AND li.is_primary = 1
+            LEFT JOIN product_service_reviews r ON l.listing_id  = r.listing_id  AND r.user_id = ?
+            WHERE oi.order_id = ?
+        ");
+        $stmt->bind_param("ii", $user_id, $order_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $items  = [];
+        while ($row = $result->fetch_assoc()) $items[] = $row;
+        $result->free();
+        $stmt->close();
+ 
+        echo json_encode(['success' => true, 'items' => $items]);
+        exit();
+    }
+ 
+    // Submit Review 
+    if ($_POST['action'] === 'submit_review') {
+        $listing_id = intval($_POST['listing_id'] ?? 0);
+        $rating     = intval($_POST['rating']     ?? 0);
+        $comment    = trim($_POST['comment']      ?? '');
+ 
+        if (!$listing_id || $rating < 1 || $rating > 10) {
+            echo json_encode(['success' => false, 'message' => 'Invalid rating. Must be between 1 and 10.']);
+            exit();
+        }
+ 
+        // Verify purchase
+        $check = $conn->prepare("
+            SELECT oi.order_item_id FROM order_items oi
+            JOIN orders o ON oi.order_id = o.order_id
+            WHERE o.user_id = ? AND oi.listing_id = ? AND o.status = 'completed'
+            LIMIT 1
+        ");
+        $check->bind_param("ii", $user_id, $listing_id);
+        $check->execute();
+        $purchased = $check->get_result()->fetch_assoc();
+        $check->close();
+ 
+        if (!$purchased) {
+            echo json_encode(['success' => false, 'message' => 'You can only review listings from completed orders.']);
+            exit();
+        }
+ 
+        // Check duplicate
+        $dup = $conn->prepare("SELECT review_id FROM product_service_reviews WHERE user_id = ? AND listing_id = ?");
+        $dup->bind_param("ii", $user_id, $listing_id);
+        $dup->execute();
+        $existing = $dup->get_result()->fetch_assoc();
+        $dup->close();
+ 
+        if ($existing) {
+            echo json_encode(['success' => false, 'message' => 'You have already reviewed this listing.']);
+            exit();
+        }
+ 
+        $stmt = $conn->prepare("INSERT INTO product_service_reviews (user_id, listing_id, rating, comment) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiis", $user_id, $listing_id, $rating, $comment);
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Review submitted successfully!']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to submit review.']);
+        }
+        $stmt->close();
+        exit();
+    }
+ 
     echo json_encode(['success' => false, 'message' => 'Unknown action.']);
     exit();
 }
@@ -124,8 +212,8 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Reside
     exit();
 }
 ?>
-
-<div class="mo-page">
+ 
+ <div class="mo-page">
  
     <?php
         $icon     = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" /></svg>';
@@ -188,7 +276,6 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Reside
     </div>
 </div>
  
- 
 <!-- CANCEL CONFIRM MODAL -->
 <div id="mo-cancel-modal" class="mo-modal-overlay" style="display:none;">
     <div class="mo-modal-box mo-modal-box--sm">
@@ -212,12 +299,29 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Reside
     </div>
 </div>
  
+<!-- REVIEW MODAL -->
+<div id="mo-review-modal" class="mo-modal-overlay" style="display:none;">
+    <div class="mo-modal-box">
+        <div class="mo-modal-header">
+            <h3>Leave a Review</h3>
+            <span class="mo-modal-close-btn" onclick="moCloseReviewModal()">&times;</span>
+        </div>
+        <div class="mo-modal-body mo-modal-body--padded" id="mo-review-body">
+            <p style="color:#9ca3af;">Loading items...</p>
+        </div>
+        <div class="mo-modal-footer">
+            <button class="mo-modal-close-btn-footer" onclick="moCloseReviewModal()">Close</button>
+        </div>
+    </div>
+</div>
+ 
 <script>
     let moCurrentTab    = 'all';
-    let moAllOrders   = [];
-    let moPageNum     = 1;
-    const MO_PER_PAGE = 6;
+    let moAllOrders     = [];
+    let moPageNum       = 1;
+    const MO_PER_PAGE   = 6;
     let moCancelOrderId = null;
+    const moRatings     = {};
  
     document.addEventListener('DOMContentLoaded', () => moLoad('all'));
  
@@ -229,116 +333,110 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Reside
     }
  
     function moLoad(status) {
-    const loading = document.getElementById('mo-loading');
-    const wrapper = document.getElementById('mo-table-wrapper');
-    const empty   = document.getElementById('mo-empty');
-    const count   = document.getElementById('mo-count-label');
-
-    moPageNum = 1;
-    loading.style.display = 'flex';
-    wrapper.style.display = 'none';
-    empty.style.display   = 'none';
-    count.textContent     = '';
-
-    const fd = new FormData();
-    fd.append('action', 'get_orders');
-    fd.append('status', status);
-
-    fetch('../pages/my-orders.php', { method: 'POST', body: fd })
-        .then(r => r.text())
-        .then(text => {
-            try {
-                const data = JSON.parse(text);
-                loading.style.display = 'none';
-
-                if (data.success && data.orders.length > 0) {
-                    moAllOrders = data.orders;
-                    moRenderPage();
-                } else {
-                    moAllOrders = [];
-                    const msgs = {
-                        all:        'You have no orders yet.',
-                        processing: 'No orders currently processing.',
-                        completed:  'No completed orders.',
-                        cancelled:  'No cancelled orders.'
-                    };
-                    document.getElementById('mo-empty-msg').textContent = msgs[status] || 'No orders found.';
-                    empty.style.display = 'flex';
-                    moRemovePagination();
-                }
-            } catch(e) { loading.style.display = 'none'; empty.style.display = 'flex'; }
-        })
-        .catch(() => { loading.style.display = 'none'; empty.style.display = 'flex'; });
-}
-
-function moRenderPage() {
-    const wrapper = document.getElementById('mo-table-wrapper');
-    const count   = document.getElementById('mo-count-label');
-    const total   = moAllOrders.length;
-    const totalPages = Math.ceil(total / MO_PER_PAGE);
-    const start   = (moPageNum - 1) * MO_PER_PAGE;
-    const paged   = moAllOrders.slice(start, start + MO_PER_PAGE);
-
-    count.textContent = `${total} order${total !== 1 ? 's' : ''} found`;
-    const tbody = document.getElementById('mo-table-body');
-    tbody.innerHTML = '';
-    paged.forEach((o, i) => tbody.appendChild(moBuildRow(o, moPageNum === 1 ? i + 1 : (moPageNum - 1) * MO_PER_PAGE + i + 1)));
-    wrapper.style.display = 'block';
-
-    moRenderPagination(totalPages);
-}
-
-function moRenderPagination(totalPages) {
-    moRemovePagination();
-    if (totalPages <= 1) return;
-
-    const wrapper = document.getElementById('mo-table-wrapper');
-    const pag     = document.createElement('div');
-    pag.id        = 'mo-pagination';
-    pag.className = 'mo-pagination';
-
-    const info       = document.createElement('span');
-    info.className   = 'mo-page-info';
-    const start      = (moPageNum - 1) * MO_PER_PAGE + 1;
-    const end        = Math.min(moPageNum * MO_PER_PAGE, moAllOrders.length);
-    info.textContent = `Showing ${start}–${end} of ${moAllOrders.length}`;
-    pag.appendChild(info);
-
-    const btns = document.createElement('div');
-    btns.className = 'mo-page-btns';
-
-    if (moPageNum > 1) {
-        const prev     = document.createElement('button');
-        prev.className = 'mo-page-btn';
-        prev.textContent = '« Prev';
-        prev.onclick   = () => { moPageNum--; moRenderPage(); };
-        btns.appendChild(prev);
+        const loading = document.getElementById('mo-loading');
+        const wrapper = document.getElementById('mo-table-wrapper');
+        const empty   = document.getElementById('mo-empty');
+        const count   = document.getElementById('mo-count-label');
+ 
+        moPageNum = 1;
+        loading.style.display = 'flex';
+        wrapper.style.display = 'none';
+        empty.style.display   = 'none';
+        count.textContent     = '';
+ 
+        const fd = new FormData();
+        fd.append('action', 'get_orders');
+        fd.append('status', status);
+ 
+        fetch('../pages/my-orders.php', { method: 'POST', body: fd })
+            .then(r => r.text())
+            .then(text => {
+                try {
+                    const data = JSON.parse(text);
+                    loading.style.display = 'none';
+                    if (data.success && data.orders.length > 0) {
+                        moAllOrders = data.orders;
+                        moRenderPage();
+                    } else {
+                        moAllOrders = [];
+                        const msgs = {
+                            all:        'You have no orders yet.',
+                            processing: 'No orders currently processing.',
+                            completed:  'No completed orders.',
+                            cancelled:  'No cancelled orders.'
+                        };
+                        document.getElementById('mo-empty-msg').textContent = msgs[status] || 'No orders found.';
+                        empty.style.display = 'flex';
+                        moRemovePagination();
+                    }
+                } catch(e) { loading.style.display = 'none'; empty.style.display = 'flex'; }
+            })
+            .catch(() => { loading.style.display = 'none'; empty.style.display = 'flex'; });
     }
-
-    for (let p = 1; p <= totalPages; p++) {
-        const btn = document.createElement('button');
-        btn.className   = 'mo-page-btn' + (p === moPageNum ? ' mo-page-btn--active' : '');
-        btn.textContent = p;
-        btn.onclick     = ((pg) => () => { moPageNum = pg; moRenderPage(); })(p);
-        btns.appendChild(btn);
+ 
+    function moRenderPage() {
+        const wrapper    = document.getElementById('mo-table-wrapper');
+        const count      = document.getElementById('mo-count-label');
+        const total      = moAllOrders.length;
+        const totalPages = Math.ceil(total / MO_PER_PAGE);
+        const start      = (moPageNum - 1) * MO_PER_PAGE;
+        const paged      = moAllOrders.slice(start, start + MO_PER_PAGE);
+ 
+        count.textContent = `${total} order${total !== 1 ? 's' : ''} found`;
+        const tbody = document.getElementById('mo-table-body');
+        tbody.innerHTML = '';
+        paged.forEach((o, i) => tbody.appendChild(moBuildRow(o, (moPageNum - 1) * MO_PER_PAGE + i + 1)));
+        wrapper.style.display = 'block';
+        moRenderPagination(totalPages);
     }
-
-    if (moPageNum < totalPages) {
-        const next     = document.createElement('button');
-        next.className = 'mo-page-btn';
-        next.textContent = 'Next »';
-        next.onclick   = () => { moPageNum++; moRenderPage(); };
-        btns.appendChild(next);
+ 
+    function moRenderPagination(totalPages) {
+        moRemovePagination();
+        if (totalPages <= 1) return;
+ 
+        const wrapper = document.getElementById('mo-table-wrapper');
+        const pag     = document.createElement('div');
+        pag.id        = 'mo-pagination';
+        pag.className = 'mo-pagination';
+ 
+        const info       = document.createElement('span');
+        info.className   = 'mo-page-info';
+        const start      = (moPageNum - 1) * MO_PER_PAGE + 1;
+        const end        = Math.min(moPageNum * MO_PER_PAGE, moAllOrders.length);
+        info.textContent = `Showing ${start}–${end} of ${moAllOrders.length}`;
+        pag.appendChild(info);
+ 
+        const btns = document.createElement('div');
+        btns.className = 'mo-page-btns';
+ 
+        if (moPageNum > 1) {
+            const prev = document.createElement('button');
+            prev.className = 'mo-page-btn'; prev.textContent = '« Prev';
+            prev.onclick = () => { moPageNum--; moRenderPage(); };
+            btns.appendChild(prev);
+        }
+        for (let p = 1; p <= totalPages; p++) {
+            const btn = document.createElement('button');
+            btn.className = 'mo-page-btn' + (p === moPageNum ? ' mo-page-btn--active' : '');
+            btn.textContent = p;
+            btn.onclick = ((pg) => () => { moPageNum = pg; moRenderPage(); })(p);
+            btns.appendChild(btn);
+        }
+        if (moPageNum < totalPages) {
+            const next = document.createElement('button');
+            next.className = 'mo-page-btn'; next.textContent = 'Next »';
+            next.onclick = () => { moPageNum++; moRenderPage(); };
+            btns.appendChild(next);
+        }
+ 
+        pag.appendChild(btns);
+        wrapper.after(pag);
     }
-
-    pag.appendChild(btns);
-    wrapper.after(pag);
-}
-
-   function moRemovePagination() {
-      const existing = document.getElementById('mo-pagination');
-      if (existing) existing.remove();
-}
+ 
+    function moRemovePagination() {
+        const existing = document.getElementById('mo-pagination');
+        if (existing) existing.remove();
+    }
  
     function moBuildRow(o, rowNum) {
         const tr       = document.createElement('tr');
@@ -348,6 +446,9 @@ function moRenderPagination(totalPages) {
         let actions = `<button class="mo-view-btn" onclick="moOpenDetail(${o.order_id})">View</button>`;
         if (o.status === 'processing') {
             actions += `<button class="mo-cancel-btn" onclick="moOpenCancelModal(${o.order_id})">Cancel</button>`;
+        }
+        if (o.status === 'completed') {
+            actions += `<button class="mo-review-btn" onclick="moOpenReviewModal(${o.order_id})">Review</button>`;
         }
  
         tr.innerHTML = `
@@ -361,6 +462,7 @@ function moRenderPagination(totalPages) {
         return tr;
     }
  
+    // Order Detail
     function moOpenDetail(order_id) {
         const modal = document.getElementById('mo-detail-modal');
         const body  = document.getElementById('mo-detail-body');
@@ -385,8 +487,7 @@ function moRenderPagination(totalPages) {
     function moBuildDetailHTML(order, items) {
         const date     = new Date(order.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         const badgeCls = { processing: 'mo-badge--processing', completed: 'mo-badge--completed', cancelled: 'mo-badge--cancelled' }[order.status] || '';
- 
-        const grouped = {};
+        const grouped  = {};
         items.forEach(item => {
             if (!grouped[item.business_name]) grouped[item.business_name] = [];
             grouped[item.business_name].push(item);
@@ -421,19 +522,22 @@ function moRenderPagination(totalPages) {
                 `;
             });
         });
- 
         return html;
     }
  
     function moCloseDetail() { document.getElementById('mo-detail-modal').style.display = 'none'; }
  
+    // Cancel
     function moOpenCancelModal(order_id) {
         moCancelOrderId = order_id;
         document.getElementById('mo-cancel-order-label').textContent = 'Order #' + order_id;
         document.getElementById('mo-cancel-modal').style.display = 'flex';
     }
  
-    function moCloseCancelModal() { document.getElementById('mo-cancel-modal').style.display = 'none'; moCancelOrderId = null; }
+    function moCloseCancelModal() {
+        document.getElementById('mo-cancel-modal').style.display = 'none';
+        moCancelOrderId = null;
+    }
  
     function moConfirmCancel() {
         if (!moCancelOrderId) return;
@@ -457,6 +561,132 @@ function moRenderPagination(totalPages) {
             .finally(() => { btn.disabled = false; btn.textContent = 'Yes, Cancel Order'; });
     }
  
+    // Review Modal 
+    function moOpenReviewModal(order_id) {
+        const modal = document.getElementById('mo-review-modal');
+        const body  = document.getElementById('mo-review-body');
+        body.innerHTML = '<p style="color:#9ca3af;">Loading items...</p>';
+        modal.style.display = 'flex';
+ 
+        const fd = new FormData();
+        fd.append('action',   'get_order_items_for_review');
+        fd.append('order_id', order_id);
+ 
+        fetch('../pages/my-orders.php', { method: 'POST', body: fd })
+            .then(r => r.text())
+            .then(text => {
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) body.innerHTML = moBuildReviewHTML(data.items);
+                    else body.innerHTML = `<p style="color:#991b1b;">${moEsc(data.message)}</p>`;
+                } catch(e) { body.innerHTML = '<p style="color:#991b1b;">Failed to load items.</p>'; }
+            });
+    }
+ 
+    function moBuildReviewHTML(items) {
+        if (!items.length) return '<p style="color:#9ca3af;">No items found.</p>';
+ 
+        return items.map(item => {
+            const imgSrc = item.primary_image
+                ? `../uploads/listings_images/${moEsc(item.primary_image)}`
+                : null;
+            const thumb = imgSrc
+                ? `<img src="${imgSrc}" alt="${moEsc(item.title)}" onerror="this.style.display='none'">`
+                : '';
+ 
+            if (parseInt(item.already_reviewed)) {
+                const existingComment = item.existing_comment
+                    ? `<p class="mo-submitted-comment">"${moEsc(item.existing_comment)}"</p>`
+                    : '';
+                return `
+                    <div class="mo-review-item">
+                        <div class="mo-review-item-img">${thumb}</div>
+                        <div class="mo-review-item-info">
+                            <p class="mo-review-item-title">${moEsc(item.title)}</p>
+                            <p class="mo-review-item-biz">${moEsc(item.business_name)}</p>
+                            <span class="mo-reviewed-badge">Reviewed — ${item.existing_rating}/10</span>
+                            ${existingComment}
+                        </div>
+                    </div>
+                `;
+            }
+ 
+            return `
+                <div class="mo-review-item" id="mo-review-item-${item.listing_id}">
+                    <div class="mo-review-item-img">${thumb}</div>
+                    <div class="mo-review-item-info">
+                        <p class="mo-review-item-title">${moEsc(item.title)}</p>
+                        <p class="mo-review-item-biz">${moEsc(item.business_name)}</p>
+                        <div class="mo-review-form">
+                            <label class="mo-review-label">Rating (1–10)</label>
+                            <div class="mo-star-row" id="mo-stars-${item.listing_id}">
+                                ${[1,2,3,4,5,6,7,8,9,10].map(n =>
+                                    `<button class="mo-star-btn" onclick="moSetRating(${item.listing_id}, ${n})" data-val="${n}">★</button>`
+                                ).join('')}
+                            </div>
+                            <span class="mo-rating-display" id="mo-rating-display-${item.listing_id}">Not rated</span>
+                            <label class="mo-review-label" style="margin-top:8px;">Comment (optional)</label>
+                            <textarea class="mo-review-textarea" id="mo-comment-${item.listing_id}"
+                                placeholder="Share your experience..."></textarea>
+                            <button class="mo-submit-review-btn" onclick="moSubmitReview(${item.listing_id})">
+                                Submit Review
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('<hr style="border:none;border-top:1px solid #f0e6f6;margin:12px 0;">');
+    }
+ 
+    function moSetRating(listing_id, val) {
+        moRatings[listing_id] = val;
+        document.querySelectorAll(`#mo-stars-${listing_id} .mo-star-btn`).forEach(btn => {
+            btn.classList.toggle('mo-star-btn--active', parseInt(btn.dataset.val) <= val);
+        });
+        document.getElementById(`mo-rating-display-${listing_id}`).textContent = `${val} / 10`;
+    }
+ 
+    function moSubmitReview(listing_id) {
+        const rating  = moRatings[listing_id] ?? 0;
+        const comment = document.getElementById(`mo-comment-${listing_id}`).value.trim();
+ 
+        if (!rating) { moShowToast('Please select a rating.', 'error'); return; }
+ 
+        const fd = new FormData();
+        fd.append('action',     'submit_review');
+        fd.append('listing_id', listing_id);
+        fd.append('rating',     rating);
+        fd.append('comment',    comment);
+ 
+        fetch('../pages/my-orders.php', { method: 'POST', body: fd })
+            .then(r => r.text())
+            .then(text => {
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        moShowToast(data.message, 'success');
+                        const item = document.getElementById(`mo-review-item-${listing_id}`);
+                        if (item) {
+                            const commentText = comment
+                                ? `<p class="mo-submitted-comment">"${moEsc(comment)}"</p>`
+                                : '';
+                            item.querySelector('.mo-review-form').innerHTML = `
+                                <span class="mo-reviewed-badge">Reviewed — ${rating}/10</span>
+                                ${commentText}
+                            `;
+                        }
+                    } else {
+                        moShowToast(data.message || 'Failed to submit.', 'error');
+                    }
+                } catch(e) { moShowToast('Unexpected error.', 'error'); }
+            });
+    }
+ 
+    function moCloseReviewModal() {
+        document.getElementById('mo-review-modal').style.display = 'none';
+    }
+ 
+    // Helpers
     function moShowToast(message, type) {
         const existing = document.getElementById('mo-toast');
         if (existing) existing.remove();

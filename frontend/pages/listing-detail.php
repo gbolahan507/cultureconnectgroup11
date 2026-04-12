@@ -1,7 +1,5 @@
 <?php
-// ============================================================
-// SESSION + DB
-// ============================================================
+// SESSION
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once '../db_connection.php';
  
@@ -101,14 +99,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         echo json_encode(['success' => true, 'new_vote' => $new_vote, 'likes' => intval($row['likes']), 'dislikes' => intval($row['dislikes'])]);
         exit();
     }
+
+    // Get reviews for this listing
+if ($_POST['action'] === 'get_reviews') {
+    $listing_id = intval($_POST['listing_id'] ?? 0);
+    $stmt = $conn->prepare("
+        SELECT r.rating, r.comment, r.created_at,
+               rp.first_name, rp.last_name
+        FROM product_service_reviews r
+        JOIN resident_profiles rp ON r.user_id = rp.user_id
+        WHERE r.listing_id = ?
+        ORDER BY r.created_at DESC
+    ");
+    $stmt->bind_param("i", $listing_id);
+    $stmt->execute();
+    $result  = $stmt->get_result();
+    $reviews = [];
+    while ($row = $result->fetch_assoc()) $reviews[] = $row;
+    $result->free();
+    $stmt->close();
+
+    $avg = !empty($reviews) ? round(array_sum(array_column($reviews, 'rating')) / count($reviews), 1) : 0;
+    echo json_encode(['success' => true, 'reviews' => $reviews, 'avg' => $avg]);
+    exit();
+}
+
+// Submit review from listing detail page
+if ($_POST['action'] === 'submit_review') {
+    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Resident') {
+        echo json_encode(['success' => false, 'message' => 'Only residents can leave reviews.']);
+        exit();
+    }
+    $user_id    = intval($_SESSION['user_id']);
+    $listing_id = intval($_POST['listing_id'] ?? 0);
+    $rating     = intval($_POST['rating']     ?? 0);
+    $comment    = trim($_POST['comment']      ?? '');
+
+    if ($rating < 1 || $rating > 10) {
+        echo json_encode(['success' => false, 'message' => 'Rating must be between 1 and 10.']);
+        exit();
+    }
+
+    // Verify purchase
+    $check = $conn->prepare("
+        SELECT oi.order_item_id FROM order_items oi
+        JOIN orders o ON oi.order_id = o.order_id
+        WHERE o.user_id = ? AND oi.listing_id = ? AND o.status = 'completed' LIMIT 1
+    ");
+    $check->bind_param("ii", $user_id, $listing_id);
+    $check->execute();
+    $purchased = $check->get_result()->fetch_assoc();
+    $check->close();
+
+    if (!$purchased) {
+        echo json_encode(['success' => false, 'message' => 'You can only review listings you have purchased.']);
+        exit();
+    }
+
+    // Check duplicate
+    $dup = $conn->prepare("SELECT review_id FROM product_service_reviews WHERE user_id = ? AND listing_id = ?");
+    $dup->bind_param("ii", $user_id, $listing_id);
+    $dup->execute();
+    if ($dup->get_result()->fetch_assoc()) {
+        echo json_encode(['success' => false, 'message' => 'You have already reviewed this listing.']);
+        exit();
+    }
+    $dup->close();
+
+    $stmt = $conn->prepare("INSERT INTO product_service_reviews (user_id, listing_id, rating, comment) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("iiis", $user_id, $listing_id, $rating, $comment);
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Review submitted!']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Failed to submit review.']);
+    }
+    $stmt->close();
+    exit();
+}
  
     echo json_encode(['success' => false, 'message' => 'Unknown action.']);
     exit();
 }
  
-// ============================================================
+
 // PAGE SETUP
-// ============================================================
 $listing_id = intval($_GET['listing_id'] ?? 0);
 if (!$listing_id) { header('Location: ../pages/browse.php'); exit(); }
  
@@ -165,6 +239,35 @@ if (isset($_SESSION['user_id'])) {
     $user_vote = $uv_row['vote_type'] ?? null;
     $uv->close();
 }
+
+// Check if resident has purchased and reviewed this listing
+$can_review     = false;
+$already_reviewed = false;
+if ($is_resident) {
+    $uid = intval($_SESSION['user_id']);
+    $pur = $conn->prepare("
+        SELECT oi.order_item_id FROM order_items oi
+        JOIN orders o ON oi.order_id = o.order_id
+        WHERE o.user_id = ? AND oi.listing_id = ? AND o.status = 'completed' LIMIT 1
+    ");
+    $pur->bind_param("ii", $uid, $listing_id);
+    $pur->execute();
+    $pur_result = $pur->get_result();
+    $can_review = $pur_result->fetch_assoc() ? true : false;
+    $pur_result->free();
+    $pur->close();
+
+    if ($can_review) {
+        $rev = $conn->prepare("SELECT review_id, rating FROM product_service_reviews WHERE user_id = ? AND listing_id = ?");
+        $rev->bind_param("ii", $uid, $listing_id);
+        $rev->execute();
+        $rev_result     = $rev->get_result();
+        $existing_review = $rev_result->fetch_assoc();
+        $already_reviewed = $existing_review ? true : false;
+        $rev_result->free();
+        $rev->close();
+    }
+  }
  
 // Fetch related listings
 $rel_stmt = $conn->prepare("
@@ -196,6 +299,7 @@ $price_tier   = $price <= 20 ? 'Affordable' : ($price <= 50 ? 'Moderate' : 'Prem
 $cat_type     = $listing['category_name'] === 'Product' ? 'Product' : 'Service';
 $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -267,6 +371,41 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
                 <p class="ld-section-title">About This Listing</p>
                 <p class="ld-description"><?= ld_safe($listing['description']) ?></p>
             </div>
+
+            <!-- Reviews Section -->
+<div class="ld-reviews-section">
+    <div class="ld-info-card">
+        <p class="ld-section-title">
+            Reviews
+            <span id="ld-review-count" class="ld-review-count-badge"></span>
+        </p>
+
+        <!-- Review form — only for eligible residents -->
+        <?php if ($is_resident && $can_review && !$already_reviewed) : ?>
+        <div class="ld-review-form-wrap" id="ld-review-form-wrap">
+            <p class="ld-review-form-label">You purchased this — leave a review!</p>
+            <div class="ld-star-row" id="ld-stars">
+                <?php for ($n = 1; $n <= 10; $n++) : ?>
+                <button class="ld-star-btn" onclick="ldSetRating(<?= $n ?>)" data-val="<?= $n ?>">★</button>
+                <?php endfor; ?>
+            </div>
+            <span class="ld-rating-display" id="ld-rating-display">Select a rating</span>
+            <textarea class="ld-review-textarea" id="ld-review-comment"
+                placeholder="Share your experience (optional)..."></textarea>
+            <button class="ld-submit-review-btn" onclick="ldSubmitReview()">Submit Review</button>
+        </div>
+        <?php elseif ($is_resident && $already_reviewed) : ?>
+        <div class="ld-already-reviewed">
+            You reviewed this listing — <?= htmlspecialchars($existing_review['rating']) ?>/10
+        </div>
+        <?php endif; ?>
+
+        <!-- Reviews list -->
+        <div id="ld-reviews-list">
+            <div class="ld-reviews-loading">Loading reviews…</div>
+        </div>
+        </div>
+        </div>
         </div>
  
         <!-- RIGHT: Info -->
@@ -433,6 +572,7 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
     const LD_IS_LOGGED   = <?= $is_logged_in ? 'true' : 'false' ?>;
     const LD_IS_RESIDENT = <?= $is_resident  ? 'true' : 'false' ?>;
     let ldIndex = 0;
+    let ldSelectedRating = 0;
  
     document.addEventListener('DOMContentLoaded', () => {
         // Build dots
@@ -446,6 +586,7 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
             });
         }
         ldUpdateTotal();
+        ldLoadReviews();
         const qtyInput = document.getElementById('ld-qty');
         if (qtyInput) qtyInput.addEventListener('input', ldUpdateTotal);
     });
@@ -455,7 +596,7 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
         if (modal && e.target === modal) ldCloseLoginModal();
     });
  
-    // ── Carousel ──────────────────────────────────────────────
+    // Carousel 
     function ldGoTo(index) {
         ldIndex = index;
         const imgEl = document.getElementById('ld-main-img');
@@ -481,7 +622,7 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
         if (el) el.textContent = (LD_PRICE * qty).toFixed(2);
     }
  
-    // ── Add to Cart ───────────────────────────────────────────
+    // Add to Cart 
     function ldAddToCart() {
         const qty = parseInt(document.getElementById('ld-qty').value ?? 1);
         const btn = document.getElementById('ld-add-cart-btn');
@@ -508,7 +649,7 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
             });
     }
  
-    // ── Voting ────────────────────────────────────────────────
+    // Voting
     function ldVote(vote_type) {
         if (!LD_IS_LOGGED) {
             document.getElementById('ld-modal-heading').textContent = 'Want to vote on this listing?';
@@ -538,7 +679,7 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
             });
     }
  
-    // ── Login modal ───────────────────────────────────────────
+    // Login modal
     function ldShowLoginModal(context) {
         if (context === 'book') {
             document.getElementById('ld-modal-heading').textContent = 'Resident Account Required';
@@ -548,7 +689,7 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
     }
     function ldCloseLoginModal() { document.getElementById('ld-login-modal').style.display = 'none'; }
  
-    // ── Toast ─────────────────────────────────────────────────
+    // Toast
     function ldShowToast(message, type) {
         const existing = document.getElementById('ld-toast');
         if (existing) existing.remove();
@@ -558,6 +699,84 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
         setTimeout(() => toast.classList.add('ld-toast--show'), 10);
         setTimeout(() => { toast.classList.remove('ld-toast--show'); setTimeout(() => toast.remove(), 300); }, 2500);
     }
+
+    function ldLoadReviews() {
+    const fd = new FormData();
+    fd.append('action',     'get_reviews');
+    fd.append('listing_id', LD_LISTING_ID);
+
+    fetch('../pages/listing-detail.php?listing_id=' + LD_LISTING_ID, { method: 'POST', body: fd })
+        .then(r => r.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                const list  = document.getElementById('ld-reviews-list');
+                const badge = document.getElementById('ld-review-count');
+
+                if (!data.success || !data.reviews.length) {
+                    list.innerHTML = '<p class="ld-no-reviews">No reviews yet. Be the first to review!</p>';
+                    if (badge) badge.textContent = '';
+                    return;
+                }
+
+                if (badge) badge.textContent = `${data.reviews.length} review${data.reviews.length !== 1 ? 's' : ''} · Avg ${data.avg}/10`;
+
+                list.innerHTML = data.reviews.map(r => `
+                    <div class="ld-review-card">
+                        <div class="ld-review-card-header">
+                            <span class="ld-reviewer-name">${ldEsc(r.first_name)} ${ldEsc(r.last_name[0])}.
+                            </span>
+                            <div style="text-align:right;">
+                                <span class="ld-review-rating-badge">${r.rating}/10</span>
+                                <span class="ld-review-date">${new Date(r.created_at).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})}</span>
+                            </div>
+                        </div>
+                        ${r.comment ? `<p class="ld-review-comment">"${ldEsc(r.comment)}"</p>` : ''}
+                    </div>
+                `).join('');
+            } catch(e) {}
+        });
+}
+
+function ldSetRating(val) {
+    ldSelectedRating = val;
+    document.querySelectorAll('#ld-stars .ld-star-btn').forEach(btn => {
+        btn.classList.toggle('ld-star-btn--active', parseInt(btn.dataset.val) <= val);
+    });
+    document.getElementById('ld-rating-display').textContent = `${val} / 10`;
+}
+
+function ldSubmitReview() {
+    if (!ldSelectedRating) { ldShowToast('Please select a rating.', 'error'); return; }
+    const comment = document.getElementById('ld-review-comment').value.trim();
+
+    const fd = new FormData();
+    fd.append('action',     'submit_review');
+    fd.append('listing_id', LD_LISTING_ID);
+    fd.append('rating',     ldSelectedRating);
+    fd.append('comment',    comment);
+
+    fetch('../pages/listing-detail.php?listing_id=' + LD_LISTING_ID, { method: 'POST', body: fd })
+        .then(r => r.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.success) {
+                    ldShowToast(data.message, 'success');
+                    document.getElementById('ld-review-form-wrap').innerHTML =
+                        `<div class="ld-already-reviewed">Thank you! Your review has been submitted.</div>`;
+                    ldLoadReviews();
+                } else {
+                    ldShowToast(data.message || 'Failed to submit.', 'error');
+                }
+            } catch(e) { ldShowToast('Unexpected error.', 'error'); }
+        });
+}
+
+function ldEsc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 </script>
  
 </body>

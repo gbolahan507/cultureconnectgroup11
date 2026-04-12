@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 12, 2026 at 02:33 AM
+-- Generation Time: Apr 13, 2026 at 12:08 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -207,7 +207,8 @@ INSERT INTO `listing_requests` (`approval_id`, `listing_id`, `user_id`, `decisio
 (18, 10, 6, 'approved', 'approved', '2026-04-09 19:43:09'),
 (19, 9, 6, 'approved', 'approved', '2026-04-09 19:43:21'),
 (20, 8, 6, 'approved', 'approved', '2026-04-09 19:43:35'),
-(21, 24, 6, 'approved', '', '2026-04-09 22:30:17');
+(21, 24, 6, 'approved', '', '2026-04-09 22:30:17'),
+(22, 24, 6, 'approved', '', '2026-04-12 21:57:02');
 
 --
 -- Triggers `listing_requests`
@@ -332,7 +333,7 @@ INSERT INTO `orders` (`order_id`, `user_id`, `total_amount`, `status`, `created_
 (7, 37, 80.00, 'completed', '2026-03-24 22:16:05'),
 (8, 37, 24.00, 'cancelled', '2026-04-03 21:16:22'),
 (9, 38, 20.00, 'completed', '2026-03-12 22:18:00'),
-(10, 38, 15.00, 'processing', '2026-04-10 21:18:28'),
+(10, 38, 15.00, 'completed', '2026-04-10 21:18:28'),
 (11, 39, 138.00, 'completed', '2026-03-20 22:20:00'),
 (12, 39, 44.00, 'completed', '2026-03-30 21:20:18'),
 (13, 40, 25.00, 'completed', '2026-03-28 22:21:41'),
@@ -341,7 +342,7 @@ INSERT INTO `orders` (`order_id`, `user_id`, `total_amount`, `status`, `created_
 (16, 41, 25.00, 'processing', '2026-04-07 21:24:06'),
 (17, 9, 53.00, 'completed', '2026-03-26 22:25:41'),
 (18, 13, 50.00, 'completed', '2026-03-31 21:26:00'),
-(19, 12, 200.00, 'processing', '2026-04-09 21:26:18'),
+(19, 12, 200.00, 'completed', '2026-04-09 21:26:18'),
 (20, 8, 20.00, 'completed', '2026-04-02 21:28:54'),
 (21, 34, 18.00, 'completed', '2026-03-07 22:29:10'),
 (22, 35, 45.00, 'completed', '2026-03-02 22:29:25'),
@@ -470,6 +471,51 @@ CREATE TABLE `product_service_reviews` (
   `comment` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `product_service_reviews`
+--
+
+INSERT INTO `product_service_reviews` (`review_id`, `user_id`, `listing_id`, `rating`, `comment`, `created_at`) VALUES
+(1, 34, 7, 9, 'Absolutely loved this class! The tutor was patient and encouraging. I had never painted before but left feeling really proud of what I created. Will definitely be back.', '2026-04-12 20:58:26'),
+(2, 41, 7, 8, 'Great beginner session. All materials were provided and the studio is a lovely space. Would recommend to anyone looking to try something creative.', '2026-04-12 20:58:26'),
+(3, 35, 8, 10, 'Best music lessons I have ever had. The tutor tailored the session to my level and I made more progress in one session than months of self-teaching. Brilliant.', '2026-04-12 20:58:26'),
+(4, 13, 8, 8, 'Really enjoyed the lesson. Very patient instructor and a relaxed atmosphere. Good for complete beginners like me.', '2026-04-12 20:58:26'),
+(5, 34, 9, 9, 'Such a unique experience. Combines movement and art in a way I had never tried before. Left feeling energised and inspired. Highly recommend.', '2026-04-12 20:58:26'),
+(6, 41, 9, 7, 'Enjoyable workshop. A bit intense for me personally but the instructor was great and the group was welcoming. Good community vibe.', '2026-04-12 20:58:26'),
+(7, 9, 9, 9, 'I was nervous going in but the atmosphere was so inclusive. Really helped me get out of my comfort zone.', '2026-04-12 20:58:26'),
+(8, 38, 10, 10, 'My daughter absolutely loved it! She came home with a beautiful painting and could not stop talking about it. The tutors were wonderful with the children.', '2026-04-12 20:58:26'),
+(9, 34, 11, 8, 'A really impressive production from a community group. The performances were heartfelt and the themes really resonated. Great evening out.', '2026-04-12 20:58:26'),
+(10, 40, 11, 9, 'Wonderful to see such local talent on stage. The writing was original and the direction was excellent. Will be coming back for the next show.', '2026-04-12 20:58:26'),
+(11, 13, 11, 7, 'Good community theatre. Some performances were stronger than others but overall an enjoyable evening with a great atmosphere.', '2026-04-12 20:58:26'),
+(12, 38, 12, 8, 'Great atmosphere and a really diverse lineup of performers. Some incredibly talented people in the local area. Would go again.', '2026-04-12 20:58:26'),
+(13, 39, 12, 7, 'Fun evening. The venue was cosy and the acts were entertaining. Nice way to spend a Friday night locally.', '2026-04-12 20:58:26'),
+(14, 40, 12, 9, 'One of the best open mic nights I have been to. The compere kept the energy up all evening and every act brought something different.', '2026-04-12 20:58:26'),
+(15, 34, 13, 10, 'These young people are incredibly talented. The plays were original, funny and at times deeply moving. A real credit to the programme.', '2026-04-12 20:58:26'),
+(16, 34, 14, 9, 'Fascinating walk through the history of Hertfordshire. Our guide was knowledgeable and passionate. Learned so much about the area I live in.', '2026-04-12 20:58:26'),
+(17, 38, 14, 8, 'Really enjoyed this tour. The route was well planned and the stories our guide shared brought the history to life. Great for the whole family.', '2026-04-12 20:58:26'),
+(18, 37, 14, 9, 'Wonderful way to spend a Saturday morning. The guide knew so many interesting facts and was happy to answer questions. Highly recommended.', '2026-04-12 20:58:26'),
+(19, 35, 15, 8, 'A curated and thoughtful gallery experience. The expert commentary really helped me understand the works on a deeper level. Loved the interactive element.', '2026-04-12 20:58:26'),
+(20, 39, 15, 7, 'Interesting programme. Learned a lot about the local art scene. The guide was very knowledgeable though the session felt a little rushed towards the end.', '2026-04-12 20:58:26'),
+(21, 41, 15, 9, 'Really enriching experience. Never thought of myself as someone who visits galleries but this programme changed that. Excellent guide.', '2026-04-12 20:58:26'),
+(22, 8, 16, 10, 'PixelCraft did an outstanding job at our community event. The photos were delivered quickly and the quality was exceptional. Professional and friendly team.', '2026-04-12 20:58:26'),
+(23, 9, 16, 9, 'Very impressed with the service. The photographer blended in well and captured some truly beautiful candid moments. Will hire again without hesitation.', '2026-04-12 20:58:26'),
+(24, 39, 17, 9, 'The design work was creative and exactly what we were looking for. Very responsive to feedback and delivered on time. Great value for local businesses.', '2026-04-12 20:58:26'),
+(25, 37, 17, 8, 'Solid graphic design service. The flyers looked professional and helped attract attention at our event. Would use again.', '2026-04-12 20:58:26'),
+(26, 37, 19, 10, 'The most beautiful piece of art I have ever purchased. The detail and care that has gone into it is extraordinary. It now takes pride of place in our living room.', '2026-04-12 20:58:26'),
+(27, 35, 19, 9, 'Stunning original watercolour. The artist has captured something really special about the Hertfordshire landscape. Arrived beautifully packaged too.', '2026-04-12 20:58:26'),
+(28, 37, 20, 10, 'Each piece is a work of art. I bought a set of mugs and bowls and they are completely unique. The craftsmanship is exceptional and they are food safe too.', '2026-04-12 20:58:26'),
+(29, 9, 20, 9, 'Beautiful ceramics. You can really feel the love and skill that has gone into each piece. Perfect as a gift or a treat for yourself.', '2026-04-12 20:58:26'),
+(30, 40, 20, 8, 'Great quality handmade pottery. Mine has a slight imperfection but that just adds to the character. Very happy with the purchase.', '2026-04-12 20:58:26'),
+(31, 39, 21, 10, 'An absolutely stunning limited edition print. The colours are vibrant and the quality of the paper is superb. A genuine collectors item.', '2026-04-12 20:58:26'),
+(32, 9, 21, 9, 'Love this poster. It is already framed and hanging on my wall. Great to support local artists and own something truly unique.', '2026-04-12 20:58:26'),
+(33, 35, 22, 9, 'The most beautiful journal I have ever owned. The leather cover is soft and the recycled pages have a wonderful texture. Perfect for sketching and writing.', '2026-04-12 20:58:26'),
+(34, 34, 23, 8, 'A genuinely moving collection. Several poems stopped me in my tracks. Great to see so many local voices represented in one volume.', '2026-04-12 20:58:26'),
+(35, 38, 23, 9, 'Bought this on a whim and was completely absorbed. Some truly talented poets in Hertfordshire. A portion going to workshops is a lovely touch.', '2026-04-12 20:58:26'),
+(36, 8, 23, 7, 'Some poems resonated more than others but overall a worthwhile read. Glad to support local publishing and the community writing workshops.', '2026-04-12 20:58:26'),
+(37, 35, 24, 8, 'A brilliant community publication. Packed with local art, stories and commentary. I subscribed straight away after reading my first issue.', '2026-04-12 20:58:26'),
+(38, 8, 24, 9, 'The Hertford Quarterly is everything a community zine should be. Authentic, creative and full of local voices. Cannot wait for the next issue.', '2026-04-12 20:58:26'),
+(39, 12, 18, 10, 'This helped make my work really easy and I would definitely recommend it.', '2026-04-12 21:19:55');
 
 --
 -- Triggers `product_service_reviews`
@@ -716,18 +762,18 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`, `role`, `email_address`) VALUES
-(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-11 23:37:00', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
+(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-12 21:20:46', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
 (8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-04 18:16:05', 'approved', 'Resident', 'nike@gmail.com'),
-(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-11 22:40:15', 'approved', 'Resident', 'josephine@gmail.com'),
+(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-12 22:04:50', 'approved', 'Resident', 'josephine@gmail.com'),
 (10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-11 23:25:12', 'approved', 'SME', 'info@harmonywellbeing.com'),
 (11, '$2y$10$pEGsw9izjII4FX3gzzaJ4.QSDLc70c6nGub9/1IU78TLgASSZUsf.', '2026-04-07 08:16:06', 'approved', 'Resident', 'victor@gmail.com'),
-(12, '$2y$10$aSQiHxr71NTJT0.ohlXxDezWv08wpyxyjnP1tR9q7tgxhcBsX.Uai', '2026-04-07 08:19:30', 'approved', 'Resident', 'jake@gmail.com'),
+(12, '$2y$10$aSQiHxr71NTJT0.ohlXxDezWv08wpyxyjnP1tR9q7tgxhcBsX.Uai', '2026-04-12 21:18:58', 'approved', 'Resident', 'jake@gmail.com'),
 (13, '$2y$10$L680iiTY/OYAE9v./tg99O4N1T/ao6GKU/AnYCR6KNO4jLIimJKHu', '2026-04-08 11:28:32', 'approved', 'Resident', 'habeeb@gmail.com'),
 (23, '$2y$10$UDiUYY47oKHijEltMpEDRusNoO93tFpEhQ389rybJJHXwzuNwcMiG', '2026-04-08 11:37:39', 'approved', 'Council Member', 'Cmember@cultureconnect.com'),
-(24, '$2y$10$ViJxAEtd.j9tpIUKfzKPw.5pPGEFm4c5JlfxBXha4GgFbGeWXTzvC', '2026-04-11 23:31:28', 'approved', 'SME', 'hello@brushstrokestudio.com'),
-(25, '$2y$10$eLhuVYx4TBSMRuld/k4THuwZ1XC2EhQG4fUCshbrKOlnRdgqz5Hva', '2026-04-09 18:58:45', 'approved', 'SME', 'info@hatfieldtheatre.com'),
+(24, '$2y$10$ViJxAEtd.j9tpIUKfzKPw.5pPGEFm4c5JlfxBXha4GgFbGeWXTzvC', '2026-04-12 19:17:16', 'approved', 'SME', 'hello@brushstrokestudio.com'),
+(25, '$2y$10$eLhuVYx4TBSMRuld/k4THuwZ1XC2EhQG4fUCshbrKOlnRdgqz5Hva', '2026-04-12 21:58:07', 'approved', 'SME', 'info@hatfieldtheatre.com'),
 (26, '$2y$10$AUciDVzSGaUL7jdXeUdkM.DhFyvuMxkxFa1J8xurcFsZV8qHyg14m', '2026-04-09 19:10:10', 'approved', 'SME', 'tours@hertheritagetours.com'),
-(27, '$2y$10$.dWO5U3z4wW4FGMV32g3COS5QZbspNds4t8z853sYSp1ErZcuvvOO', '2026-04-09 19:17:47', 'approved', 'SME', 'studio@pixelcraftmedia.com'),
+(27, '$2y$10$.dWO5U3z4wW4FGMV32g3COS5QZbspNds4t8z853sYSp1ErZcuvvOO', '2026-04-12 21:16:53', 'approved', 'SME', 'studio@pixelcraftmedia.com'),
 (28, '$2y$10$LT2xJjdlHYINbJNC5PaEuup2dqUpNQMvIxct0ueW3FJRfYgObhWtK', '2026-04-09 19:25:00', 'approved', 'SME', 'shop@hatfieldhandmade.com'),
 (29, '$2y$10$HrsNx52kvUjSBIemM/6gcuaWiVz5LhBgpQMJz0pf4LxY4W1cPPC5m', '2026-04-09 19:35:19', 'approved', 'SME', 'press@hertfordink.com'),
 (34, '$2y$10$sCH/qU1xp9OQjvBqIRP1FuasIU/k/tRQ5N5JV3wSQtVllyC68uQ.q', '2026-04-10 09:25:47', 'approved', 'Resident', 'marcus.osei@gmail.com'),
@@ -740,7 +786,7 @@ INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`,
 (41, '$2y$10$cu9oDMLdhSIgMNc1rdFB2.dTIOaAlut0tK2ksA2ReCG.3BriB2bla', '2026-04-10 09:38:53', 'approved', 'Resident', 'david.kofi@gmail.com'),
 (42, '$2y$10$t1KGemGc.6azqpROkQ/YmOT24z5XhhjDM5csnmACFRieI.zkEKbka', '2026-04-10 09:45:08', 'pending', 'Resident', 'tariq.hussain@gmail.com'),
 (43, '$2y$10$HufOb6B1aOSL2XRrwCV7Ze7NxNE1LX1oduX1pzbGIPlwNxJ1WHE9S', '2026-04-10 09:46:55', 'pending', 'Resident', 'siobhan.oconnor@gmail.com'),
-(44, '$2y$10$x1vCCutsYAkIALta/IzB/OwuVjieM6HfMTtUV/BLNot5kjkgfRCwm', '2026-04-10 09:49:09', 'pending', 'Resident', 'samuel.tally@gmail.com'),
+(44, '$2y$10$x1vCCutsYAkIALta/IzB/OwuVjieM6HfMTtUV/BLNot5kjkgfRCwm', '2026-04-10 09:49:09', 'rejected', 'Resident', 'samuel.tally@gmail.com'),
 (45, '$2y$10$1N6upPakt9SvA2705zNUF.tx5VF5hfjzlabv4BXhFgb7C1/6jcXNy', '2026-04-10 09:52:08', 'pending', 'SME', 'info@africanheritagecrafts.co.uk'),
 (46, '$2y$10$yzbl51n2Sa4whe2ggwRicuhjxExcYsKm3DoGNfDfIlClcVsYbZ6v6', '2026-04-10 09:54:48', 'pending', 'SME', 'hello@hertsmusicschool.co.uk'),
 (47, '$2y$10$EdYx3Tr2i3A.w0ayszXgDu/KgyWJbGdyzBns8BLuenmvpInRtm1xu', '2026-04-10 09:57:07', 'pending', 'SME', 'contact@communityfilmherts.co.uk');
@@ -793,7 +839,21 @@ INSERT INTO `user_documents` (`document_id`, `user_id`, `document_type`, `file_p
 (4, 11, 'Bank_Statement', '../uploads/verification_documents/1775553366_bank_statement.pdf', 'approved', '2026-04-07 08:16:06'),
 (5, 12, 'Bank_Statement', '../uploads/verification_documents/1775553570_bank_statement.pdf', 'approved', '2026-04-07 08:19:30'),
 (6, 13, 'Bank_Statement', '../uploads/verification_documents/1775553662_bank_statement.pdf', 'approved', '2026-04-07 08:21:02'),
-(7, 23, 'Bank_Statement', '../uploads/verification_documents/1775647905_bank_statement.pdf', 'approved', '2026-04-08 11:31:45');
+(7, 23, 'Bank_Statement', '../uploads/verification_documents/1775647905_bank_statement.pdf', 'approved', '2026-04-08 11:31:45'),
+(14, 42, 'Driver_License', '../uploads/verification_documents/placeholder_tariq.pdf', 'approved', '2026-04-12 21:51:21'),
+(15, 43, 'Utility_Bill', '../uploads/verification_documents/placeholder_siobhan.pdf', 'approved', '2026-04-12 21:51:21'),
+(16, 44, 'Bank_Statement', '../uploads/verification_documents/placeholder_samuel.pdf', 'approved', '2026-04-12 21:51:21'),
+(17, 45, 'Bank_Statement', '../uploads/verification_documents/placeholder_african.pdf', 'approved', '2026-04-12 21:51:21'),
+(18, 46, 'Bank_Statement', '../uploads/verification_documents/placeholder_herts.pdf', 'approved', '2026-04-12 21:51:21'),
+(19, 47, 'Bank_Statement', '../uploads/verification_documents/placeholder_film.pdf', 'approved', '2026-04-12 21:51:21'),
+(20, 34, 'Driver_License', '../uploads/verification_documents/placeholder_marcus.pdf', 'approved', '2026-04-12 21:56:35'),
+(21, 35, 'Driver_License', '../uploads/verification_documents/placeholder_aisha.pdf', 'approved', '2026-04-12 21:56:35'),
+(22, 36, 'Utility_Bill', '../uploads/verification_documents/placeholder_daniel.pdf', 'approved', '2026-04-12 21:56:35'),
+(23, 37, 'Driver_License', '../uploads/verification_documents/placeholder_fatima.pdf', 'approved', '2026-04-12 21:56:35'),
+(24, 38, 'Bank_Statement', '../uploads/verification_documents/placeholder_james.pdf', 'approved', '2026-04-12 21:56:35'),
+(25, 39, 'Driver_License', '../uploads/verification_documents/placeholder_priya.pdf', 'approved', '2026-04-12 21:56:35'),
+(26, 40, 'Utility_Bill', '../uploads/verification_documents/placeholder_sarah.pdf', 'approved', '2026-04-12 21:56:35'),
+(27, 41, 'Bank_Statement', '../uploads/verification_documents/placeholder_david.pdf', 'approved', '2026-04-12 21:56:35');
 
 -- --------------------------------------------------------
 
@@ -824,7 +884,9 @@ INSERT INTO `user_registration_requests` (`review_id`, `user_id`, `admin_id`, `d
 (6, 13, 6, 'approved', '', '2026-04-08 10:40:22', 6),
 (7, 12, 23, 'approved', '', '2026-04-08 11:46:05', 5),
 (8, 11, 23, 'rejected', 'testing', '2026-04-08 11:46:25', 4),
-(9, 11, 23, 'approved', '', '2026-04-08 11:46:39', 4);
+(9, 11, 23, 'approved', '', '2026-04-08 11:46:39', 4),
+(10, 44, 6, 'approved', '', '2026-04-12 21:51:35', 16),
+(11, 44, 6, 'rejected', 'Testing', '2026-04-12 21:51:52', 16);
 
 -- --------------------------------------------------------
 
@@ -1023,7 +1085,7 @@ ALTER TABLE `user_roles`
 -- AUTO_INCREMENT for table `areas`
 --
 ALTER TABLE `areas`
-  MODIFY `area_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `area_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `listings`
@@ -1041,7 +1103,7 @@ ALTER TABLE `listing_images`
 -- AUTO_INCREMENT for table `listing_requests`
 --
 ALTER TABLE `listing_requests`
-  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `listing_votes`
@@ -1077,7 +1139,7 @@ ALTER TABLE `product_service_categories`
 -- AUTO_INCREMENT for table `product_service_reviews`
 --
 ALTER TABLE `product_service_reviews`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `product_service_subcategories`
@@ -1107,13 +1169,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `user_documents`
 --
 ALTER TABLE `user_documents`
-  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `user_registration_requests`
 --
 ALTER TABLE `user_registration_requests`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Constraints for dumped tables

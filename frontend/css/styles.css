@@ -81,6 +81,8 @@ padding-bottom: 4px;
 display: flex;
 align-items: center;
 gap: 2px;
+width: 40px;
+height: 40px;
 }
 
 .column {
@@ -2934,7 +2936,7 @@ font-size:13px;
 .br-login-modal-dismiss:hover { color: #6b7280; }
 
 /* ================================
-            LISTING DETAIL  PAGE
+    LISTING DETAIL  PAGE
     ================================ */
 .ld-page-wrap {
     --ld-violet:  #230c33;
@@ -3680,6 +3682,129 @@ font-size:13px;
 }
  
 .ld-login-modal-dismiss:hover { color: #6b7280; }
+
+/* Reviews  */
+.ld-reviews-section { margin-top: 20px; }
+
+.ld-review-count-badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #9ca3af;
+    margin-left: 8px;
+}
+
+.ld-review-form-wrap {
+    background: #faf5ff;
+    border: 1px solid #f0e6f6;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.ld-review-form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #230c33;
+    margin: 0 0 10px;
+}
+
+.ld-star-row { display: flex; gap: 3px; margin-bottom: 4px; flex-wrap: wrap; }
+
+.ld-star-btn {
+    background: none; border: none;
+    font-size: 22px; color: #d1d5db;
+    cursor: pointer; padding: 0; line-height: 1;
+    transition: color 0.1s;
+}
+
+.ld-star-btn--active { color: #f59e0b; }
+.ld-star-btn:hover   { color: #fbbf24; }
+
+.ld-rating-display {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 10px;
+}
+
+.ld-review-textarea {
+    width: 100%;
+    min-height: 75px;
+    border: 1px solid #e5e5e5;
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+.ld-review-textarea:focus { outline: none; border-color: #bf2ab9; }
+
+.ld-submit-review-btn {
+    padding: 8px 20px;
+    background: linear-gradient(90deg, #bf2ab9, #e00180);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.ld-submit-review-btn:hover { opacity: 0.88; }
+
+.ld-already-reviewed {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.ld-reviews-loading { color: #9ca3af; font-size: 0.85rem; padding: 0.5rem 0; }
+.ld-no-reviews      { color: #9ca3af; font-size: 0.85rem; padding: 0.5rem 0; font-style: italic; }
+
+.ld-review-card {
+    border-bottom: 1px solid #f5f5f5;
+    padding: 0.85rem 0;
+}
+
+.ld-review-card:last-child { border-bottom: none; }
+
+.ld-review-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.ld-reviewer-name { font-weight: 600; font-size: 0.85rem; color: #230c33; }
+
+.ld-review-rating-badge {
+    display: inline-block;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-right: 6px;
+}
+
+.ld-review-date { font-size: 0.72rem; color: #9ca3af; display: block; }
+
+.ld-review-comment {
+    font-size: 0.85rem;
+    color: #4b5563;
+    font-style: italic;
+    margin: 0;
+    line-height: 1.6;
+}
 
 /* ================================
     CART  PAGE
@@ -4592,6 +4717,103 @@ font-size:13px;
 }
 
 .mo-page-btn--active:hover { background: var(--mo-violet); }
+
+/* Review button */
+.mo-review-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+    transition: background 0.15s;
+}
+.mo-review-btn:hover { background: #fde68a; }
+
+/* Review modal items */
+.mo-review-item {
+    display: flex;
+    gap: 14px;
+    padding: 12px 0;
+    align-items: flex-start;
+}
+.mo-review-item-img {
+    width: 56px; height: 56px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f0e6f6;
+    flex-shrink: 0;
+}
+.mo-review-item-img img { width: 100%; height: 100%; object-fit: cover; }
+.mo-review-item-title { font-weight: 600; font-size: 13px; color: #230c33; margin: 0 0 2px; }
+.mo-review-item-biz   { font-size: 12px; color: #9ca3af; margin: 0 0 8px; }
+.mo-review-item-info  { flex: 1; }
+
+.mo-reviewed-badge {
+    display: inline-block;
+    background: #d1fae5;
+    color: #065f46;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Star rating */
+.mo-star-row { display: flex; gap: 4px; margin-bottom: 4px; }
+.mo-star-btn {
+    background: none; border: none; font-size: 20px;
+    color: #d1d5db; cursor: pointer; padding: 0; line-height: 1;
+    transition: color 0.1s;
+}
+.mo-star-btn--active { color: #f59e0b; }
+.mo-star-btn:hover   { color: #fbbf24; }
+
+.mo-rating-display { font-size: 12px; color: #6b7280; }
+
+.mo-review-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #230c33;
+    margin-bottom: 4px;
+}
+.mo-review-textarea {
+    width: 100%;
+    min-height: 70px;
+    border: 1px solid #e5e5e5;
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+}
+.mo-review-textarea:focus { outline: none; border-color: #bf2ab9; }
+.mo-submit-review-btn {
+    padding: 7px 18px;
+    background: linear-gradient(90deg, #bf2ab9, #e00180);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.mo-submit-review-btn:hover { opacity: 0.88; }
+
+.mo-submitted-comment {
+    font-size: 12px;
+    color: #4b5563;
+    font-style: italic;
+    margin: 6px 0 0;
+    line-height: 1.5;
+}
 
 /* ================================
    MANAGE ORDERS PAGE
@@ -6059,7 +6281,7 @@ font-size:13px;
 .an-score--neg { background: #fee2e2; color: #991b1b; }
 
 /* ================================
-   VIEW VOTES PAGE (vv-)
+   VIEW VOTES PAGE
 ================================ */
 .vv-page {
     --vv-violet:  #230c33;
@@ -6377,4 +6599,93 @@ font-size:13px;
     background: var(--vv-violet);
     border-color: var(--vv-violet);
     color: var(--vv-white);
+}
+
+/* Votes & Reviews page additions */
+.vv-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #230c33;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 2px solid #e5e5e5;
+}
+
+.vv-reviews-section { margin-top: 1rem; }
+
+.vv-review-stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.vv-review-stat-card {
+    background: #f0e6f6;
+    border-radius: 10px;
+    padding: 0.9rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 140px;
+}
+
+.vv-review-stat-card--gold { background: #fef3c7; }
+
+.vv-review-stat-num {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #230c33;
+    line-height: 1;
+}
+
+.vv-review-stat-lbl { font-size: 0.75rem; font-weight: 600; color: #6b7280; }
+
+.vv-reviews-list { display: flex; flex-direction: column; gap: 12px; }
+
+.vv-review-card {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(35,12,51,.05);
+}
+
+.vv-review-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.vv-review-listing {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #230c33;
+    margin: 0 0 2px;
+}
+
+.vv-review-author { font-size: 0.78rem; color: #9ca3af; margin: 0; }
+
+.vv-review-rating-wrap { text-align: right; }
+
+.vv-review-rating {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #d97706;
+}
+
+.vv-review-rating-max { font-size: 0.75rem; font-weight: 400; color: #9ca3af; }
+
+.vv-review-date { font-size: 0.72rem; color: #9ca3af; }
+
+.vv-review-comment {
+    font-size: 0.85rem;
+    color: #4b5563;
+    font-style: italic;
+    margin: 0;
+    line-height: 1.6;
 }
