@@ -2,7 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once '../db_connection.php';
  
-// AJAX HANDLER 
+// AJAX HANDLER
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     while (ob_get_level()) ob_end_clean();
     header('Content-Type: application/json');
@@ -43,7 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                    pc.category_name, pc.category_id,
                    sp.business_name,
                    a.area_name,
-                   li.image_url AS primary_image
+                   li.image_url AS primary_image,
+                   COALESCE(SUM(lv.vote_type = 'like'),    0) AS likes,
+                   COALESCE(SUM(lv.vote_type = 'dislike'), 0) AS dislikes
             FROM listings l
             JOIN product_service ps                ON l.item_id         = ps.item_id
             JOIN product_service_subcategories pss ON ps.subcategory_id  = pss.subcategory_id
@@ -51,7 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             JOIN sme_profiles sp                   ON l.sme_id           = sp.sme_id
             JOIN areas a                           ON sp.area_id         = a.area_id
             LEFT JOIN listing_images li            ON l.listing_id       = li.listing_id AND li.is_primary = 1
+            LEFT JOIN listing_votes lv             ON l.listing_id       = lv.listing_id
             WHERE $where_sql
+            GROUP BY l.listing_id
             ORDER BY l.created_at DESC
         ";
  
@@ -95,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
  
-    // Cart: Add Item 
+    // Add to Cart
     if ($_POST['action'] === 'add_to_cart') {
         $listing_id = intval($_POST['listing_id'] ?? 0);
         $quantity   = max(1, intval($_POST['quantity'] ?? 1));
@@ -153,10 +157,86 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
  
-    // Cart: Get Count 
+    // Cart: Get Count
     if ($_POST['action'] === 'get_cart_count') {
         $count = isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0;
         echo json_encode(['success' => true, 'count' => $count]);
+        exit();
+    }
+ 
+    // Toggle Vote (like/dislike)
+    if ($_POST['action'] === 'toggle_vote') {
+        if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Resident') {
+            echo json_encode(['success' => false, 'message' => 'You must be logged in as a resident to vote.']);
+            exit();
+        }
+ 
+        $user_id    = intval($_SESSION['user_id']);
+        $listing_id = intval($_POST['listing_id'] ?? 0);
+        $vote_type  = $_POST['vote_type'] ?? '';
+ 
+        if (!$listing_id || !in_array($vote_type, ['like', 'dislike'])) {
+            echo json_encode(['success' => false, 'message' => 'Invalid vote.']);
+            exit();
+        }
+ 
+        $check = $conn->prepare("SELECT vote_id, vote_type FROM listing_votes WHERE user_id = ? AND listing_id = ?");
+        $check->bind_param("ii", $user_id, $listing_id);
+        $check->execute();
+        $existing = $check->get_result()->fetch_assoc();
+        $check->close();
+ 
+        if ($existing) {
+            if ($existing['vote_type'] === $vote_type) {
+                // Same vote — toggle off
+                $del = $conn->prepare("DELETE FROM listing_votes WHERE vote_id = ?");
+                $del->bind_param("i", $existing['vote_id']);
+                $del->execute();
+                $del->close();
+                $new_vote = null;
+            } else {
+                // Different vote — switch it
+                $upd = $conn->prepare("UPDATE listing_votes SET vote_type = ?, created_at = NOW() WHERE vote_id = ?");
+                $upd->bind_param("si", $vote_type, $existing['vote_id']);
+                $upd->execute();
+                $upd->close();
+                $new_vote = $vote_type;
+            }
+        } else {
+            // New vote
+            $ins = $conn->prepare("INSERT INTO listing_votes (user_id, listing_id, vote_type) VALUES (?, ?, ?)");
+            $ins->bind_param("iis", $user_id, $listing_id, $vote_type);
+            $ins->execute();
+            $ins->close();
+            $new_vote = $vote_type;
+        }
+ 
+        $counts = $conn->prepare("SELECT COALESCE(SUM(vote_type='like'),0) AS likes, COALESCE(SUM(vote_type='dislike'),0) AS dislikes FROM listing_votes WHERE listing_id = ?");
+        $counts->bind_param("i", $listing_id);
+        $counts->execute();
+        $row = $counts->get_result()->fetch_assoc();
+        $counts->close();
+ 
+        echo json_encode([
+            'success'  => true,
+            'new_vote' => $new_vote,
+            'likes'    => intval($row['likes']),
+            'dislikes' => intval($row['dislikes'])
+        ]);
+        exit();
+    }
+ 
+    // Get User's Votes
+    if ($_POST['action'] === 'get_user_votes') {
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode(['success' => true, 'votes' => []]);
+            exit();
+        }
+        $user_id = intval($_SESSION['user_id']);
+        $result  = mysqli_query($conn, "SELECT listing_id, vote_type FROM listing_votes WHERE user_id = $user_id");
+        $votes   = [];
+        while ($row = mysqli_fetch_assoc($result)) $votes[$row['listing_id']] = $row['vote_type'];
+        echo json_encode(['success' => true, 'votes' => $votes]);
         exit();
     }
  
@@ -167,6 +247,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 // PAGE SETUP
 $cart_count   = isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0;
 $is_logged_in = isset($_SESSION['user_id']);
+$is_resident  = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Resident';
 
 ?>
 
@@ -181,16 +262,14 @@ $is_logged_in = isset($_SESSION['user_id']);
 <body class="br-page-wrap">
  
 <?php include '../components/header.php'; ?>
-
-<!-- ── Hero ──────────────────────────────────────────────────── -->
+ 
+<!-- Hero -->
 <div class="br-hero">
     <div class="br-hero-inner">
         <div>
             <h1 class="br-hero-title">Browse Cultural Products &amp; Services</h1>
             <p class="br-hero-subtitle">Discover local cultural offerings from Hertfordshire businesses.</p>
         </div>
- 
-        <!-- Cart button -->
         <a href="../pages/cart.php" class="br-cart-btn">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
@@ -201,54 +280,42 @@ $is_logged_in = isset($_SESSION['user_id']);
     </div>
 </div>
  
-<!-- ── Main container ────────────────────────────────────────── -->
+<!-- Main container -->
 <div class="br-container">
  
     <!-- Filter bar -->
     <div class="br-filter-bar">
- 
-        <!-- Search -->
         <div class="br-search-wrap">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18" class="br-search-icon">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
-            <input type="text" id="br-search" class="br-search-input"
-                   placeholder="Search listings, businesses…"
-                   oninput="brDebounce()">
+            <input type="text" id="br-search" class="br-search-input" placeholder="Search listings, businesses…" oninput="brDebounce()">
             <button class="br-search-clear" id="br-search-clear" onclick="brClearSearch()" style="display:none;">&times;</button>
         </div>
  
-        <!-- Selects row -->
         <div class="br-selects-row">
- 
             <div class="br-select-group">
                 <span class="br-select-label">Category</span>
                 <select id="br-cat-select" class="br-select" onchange="brCategoryChange()">
                     <option value="0">All Categories</option>
                 </select>
             </div>
- 
             <div class="br-select-group">
                 <span class="br-select-label">Subcategory</span>
                 <select id="br-sub-select" class="br-select" onchange="brLoad()">
                     <option value="0">All Subcategories</option>
                 </select>
             </div>
- 
             <div class="br-select-group">
                 <span class="br-select-label">Area</span>
                 <select id="br-area-select" class="br-select" onchange="brLoad()">
                     <option value="0">All Areas</option>
                 </select>
             </div>
- 
             <div class="br-price-wrap">
                 <span class="br-price-label">Max Price: <span class="br-price-val" id="br-price-val">Any</span></span>
-                <input type="range" id="br-price-range" class="br-price-range"
-                       min="0" max="200" value="200" step="5"
-                       oninput="brPriceChange(this.value)">
+                <input type="range" id="br-price-range" class="br-price-range" min="0" max="200" value="200" step="5" oninput="brPriceChange(this.value)">
             </div>
- 
         </div>
     </div>
  
@@ -278,23 +345,55 @@ $is_logged_in = isset($_SESSION['user_id']);
  
 </div>
  
-<?php include '../components/footer.php'; ?>
-
-<script>
-    let brAllSubs  = [];
-    let brDebTimer = null;
-    let brMaxPrice = 200;
-    let brPriceMax = '';
+<!-- Login prompt modal -->
+<div id="br-login-modal" class="br-login-modal-overlay" style="display:none;">
+    <div class="br-login-modal-box">
+        <button class="br-login-modal-close" onclick="brCloseVoteModal()">&times;</button>
+        <div class="br-login-modal-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="32" height="32">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904m10.598-9.75H14.25M5.904 18.5c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 0 1-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h1.053c.472 0 .745.556.5.96a8.958 8.958 0 0 0-1.302 4.665c0 1.194.232 2.333.654 3.375Z" />
+            </svg>
+        </div>
+        <h3>Want to vote on this listing?</h3>
+        <p>Create a free resident account or log in to vote on listings in your community.</p>
+        <div class="br-login-modal-actions">
+            <a href="../pages/login.php"    class="br-login-modal-btn br-login-modal-btn--primary">Log In</a>
+            <a href="../pages/register.php" class="br-login-modal-btn br-login-modal-btn--secondary">Create Account</a>
+        </div>
+        <button class="br-login-modal-dismiss" onclick="brCloseVoteModal()">Maybe later</button>
+    </div>
+</div>
  
+<?php include '../components/footer.php'; ?>
+ 
+<script>
+    //  State
+    let brAllSubs   = [];
+    let brDebTimer  = null;
+    let brMaxPrice  = 200;
+    let brPriceMax  = '';
+    let brUserVotes = {};
+ 
+    const BR_IS_LOGGED_IN = <?= $is_logged_in ? 'true' : 'false' ?>;
+    const BR_IS_RESIDENT  = <?= $is_resident  ? 'true' : 'false' ?>;
+ 
+    // Init
     document.addEventListener('DOMContentLoaded', () => {
         brLoadFilters();
         brUpdateBadge(<?= $cart_count ?>);
+        brLoadUserVotes();
     });
  
+    // Close login modal on backdrop click
+    document.addEventListener('click', (e) => {
+        const modal = document.getElementById('br-login-modal');
+        if (modal && e.target === modal) brCloseVoteModal();
+    });
+ 
+    // Filters 
     function brLoadFilters() {
         const fd = new FormData();
         fd.append('action', 'get_filters');
- 
         fetch('../pages/browse.php', { method: 'POST', body: fd })
             .then(r => r.text())
             .then(text => {
@@ -332,7 +431,6 @@ $is_logged_in = isset($_SESSION['user_id']);
         const catId  = parseInt(document.getElementById('br-cat-select').value);
         const subSel = document.getElementById('br-sub-select');
         subSel.innerHTML = '<option value="0">All Subcategories</option>';
- 
         if (catId > 0) {
             brAllSubs.filter(s => s.category_id == catId).forEach(s => {
                 const o = document.createElement('option');
@@ -382,6 +480,7 @@ $is_logged_in = isset($_SESSION['user_id']);
         brLoad();
     }
  
+    // Load listings
     function brLoad() {
         const grid    = document.getElementById('br-grid');
         const loading = document.getElementById('br-loading');
@@ -406,12 +505,12 @@ $is_logged_in = isset($_SESSION['user_id']);
                 try {
                     const data = JSON.parse(text);
                     loading.style.display = 'none';
- 
                     if (data.success && data.listings.length > 0) {
-                        count.textContent  = `Showing ${data.count} listing${data.count !== 1 ? 's' : ''}`;
-                        grid.innerHTML     = '';
+                        count.textContent = `Showing ${data.count} listing${data.count !== 1 ? 's' : ''}`;
+                        grid.innerHTML    = '';
                         data.listings.forEach(l => grid.appendChild(brBuildCard(l)));
                         grid.style.display = 'grid';
+                        brApplyVoteStates();
                     } else {
                         count.textContent   = '0 listings found';
                         empty.style.display = 'flex';
@@ -427,9 +526,10 @@ $is_logged_in = isset($_SESSION['user_id']);
             });
     }
  
+    // Build card
     function brBuildCard(l) {
-        const card  = document.createElement('div');
-        card.className = 'br-card';
+        const card      = document.createElement('div');
+        card.className  = 'br-card';
  
         const price     = parseFloat(l.price);
         const imgSrc    = l.primary_image ? `../uploads/listings_images/${brEsc(l.primary_image)}` : null;
@@ -455,9 +555,7 @@ $is_logged_in = isset($_SESSION['user_id']);
                 <p class="br-card-business">${brEsc(l.business_name)}</p>
                 <h3 class="br-card-title" onclick="brGoTo(${l.listing_id})">${brEsc(l.title)}</h3>
                 <p class="br-card-caption">${brEsc(l.caption ?? '')}</p>
-                <div class="br-cultural-benefit">
-                          ${brEsc(l.subcategory_name)}
-                </div>
+                <div class="br-cultural-benefit">${brEsc(l.subcategory_name)}</div>
                 <div class="br-card-footer">
                     <span class="br-card-price">£${price.toFixed(2)}</span>
                     <span class="br-card-area">
@@ -468,6 +566,24 @@ $is_logged_in = isset($_SESSION['user_id']);
                         ${brEsc(l.area_name)}
                     </span>
                 </div>
+                <div class="br-vote-row">
+                    <button class="br-vote-btn br-vote-btn--like"
+                            id="br-like-${l.listing_id}"
+                            onclick="brVote(${l.listing_id}, 'like')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="14" height="14">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904m10.598-9.75H14.25M5.904 18.5c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 0 1-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h1.053c.472 0 .745.556.5.96a8.958 8.958 0 0 0-1.302 4.665c0 1.194.232 2.333.654 3.375Z" />
+                        </svg>
+                        <span id="br-likes-${l.listing_id}">${parseInt(l.likes)}</span>
+                    </button>
+                    <button class="br-vote-btn br-vote-btn--dislike"
+                            id="br-dislike-${l.listing_id}"
+                            onclick="brVote(${l.listing_id}, 'dislike')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="14" height="14">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.498 15.25H4.372c-1.026 0-1.945-.694-2.054-1.715a12.137 12.137 0 0 1-.068-1.285c0-2.848.992-5.464 2.649-7.521C5.287 4.247 5.886 4 6.504 4h4.016a4.5 4.5 0 0 1 1.423.23l3.114 1.04a4.5 4.5 0 0 0 1.423.23h1.294M7.498 15.25c.618 0 .991.724.725 1.282A7.471 7.471 0 0 0 7.5 19.75 2.25 2.25 0 0 0 9.75 22a.75.75 0 0 0 .75-.75v-.633c0-.573.11-1.14.322-1.672.304-.76.93-1.33 1.653-1.715a9.04 9.04 0 0 0 2.86-2.4c.498-.634 1.226-1.08 2.032-1.08h.384m-10.253 1.5H9.7m8.075-9.75c.01.05.027.1.05.148.593 1.2.925 2.55.925 3.977 0 1.487-.36 2.89-.999 4.125m.023-8.25c-.076-.365.183-.75.575-.75h.908c.889 0 1.713.518 1.972 1.368.339 1.11.521 2.287.521 3.507 0 1.553-.295 3.036-.831 4.398-.306.774-1.086 1.227-1.918 1.227h-1.053c-.472 0-.745-.556-.5-.96a8.95 8.95 0 0 0 .303-.54" />
+                        </svg>
+                        <span id="br-dislikes-${l.listing_id}">${parseInt(l.dislikes)}</span>
+                    </button>
+                </div>
                 <button class="br-card-add-btn" onclick="brAddToCart(${l.listing_id}, this)">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
@@ -476,7 +592,6 @@ $is_logged_in = isset($_SESSION['user_id']);
                 </button>
             </div>
         `;
- 
         return card;
     }
  
@@ -484,6 +599,72 @@ $is_logged_in = isset($_SESSION['user_id']);
         window.location.href = '../pages/listing-detail.php?listing_id=' + listing_id;
     }
  
+    // Voting
+    function brLoadUserVotes() {
+        const fd = new FormData();
+        fd.append('action', 'get_user_votes');
+        fetch('../pages/browse.php', { method: 'POST', body: fd })
+            .then(r => r.text())
+            .then(text => {
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) { brUserVotes = data.votes; brApplyVoteStates(); }
+                } catch(e) {}
+            });
+    }
+ 
+    function brApplyVoteStates() {
+        Object.entries(brUserVotes).forEach(([listing_id, vote_type]) => {
+            const likeBtn    = document.getElementById(`br-like-${listing_id}`);
+            const dislikeBtn = document.getElementById(`br-dislike-${listing_id}`);
+            if (!likeBtn) return;
+            likeBtn.classList.toggle('br-vote-btn--active-like',       vote_type === 'like');
+            dislikeBtn.classList.toggle('br-vote-btn--active-dislike', vote_type === 'dislike');
+        });
+    }
+ 
+    function brVote(listing_id, vote_type) {
+        if (!BR_IS_LOGGED_IN) {
+            brShowVoteModal();
+            return;
+        }
+        if (!BR_IS_RESIDENT) {
+            brShowToast('Only residents can like or dislike listings.', 'error');
+            return;
+        }
+ 
+        const fd = new FormData();
+        fd.append('action',     'toggle_vote');
+        fd.append('listing_id', listing_id);
+        fd.append('vote_type',  vote_type);
+ 
+        fetch('../pages/browse.php', { method: 'POST', body: fd })
+            .then(r => r.text())
+            .then(text => {
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        document.getElementById(`br-likes-${listing_id}`).textContent    = data.likes;
+                        document.getElementById(`br-dislikes-${listing_id}`).textContent = data.dislikes;
+ 
+                        const likeBtn    = document.getElementById(`br-like-${listing_id}`);
+                        const dislikeBtn = document.getElementById(`br-dislike-${listing_id}`);
+                        likeBtn.classList.toggle('br-vote-btn--active-like',       data.new_vote === 'like');
+                        dislikeBtn.classList.toggle('br-vote-btn--active-dislike', data.new_vote === 'dislike');
+ 
+                        if (data.new_vote) brUserVotes[listing_id] = data.new_vote;
+                        else delete brUserVotes[listing_id];
+                    } else {
+                        brShowToast(data.message || 'Could not vote.', 'error');
+                    }
+                } catch(e) {}
+            });
+    }
+ 
+    function brShowVoteModal()  { document.getElementById('br-login-modal').style.display = 'flex'; }
+    function brCloseVoteModal() { document.getElementById('br-login-modal').style.display = 'none'; }
+ 
+    // Cart
     function brAddToCart(listing_id, btn) {
         btn.disabled    = true;
         btn.textContent = 'Adding…';
@@ -527,6 +708,7 @@ $is_logged_in = isset($_SESSION['user_id']);
         setTimeout(() => badge.classList.remove('br-cart-badge--bump'), 300);
     }
  
+    // Helpers 
     function brShowToast(message, type) {
         const existing = document.getElementById('br-toast');
         if (existing) existing.remove();
@@ -541,9 +723,7 @@ $is_logged_in = isset($_SESSION['user_id']);
  
     function brEsc(str) {
         if (!str) return '';
-        return String(str)
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
 </script>
  

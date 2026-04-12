@@ -1,8 +1,6 @@
 <?php ob_start(); ?>
 <?php
-// ============================================================
 // AJAX HANDLER
-// ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if (session_status() === PHP_SESSION_NONE) session_start();
     if (!isset($conn)) include '../db_connection.php';
@@ -12,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $user_id = $_SESSION['user_id'] ?? null;
     if (!$user_id) { echo json_encode(['success' => false, 'message' => 'Not authenticated.']); exit(); }
  
-    // ── Get Orders ────────────────────────────────────────────
+    //  Get Orders 
     if ($_POST['action'] === 'get_orders') {
         $status_filter = $_POST['status'] ?? 'all';
  
@@ -21,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 SELECT o.order_id, o.total_amount, o.status, o.created_at,
                        COUNT(oi.order_item_id) AS item_count
                 FROM orders o
-                JOIN order_item oi ON o.order_id = oi.order_id
+                JOIN order_items oi ON o.order_id = oi.order_id
                 WHERE o.user_id = ?
                 GROUP BY o.order_id
                 ORDER BY o.created_at DESC
@@ -32,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 SELECT o.order_id, o.total_amount, o.status, o.created_at,
                        COUNT(oi.order_item_id) AS item_count
                 FROM orders o
-                JOIN order_item oi ON o.order_id = oi.order_id
+                JOIN order_items oi ON o.order_id = oi.order_id
                 WHERE o.user_id = ? AND o.status = ?
                 GROUP BY o.order_id
                 ORDER BY o.created_at DESC
@@ -50,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
  
-    // ── Get Order Details ─────────────────────────────────────
+    // Get Order Details
     if ($_POST['action'] === 'get_order_details') {
         $order_id = intval($_POST['order_id'] ?? 0);
  
@@ -68,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                    pc.category_name,
                    sp.business_name,
                    li.image_url AS primary_image
-            FROM order_item oi
+            FROM order_items oi
             JOIN listings l                        ON oi.listing_id     = l.listing_id
             JOIN product_service ps                ON l.item_id         = ps.item_id
             JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
@@ -89,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
  
-    // ── Cancel Order ──────────────────────────────────────────
+    //  Cancel Order 
     if ($_POST['action'] === 'cancel_order') {
         $order_id = intval($_POST['order_id'] ?? 0);
  
@@ -284,7 +282,7 @@ function moRenderPage() {
     count.textContent = `${total} order${total !== 1 ? 's' : ''} found`;
     const tbody = document.getElementById('mo-table-body');
     tbody.innerHTML = '';
-    paged.forEach(o => tbody.appendChild(moBuildRow(o)));
+    paged.forEach((o, i) => tbody.appendChild(moBuildRow(o, moPageNum === 1 ? i + 1 : (moPageNum - 1) * MO_PER_PAGE + i + 1)));
     wrapper.style.display = 'block';
 
     moRenderPagination(totalPages);
@@ -342,7 +340,7 @@ function moRenderPagination(totalPages) {
       if (existing) existing.remove();
 }
  
-    function moBuildRow(o) {
+    function moBuildRow(o, rowNum) {
         const tr       = document.createElement('tr');
         const badgeCls = { processing: 'mo-badge--processing', completed: 'mo-badge--completed', cancelled: 'mo-badge--cancelled' }[o.status] || '';
         const date     = new Date(o.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -353,7 +351,7 @@ function moRenderPagination(totalPages) {
         }
  
         tr.innerHTML = `
-            <td class="mo-order-id">#${o.order_id}</td>
+            <td class="mo-order-id">#${rowNum}</td>
             <td>${date}</td>
             <td>${o.item_count} item${o.item_count != 1 ? 's' : ''}</td>
             <td class="mo-total-cell">£${parseFloat(o.total_amount).toFixed(2)}</td>

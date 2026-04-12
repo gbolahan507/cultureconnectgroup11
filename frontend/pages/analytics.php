@@ -6,20 +6,22 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Counci
     exit();
 }
  
+$base_url     = 'dashboard.php?page=analytics';
+
 if (!isset($conn)) include '../db_connection.php';
-   
-// DATA QUERIES
  
-// Overview Stats 
-$total_users    = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM users"))['n'] ?? 0;
-$total_residents = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM resident_profiles"))['n'] ?? 0;
-$total_smes     = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM sme_profiles WHERE approval_status = 'approved'"))['n'] ?? 0;
-$pending_smes   = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM sme_profiles WHERE approval_status = 'pending'"))['n'] ?? 0;
-$active_listings = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM listings WHERE status = 'active'"))['n'] ?? 0;
+// DATA QUERIES
+// Overview Stats
+$total_users      = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM users"))['n'] ?? 0;
+$total_residents  = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM resident_profiles"))['n'] ?? 0;
+$total_smes       = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM sme_profiles WHERE approval_status = 'approved'"))['n'] ?? 0;
+$pending_smes     = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM sme_profiles WHERE approval_status = 'pending'"))['n'] ?? 0;
+$active_listings  = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM listings WHERE status = 'active'"))['n'] ?? 0;
 $pending_listings = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM listings WHERE status = 'pending'"))['n'] ?? 0;
-$total_orders   = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM orders"))['n'] ?? 0;
-$total_votes    = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM poll_votes"))['n'] ?? 0;
-$total_polls    = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM poll"))['n'] ?? 0;
+$total_orders     = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM orders"))['n'] ?? 0;
+$total_likes      = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM listing_votes WHERE vote_type = 'like'"))['n'] ?? 0;
+$total_dislikes   = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM listing_votes WHERE vote_type = 'dislike'"))['n'] ?? 0;
+$total_lv         = intval($total_likes) + intval($total_dislikes);
  
 // Orders by Status
 $order_stats_r = mysqli_query($conn, "
@@ -28,60 +30,61 @@ $order_stats_r = mysqli_query($conn, "
 ");
 $order_stats = [];
 while ($row = mysqli_fetch_assoc($order_stats_r)) $order_stats[$row['status']] = $row;
- 
 $total_revenue = array_sum(array_column($order_stats, 'revenue'));
  
-// Poll Results
-$polls_r = mysqli_query($conn, "
-    SELECT p.poll_id, p.title, p.start_date, p.end_date,
-           COUNT(DISTINCT pv.vote_id) AS total_votes
-    FROM poll p
-    LEFT JOIN poll_votes pv ON p.poll_id = pv.poll_id
-    GROUP BY p.poll_id
-    ORDER BY p.end_date DESC
+// Community Listing Votes from resident_product_service_interest view
+// Fetch all voted listings
+$votes_r = mysqli_query($conn, "
+    SELECT product_name, listing_title, price,
+           total_likes, total_dislikes, ranking
+    FROM resident_product_service_interest
+    WHERE (total_likes + total_dislikes) > 0
+    ORDER BY ranking DESC
 ");
-$polls = [];
-while ($row = mysqli_fetch_assoc($polls_r)) $polls[] = $row;
- 
-// Get options + votes for each poll
-foreach ($polls as &$poll) {
-    $opts_r = mysqli_query($conn, "
-        SELECT po.option_id, l.title, sp.business_name,
-               COUNT(pv.vote_id) AS vote_count
-        FROM poll_options po
-        JOIN listings l      ON po.listing_id = l.listing_id
-        JOIN sme_profiles sp ON l.sme_id      = sp.sme_id
-        LEFT JOIN poll_votes pv ON po.option_id = pv.option_id
-        WHERE po.poll_id = {$poll['poll_id']}
-        GROUP BY po.option_id
-        ORDER BY vote_count DESC
-    ");
-    $poll['options'] = [];
-    while ($opt = mysqli_fetch_assoc($opts_r)) $poll['options'][] = $opt;
-}
-unset($poll);
+$vote_rankings = [];
+while ($row = mysqli_fetch_assoc($votes_r)) $vote_rankings[] = $row;
+
+// Pagination
+$votes_per_page  = 8;
+$votes_page      = max(1, intval($_GET['votes_page'] ?? 1));
+$total_votes_p   = count($vote_rankings);
+$votes_pages     = ceil($total_votes_p / $votes_per_page);
+$votes_page      = min($votes_page, max(1, $votes_pages));
+$votes_offset    = ($votes_page - 1) * $votes_per_page;
+$paged_votes     = array_slice($vote_rankings, $votes_offset, $votes_per_page);
+$max_votes = !empty($vote_rankings)
+    ? max(array_map(fn($r) => intval($r['total_likes']) + intval($r['total_dislikes']), $vote_rankings))
+    : 1;
  
 // Top Listings by Orders
 $top_listings_r = mysqli_query($conn, "
     SELECT l.listing_id, l.title, l.price,
            sp.business_name,
            pc.category_name,
-           COUNT(oi.order_item_id) AS order_count,
-           SUM(oi.quantity)        AS units_sold,
-           SUM(oi.price * oi.quantity) AS revenue
+           COUNT(oi.order_item_id)      AS order_count,
+           SUM(oi.quantity)             AS units_sold,
+           SUM(oi.price * oi.quantity)  AS revenue
     FROM listings l
-    JOIN product_service ps                ON l.item_id        = ps.item_id
+    JOIN product_service ps                ON l.item_id         = ps.item_id
     JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
     JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
     JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
-    JOIN order_item oi                     ON l.listing_id      = oi.listing_id
+    JOIN order_items oi                    ON l.listing_id       = oi.listing_id
     GROUP BY l.listing_id
     ORDER BY order_count DESC
-    LIMIT 8
 ");
 $top_listings = [];
 while ($row = mysqli_fetch_assoc($top_listings_r)) $top_listings[] = $row;
-$max_orders = !empty($top_listings) ? $top_listings[0]['order_count'] : 1;
+
+// Add pagination
+$top_per_page   = 8;
+$top_page       = max(1, intval($_GET['top_page'] ?? 1));
+$total_top      = count($top_listings);
+$top_pages      = ceil($total_top / $top_per_page);
+$top_page       = min($top_page, max(1, $top_pages));
+$top_offset     = ($top_page - 1) * $top_per_page;
+$paged_top      = array_slice($top_listings, $top_offset, $top_per_page);
+$max_orders     = !empty($top_listings) ? $top_listings[0]['order_count'] : 1;
  
 // Area Activity
 $area_r = mysqli_query($conn, "
@@ -90,9 +93,9 @@ $area_r = mysqli_query($conn, "
            COUNT(DISTINCT l.listing_id)  AS listing_count,
            COUNT(DISTINCT rp.profile_id) AS resident_count
     FROM areas a
-    LEFT JOIN sme_profiles sp       ON a.area_id = sp.area_id AND sp.approval_status = 'approved'
-    LEFT JOIN listings l            ON sp.sme_id = l.sme_id AND l.status = 'active'
-    LEFT JOIN resident_profiles rp  ON a.area_id = rp.area_id
+    LEFT JOIN sme_profiles sp      ON a.area_id = sp.area_id AND sp.approval_status = 'approved'
+    LEFT JOIN listings l           ON sp.sme_id  = l.sme_id  AND l.status = 'active'
+    LEFT JOIN resident_profiles rp ON a.area_id  = rp.area_id
     GROUP BY a.area_id
     ORDER BY listing_count DESC
 ");
@@ -100,15 +103,15 @@ $areas = [];
 while ($row = mysqli_fetch_assoc($area_r)) $areas[] = $row;
 $max_area_listings = !empty($areas) ? max(array_column($areas, 'listing_count')) : 1;
  
-// SME Performance 
+// SME Performance
 $sme_perf_r = mysqli_query($conn, "
     SELECT sp.business_name,
-           COUNT(DISTINCT l.listing_id)      AS listing_count,
-           COUNT(DISTINCT oi.order_item_id)  AS order_count,
-           SUM(oi.price * oi.quantity)       AS revenue
+           COUNT(DISTINCT l.listing_id)     AS listing_count,
+           COUNT(DISTINCT oi.order_item_id) AS order_count,
+           SUM(oi.price * oi.quantity)      AS revenue
     FROM sme_profiles sp
-    LEFT JOIN listings l    ON sp.sme_id    = l.sme_id AND l.status = 'active'
-    LEFT JOIN order_item oi ON l.listing_id = oi.listing_id
+    LEFT JOIN listings l     ON sp.sme_id     = l.sme_id AND l.status = 'active'
+    LEFT JOIN order_items oi ON l.listing_id  = oi.listing_id
     WHERE sp.approval_status = 'approved'
     GROUP BY sp.sme_id
     ORDER BY order_count DESC
@@ -116,21 +119,20 @@ $sme_perf_r = mysqli_query($conn, "
 $sme_perf = [];
 while ($row = mysqli_fetch_assoc($sme_perf_r)) $sme_perf[] = $row;
 ?>
-
-<!-- ANALYTICS PAGE-->
+ 
+ <!-- ANALYTICS PAGE -->
 <div class="an-page">
  
     <?php
-        $icon     = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                </svg>';
+        $icon     = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>';
         $title    = 'Analytics';
-        $subtitle = 'Platform-wide statistics, poll results and community insights.';
+        $subtitle = 'Platform-wide statistics, community votes and cultural insights.';
         include '../components/section_header.php';
     ?>
  
-<!-- OVERVIEW STATS  -->
+    <!-- OVERVIEW STATS -->
     <div class="an-stats-grid">
+ 
         <div class="an-stat-card an-stat-card--purple">
             <div class="an-stat-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="22" height="22">
@@ -177,15 +179,16 @@ while ($row = mysqli_fetch_assoc($sme_perf_r)) $sme_perf[] = $row;
                 </svg>
             </div>
             <div class="an-stat-info">
-                <span class="an-stat-num"><?= number_format($total_votes) ?></span>
-                <span class="an-stat-lbl">Poll Votes Cast</span>
+                <span class="an-stat-num"><?= number_format($total_lv) ?></span>
+                <span class="an-stat-lbl">Total Listing Votes</span>
             </div>
-            <div class="an-stat-sub"><?= $total_polls ?> poll<?= $total_polls != 1 ? 's' : '' ?> created</div>
+            <div class="an-stat-sub"><?= $total_likes ?> likes · <?= $total_dislikes ?> dislikes</div>
         </div>
+ 
     </div>
  
  
-    <!-- ORDERS SUMMARY -->
+    <!-- ORDERS SUMMARY  -->
     <div class="an-section">
         <h2 class="an-section-title">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
@@ -193,14 +196,13 @@ while ($row = mysqli_fetch_assoc($sme_perf_r)) $sme_perf[] = $row;
             </svg>
             Orders Summary
         </h2>
- 
         <div class="an-orders-grid">
             <?php
             $statuses = [
-                 'processing' => ['label' => 'Processing', 'cls' => 'an-order-stat--processing'],
-                 'completed'  => ['label' => 'Completed',  'cls' => 'an-order-stat--completed'],
-                 'cancelled'  => ['label' => 'Cancelled',  'cls' => 'an-order-stat--cancelled'],
-             ];
+                'processing' => ['label' => 'Processing', 'cls' => 'an-order-stat--processing'],
+                'completed'  => ['label' => 'Completed',  'cls' => 'an-order-stat--completed'],
+                'cancelled'  => ['label' => 'Cancelled',  'cls' => 'an-order-stat--cancelled'],
+            ];
             foreach ($statuses as $key => $s) :
                 $data = $order_stats[$key] ?? ['count' => 0, 'revenue' => 0];
             ?>
@@ -214,97 +216,117 @@ while ($row = mysqli_fetch_assoc($sme_perf_r)) $sme_perf[] = $row;
     </div>
  
  
-    <!-- POLL RESULTS -->
-    <div class="an-section">
-        <h2 class="an-section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-            </svg>
-            Poll Results
-        </h2>
- 
-        <?php if (empty($polls)) : ?>
-        <div class="an-empty">No polls have been created yet.</div>
-        <?php else : ?>
-        <div class="an-polls-wrap">
-            <?php foreach ($polls as $poll) :
-                $today   = date('Y-m-d');
-                $isOpen  = $today >= $poll['start_date'] && $today <= $poll['end_date'];
-                $isUp    = $today < $poll['start_date'];
-                $sCls    = $isOpen ? 'an-poll-status--open' : ($isUp ? 'an-poll-status--upcoming' : 'an-poll-status--closed');
-                $sLbl    = $isOpen ? 'Open' : ($isUp ? 'Upcoming' : 'Closed');
-                $endFmt  = date('d M Y', strtotime($poll['end_date']));
-                $winner  = !empty($poll['options']) ? $poll['options'][0] : null;
-            ?>
-            <div class="an-poll-card">
-                <div class="an-poll-card-header">
-                    <div>
-                        <span class="an-poll-status <?= $sCls ?>"><?= $sLbl ?></span>
-                        <h3 class="an-poll-title"><?= htmlspecialchars($poll['title']) ?></h3>
-                        <p class="an-poll-meta">Closes <?= $endFmt ?> · <?= $poll['total_votes'] ?> vote<?= $poll['total_votes'] != 1 ? 's' : ''?> total</p>
-                    </div>
-                    <?php if ($winner && $poll['total_votes'] > 0) : ?>
-                    <div class="an-poll-winner">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                            <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.536.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.769-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
-                        </svg>
-                        <span><?= htmlspecialchars($winner['title']) ?></span>
-                    </div>
-                    <?php endif; ?>
-                </div>
- 
-                <?php if (!empty($poll['options'])) : ?>
-                <div class="an-poll-options">
-                    <?php foreach ($poll['options'] as $i => $opt) :
-                        $pct     = $poll['total_votes'] > 0 ? round(($opt['vote_count'] / $poll['total_votes']) * 100) : 0;
-                        $isWinner = $i === 0 && $poll['total_votes'] > 0;
-                    ?>
-                    <div class="an-poll-option">
-                        <div class="an-poll-option-info">
-                            <span class="an-poll-option-title <?= $isWinner ? 'an-poll-option-title--winner' : '' ?>">
-                                <?php if ($isWinner) : ?>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="12" height="12" style="color:#f59e0b;">
-                                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.536.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.769-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
-                                </svg>
-                                <?php endif; ?>
-                                <?= htmlspecialchars($opt['title']) ?>
-                            </span>
-                            <span class="an-poll-option-biz"><?= htmlspecialchars($opt['business_name']) ?></span>
-                        </div>
-                        <div class="an-poll-bar-wrap">
-                            <div class="an-poll-bar <?= $isWinner ? 'an-poll-bar--winner' : '' ?>" style="width: <?= $pct ?>%"></div>
-                        </div>
-                        <div class="an-poll-option-stats">
-                            <span><?= $opt['vote_count'] ?> vote<?= $opt['vote_count'] != 1 ? 's' : '' ?></span>
-                            <span class="an-poll-pct"><?= $pct ?>%</span>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <?php else : ?>
-                <p class="an-poll-no-votes">No votes cast yet.</p>
-                <?php endif; ?>
-            </div>
-            <?php endforeach; ?>
-        </div>
-        <?php endif; ?>
-    </div>
- 
- 
-    <!-- LIKE/DISLIKE PLACEHOLDER -->
+    <!-- COMMUNITY LISTING VOTES -->
     <div class="an-section">
         <h2 class="an-section-title">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904m10.598-9.75H14.25M5.904 18.5c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 0 1-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h1.053c.472 0 .745.556.5.96a8.958 8.958 0 0 0-1.302 4.665c0 1.194.232 2.333.654 3.375Z" />
             </svg>
-            Community Listing Votes (Likes &amp; Dislikes)
+            Community Listing Votes
         </h2>
-        <div class="an-placeholder">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" width="40" height="40">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>
-            <p>Like &amp; dislike data will appear here once the <strong>listing_votes</strong> table has been set up by the database admin.</p>
+ 
+        <!-- Vote totals summary row -->
+        <div class="an-vote-summary">
+            <div class="an-vote-summary-card an-vote-summary-card--total">
+                <span class="an-vote-summary-num"><?= number_format($total_lv) ?></span>
+                <span class="an-vote-summary-lbl">Total Votes</span>
+            </div>
+            <div class="an-vote-summary-card an-vote-summary-card--like">
+                <span class="an-vote-summary-num"><?= number_format($total_likes) ?></span>
+                <span class="an-vote-summary-lbl"> Total Likes</span>
+            </div>
+            <div class="an-vote-summary-card an-vote-summary-card--dislike">
+                <span class="an-vote-summary-num"><?= number_format($total_dislikes) ?></span>
+                <span class="an-vote-summary-lbl"> Total Dislikes</span>
+            </div>
+            <?php if ($total_lv > 0) : ?>
+            <div class="an-vote-summary-card an-vote-summary-card--pct">
+                <span class="an-vote-summary-num"><?= round(($total_likes / $total_lv) * 100) ?>%</span>
+                <span class="an-vote-summary-lbl">Positive Rate</span>
+            </div>
+            <?php endif; ?>
         </div>
+ 
+        <?php if (empty($vote_rankings)) : ?>
+        <div class="an-empty">No votes have been cast on listings yet.</div>
+        <?php else : ?>
+        <div class="an-table-wrap">
+            <table class="an-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Listing</th>
+                        <th>Product / Service</th>
+                        <th>Price</th>
+                        <th>Likes</th>
+                        <th>Dislikes</th>
+                        <th>Sentiment</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($paged_votes as $i => $vr) :
+                        $likes      = intval($vr['total_likes']);
+                        $dislikes   = intval($vr['total_dislikes']);
+                        $total      = $likes + $dislikes;
+                        $likePct    = $total > 0 ? round(($likes / $total) * 100) : 0;
+                        $disPct     = 100 - $likePct;
+                        $score      = $likes - $dislikes;
+ 
+                        if ($likePct >= 70)      { $sentiment = 'Positive'; $sentCls = 'an-sentiment--positive'; }
+                        elseif ($disPct >= 70)   { $sentiment = 'Negative'; $sentCls = 'an-sentiment--negative'; }
+                        else                     { $sentiment = 'Mixed';    $sentCls = 'an-sentiment--mixed'; }
+                    ?>
+                    <tr>
+                        <td class="an-rank"><?= $votes_offset + $i + 1 ?></td>
+                        <td class="an-listing-title"><?= htmlspecialchars($vr['listing_title']) ?></td>
+                        <td><?= htmlspecialchars($vr['product_name']) ?></td>
+                        <td class="an-revenue">£<?= number_format(floatval($vr['price']), 2) ?></td>
+                        <td>
+                            <span class="an-vote-pill an-vote-pill--like"><?= $likes ?></span>
+                        </td>
+                        <td>
+                            <span class="an-vote-pill an-vote-pill--dislike"><?= $dislikes ?></span>
+                        </td>
+                        <td>
+                            <div class="an-vote-bar-wrap">
+                                <div class="an-vote-bar">
+                                    <div class="an-vote-bar-like"    style="width:<?= $likePct ?>%"></div>
+                                    <div class="an-vote-bar-dislike" style="width:<?= $disPct ?>%"></div>
+                                </div>
+                                <span class="an-sentiment <?= $sentCls ?>"><?= $sentiment ?></span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="an-score <?= $score >= 0 ? 'an-score--pos' : 'an-score--neg' ?>">
+                                <?= $score >= 0 ? '+' : '' ?><?= $score ?>
+                            </span>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <?php if ($votes_pages > 1) : ?>
+<div class="an-pagination">
+    <?php if ($votes_page > 1) : ?>
+    <a href="<?= $base_url ?>&votes_page=<?= $votes_page - 1 ?>" class="an-page-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
+        Prev
+    </a>
+    <?php endif; ?>
+    <?php for ($p = 1; $p <= $votes_pages; $p++) : ?>
+    <a href="<?= $base_url ?>&votes_page=<?= $p ?>" class="an-page-btn <?= $p === $votes_page ? 'an-page-btn--active' : '' ?>"><?= $p ?></a>
+    <?php endfor; ?>
+    <?php if ($votes_page < $votes_pages) : ?>
+    <a href="<?= $base_url ?>&votes_page=<?= $votes_page + 1 ?>" class="an-page-btn">
+        Next
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
+    </a>
+    <?php endif; ?>
+    </div>
+    <?php endif; ?>
+        </div>
+        <?php endif; ?>
     </div>
  
  
@@ -335,11 +357,11 @@ while ($row = mysqli_fetch_assoc($sme_perf_r)) $sme_perf[] = $row;
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($top_listings as $i => $l) :
+                    <?php foreach ($paged_top as $i => $l) :
                         $pct = $max_orders > 0 ? round(($l['order_count'] / $max_orders) * 100) : 0;
                     ?>
                     <tr>
-                        <td class="an-rank"><?= $i + 1 ?></td>
+                        <td class="an-rank"><?= $top_offset + $i + 1 ?></td>
                         <td class="an-listing-title"><?= htmlspecialchars($l['title']) ?></td>
                         <td><?= htmlspecialchars($l['business_name']) ?></td>
                         <td><span class="an-cat-badge"><?= htmlspecialchars($l['category_name']) ?></span></td>
@@ -348,13 +370,31 @@ while ($row = mysqli_fetch_assoc($sme_perf_r)) $sme_perf[] = $row;
                         <td class="an-revenue">£<?= number_format($l['revenue'], 2) ?></td>
                         <td class="an-bar-cell">
                             <div class="an-mini-bar-wrap">
-                                <div class="an-mini-bar" style="width: <?= $pct ?>%"></div>
+                                <div class="an-mini-bar" style="width:<?= $pct ?>%"></div>
                             </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php if ($top_pages > 1) : ?>
+<div class="an-pagination">
+    <?php if ($top_page > 1) : ?>
+    <a href="<?= $base_url ?>&top_page=<?= $top_page - 1 ?>" class="an-page-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
+        Prev
+    </a>
+    <?php endif; ?>
+             <?php for ($p = 1; $p <= $top_pages; $p++) : ?>
+             <a href="<?= $base_url ?>&top_page=<?= $p ?>" class="an-page-btn <?= $p === $top_page ? 'an-page-btn--active' : '' ?>"><?= $p ?></a>
+             <?php endfor; ?>
+    <?php if ($top_page < $top_pages) : ?>
+             <a href="<?= $base_url ?>&top_page=<?= $top_page + 1 ?>" class="an-page-btn"> Next
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
+             </a>
+    <?php endif; ?>
+    </div>
+    <?php endif; ?>
         </div>
         <?php endif; ?>
     </div>
@@ -362,88 +402,78 @@ while ($row = mysqli_fetch_assoc($sme_perf_r)) $sme_perf[] = $row;
  
     <!-- BUSINESS PERFORMANCE -->
     <div class="an-section">
-    <h2 class="an-section-title">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016 2.993 2.993 0 0 0 2.25-1.016 3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
-        </svg>
-        Business Performance
-    </h2>
-
-    <?php
-    $biz_per_page  = 6;
-    $biz_page      = max(1, intval($_GET['biz_page'] ?? 1));
-    $total_biz_p   = count($sme_perf);
-    $total_pages   = ceil($total_biz_p / $biz_per_page);
-    $biz_page      = min($biz_page, max(1, $total_pages));
-    $offset        = ($biz_page - 1) * $biz_per_page;
-    $paged_smes    = array_slice($sme_perf, $offset, $biz_per_page);
-    $base_url      = 'dashboard.php?page=analytics';
-    ?>
-
-    <?php if (empty($sme_perf)) : ?>
-    <div class="an-empty">No business data available.</div>
-    <?php else : ?>
-
-    <div class="an-biz-page-info">
-        Showing <?= $offset + 1 ?>–<?= min($offset + $biz_per_page, $total_biz_p) ?> of <?= $total_biz_p ?> businesses
-    </div>
-
-    <div class="an-table-wrap">
-        <table class="an-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Business</th>
-                    <th>Active Listings</th>
-                    <th>Total Orders</th>
-                    <th>Revenue</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($paged_smes as $i => $s) : ?>
-                <tr>
-                    <td class="an-rank"><?= $offset + $i + 1 ?></td>
-                    <td class="an-listing-title"><?= htmlspecialchars($s['business_name']) ?></td>
-                    <td class="an-num"><?= $s['listing_count'] ?></td>
-                    <td class="an-num"><?= $s['order_count'] ?></td>
-                    <td class="an-revenue">£<?= number_format($s['revenue'] ?? 0, 2) ?></td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <?php if ($total_pages > 1) : ?>
-    <div class="an-pagination">
-        <?php if ($biz_page > 1) : ?>
-        <a href="<?= $base_url ?>&biz_page=<?= $biz_page - 1 ?>" class="an-page-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+        <h2 class="an-section-title">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016 2.993 2.993 0 0 0 2.25-1.016 3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
             </svg>
-            Prev
-        </a>
+            Business Performance
+        </h2>
+ 
+        <?php
+        $biz_per_page = 6;
+        $biz_page     = max(1, intval($_GET['biz_page'] ?? 1));
+        $total_biz_p  = count($sme_perf);
+        $total_pages  = ceil($total_biz_p / $biz_per_page);
+        $biz_page     = min($biz_page, max(1, $total_pages));
+        $offset       = ($biz_page - 1) * $biz_per_page;
+        $paged_smes   = array_slice($sme_perf, $offset, $biz_per_page);
+        ?>
+ 
+        <?php if (empty($sme_perf)) : ?>
+        <div class="an-empty">No business data available.</div>
+        <?php else : ?>
+ 
+        <div class="an-biz-page-info">
+            Showing <?= $offset + 1 ?>–<?= min($offset + $biz_per_page, $total_biz_p) ?> of <?= $total_biz_p ?> businesses
+        </div>
+ 
+        <div class="an-table-wrap">
+            <table class="an-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Business</th>
+                        <th>Active Listings</th>
+                        <th>Total Orders</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($paged_smes as $i => $s) : ?>
+                    <tr>
+                        <td class="an-rank"><?= $offset + $i + 1 ?></td>
+                        <td class="an-listing-title"><?= htmlspecialchars($s['business_name']) ?></td>
+                        <td class="an-num"><?= $s['listing_count'] ?></td>
+                        <td class="an-num"><?= $s['order_count'] ?></td>
+                        <td class="an-revenue">£<?= number_format($s['revenue'] ?? 0, 2) ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+ 
+        <?php if ($total_pages > 1) : ?>
+        <div class="an-pagination">
+            <?php if ($biz_page > 1) : ?>
+            <a href="<?= $base_url ?>&biz_page=<?= $biz_page - 1 ?>" class="an-page-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
+                Prev
+            </a>
+            <?php endif; ?>
+            <?php for ($p = 1; $p <= $total_pages; $p++) : ?>
+            <a href="<?= $base_url ?>&biz_page=<?= $p ?>" class="an-page-btn <?= $p === $biz_page ? 'an-page-btn--active' : '' ?>"><?= $p ?></a>
+            <?php endfor; ?>
+            <?php if ($biz_page < $total_pages) : ?>
+            <a href="<?= $base_url ?>&biz_page=<?= $biz_page + 1 ?>" class="an-page-btn">
+                Next
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
+            </a>
+            <?php endif; ?>
+        </div>
         <?php endif; ?>
-
-        <?php for ($p = 1; $p <= $total_pages; $p++) : ?>
-        <a href="<?= $base_url ?>&biz_page=<?= $p ?>"
-           class="an-page-btn <?= $p === $biz_page ? 'an-page-btn--active' : '' ?>">
-            <?= $p ?>
-        </a>
-        <?php endfor; ?>
-
-        <?php if ($biz_page < $total_pages) : ?>
-        <a href="<?= $base_url ?>&biz_page=<?= $biz_page + 1 ?>" class="an-page-btn">
-            Next
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
-        </a>
         <?php endif; ?>
     </div>
-    <?php endif; ?>
-
-    <?php endif; ?>
-</div>
+ 
  
     <!-- AREA ACTIVITY -->
     <div class="an-section">
@@ -479,7 +509,7 @@ while ($row = mysqli_fetch_assoc($sme_perf_r)) $sme_perf[] = $row;
                     </div>
                 </div>
                 <div class="an-area-bar-wrap">
-                    <div class="an-area-bar" style="width: <?= $pct ?>%"></div>
+                    <div class="an-area-bar" style="width:<?= $pct ?>%"></div>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -488,5 +518,3 @@ while ($row = mysqli_fetch_assoc($sme_perf_r)) $sme_perf[] = $row;
     </div>
  
 </div>
-
-

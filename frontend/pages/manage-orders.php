@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                        COUNT(oi.order_item_id) AS item_count,
                        SUM(oi.price * oi.quantity) AS sme_total
                 FROM orders o
-                JOIN order_item oi  ON o.order_id   = oi.order_id
+                JOIN order_items oi  ON o.order_id   = oi.order_id
                 JOIN listings l     ON oi.listing_id = l.listing_id
                 JOIN users u        ON o.user_id     = u.user_id
                 LEFT JOIN resident_profiles rp ON o.user_id = rp.user_id
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                        COUNT(oi.order_item_id) AS item_count,
                        SUM(oi.price * oi.quantity) AS sme_total
                 FROM orders o
-                JOIN order_item oi  ON o.order_id   = oi.order_id
+                JOIN order_items oi  ON o.order_id   = oi.order_id
                 JOIN listings l     ON oi.listing_id = l.listing_id
                 JOIN users u        ON o.user_id     = u.user_id
                 LEFT JOIN resident_profiles rp ON o.user_id = rp.user_id
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                    l.title, l.listing_id,
                    pc.category_name,
                    li.image_url AS primary_image
-            FROM order_item oi
+            FROM order_items oi
             JOIN listings l                        ON oi.listing_id     = l.listing_id
             JOIN product_service ps                ON l.item_id         = ps.item_id
             JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
  
         $check = $conn->prepare("
             SELECT o.status FROM orders o
-            JOIN order_item oi ON o.order_id = oi.order_id
+            JOIN order_items oi ON o.order_id = oi.order_id
             JOIN listings l ON oi.listing_id = l.listing_id
             WHERE o.order_id = ? AND l.sme_id = ? LIMIT 1
         ");
@@ -147,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
  
         $check = $conn->prepare("
             SELECT o.status FROM orders o
-            JOIN order_item oi ON o.order_id = oi.order_id
+            JOIN order_items oi ON o.order_id = oi.order_id
             JOIN listings l ON oi.listing_id = l.listing_id
             WHERE o.order_id = ? AND l.sme_id = ? LIMIT 1
         ");

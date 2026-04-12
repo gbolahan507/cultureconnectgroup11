@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $ord_stmt->close();
  
             foreach ($items as $item) {
-                $oi_stmt = $conn->prepare("INSERT INTO order_item (order_id, listing_id, quantity, price) VALUES (?, ?, ?, ?)");
+                $oi_stmt = $conn->prepare("INSERT INTO order_items (order_id, listing_id, quantity, price) VALUES (?, ?, ?, ?)");
                 $oi_stmt->bind_param("iiid", $order_id, $item['listing_id'], $item['quantity'], $item['price']);
                 $oi_stmt->execute();
                 $oi_stmt->close();

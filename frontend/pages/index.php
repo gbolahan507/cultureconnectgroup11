@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once '../db_connection.php';
  
@@ -28,7 +30,7 @@ $popular_stmt = $conn->prepare("
     JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
     JOIN areas a                           ON sp.area_id        = a.area_id
     LEFT JOIN listing_images li            ON l.listing_id      = li.listing_id AND li.is_primary = 1
-    LEFT JOIN order_item oi                ON l.listing_id      = oi.listing_id
+    LEFT JOIN order_items oi                ON l.listing_id      = oi.listing_id
     WHERE l.status = 'active'
     GROUP BY l.listing_id
     ORDER BY order_count DESC, l.created_at DESC
@@ -76,7 +78,7 @@ $events = [
     ['image' => 'event2.jpg', 'title' => 'Community Arts Exhibition',             'date' => '24 Aug 2025',  'desc' => 'Local artists showcase their work at the Hatfield Arts Centre.'],
     ['image' => 'event3.jpg', 'title' => 'Open Mic Night — Local Voices',         'date' => '05 Sep 2025',  'desc' => 'An evening of spoken word, poetry and live music from Hertfordshire residents.'],
     ['image' => 'event4.jpg', 'title' => 'Heritage &amp; History Walk',           'date' => '18 Oct 2025',  'desc' => 'Explore the rich cultural heritage of Hertfordshire with our expert guides.'],
-    ['image' => 'event5.jpg', 'title' => 'Winter Handmade Market',                'date' => '30 Nov 2025',  'desc' => 'Shop handmade goods, crafts and cultural products from local artisans.'],
+    ['image' => 'event5.jpg', 'title' => 'Summer Movie Day',                'date' => '30 Nov 2025',  'desc' => 'Shop handmade goods, crafts and cultural products from local artisans.'],
 ];
  
 // Honoured Residents (static) 

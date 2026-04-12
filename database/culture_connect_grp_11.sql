@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Apr 11, 2026 at 02:10 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost
+-- Generation Time: Apr 12, 2026 at 02:33 AM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -250,7 +250,61 @@ INSERT INTO `listing_votes` (`vote_id`, `user_id`, `listing_id`, `vote_type`, `c
 (2, 9, 16, 'like', '2026-04-10 10:28:42'),
 (3, 11, 17, 'like', '2026-04-10 10:28:42'),
 (4, 12, 17, 'dislike', '2026-04-10 10:28:42'),
-(5, 13, 18, 'like', '2026-04-10 10:28:42');
+(5, 13, 18, 'like', '2026-04-10 10:28:42'),
+(6, 34, 7, 'like', '2026-04-11 21:37:08'),
+(7, 35, 7, 'like', '2026-04-11 21:37:08'),
+(8, 37, 7, 'like', '2026-04-11 21:37:08'),
+(9, 38, 7, 'like', '2026-04-11 21:37:08'),
+(10, 40, 7, 'like', '2026-04-11 21:37:08'),
+(11, 34, 8, 'like', '2026-04-11 21:37:08'),
+(12, 35, 8, 'like', '2026-04-11 21:37:08'),
+(13, 39, 8, 'like', '2026-04-11 21:37:08'),
+(14, 41, 8, 'like', '2026-04-11 21:37:08'),
+(15, 37, 9, 'like', '2026-04-11 21:37:08'),
+(16, 38, 9, 'like', '2026-04-11 21:37:08'),
+(17, 41, 9, 'like', '2026-04-11 21:37:08'),
+(18, 34, 11, 'like', '2026-04-11 21:37:08'),
+(19, 35, 11, 'like', '2026-04-11 21:37:08'),
+(20, 40, 11, 'dislike', '2026-04-11 21:37:08'),
+(21, 38, 12, 'like', '2026-04-11 21:37:08'),
+(22, 39, 12, 'like', '2026-04-11 21:37:08'),
+(23, 41, 12, 'like', '2026-04-11 21:37:08'),
+(24, 34, 14, 'like', '2026-04-11 21:37:08'),
+(25, 37, 14, 'like', '2026-04-11 21:37:08'),
+(26, 38, 14, 'like', '2026-04-11 21:37:08'),
+(27, 35, 15, 'like', '2026-04-11 21:37:08'),
+(28, 39, 15, 'dislike', '2026-04-11 21:37:08'),
+(29, 34, 16, 'dislike', '2026-04-11 21:37:08'),
+(30, 37, 16, 'like', '2026-04-11 21:37:08'),
+(31, 38, 16, 'like', '2026-04-11 21:37:08'),
+(32, 34, 17, 'like', '2026-04-11 21:37:08'),
+(33, 35, 17, 'like', '2026-04-11 21:37:08'),
+(34, 37, 17, 'like', '2026-04-11 21:37:08'),
+(35, 39, 17, 'dislike', '2026-04-11 21:37:08'),
+(36, 34, 18, 'like', '2026-04-11 21:37:08'),
+(37, 35, 18, 'like', '2026-04-11 21:37:08'),
+(38, 40, 18, 'like', '2026-04-11 21:37:08'),
+(39, 35, 19, 'like', '2026-04-11 21:37:08'),
+(40, 37, 19, 'like', '2026-04-11 21:37:08'),
+(41, 39, 19, 'like', '2026-04-11 21:37:08'),
+(42, 41, 19, 'like', '2026-04-11 21:37:08'),
+(43, 34, 20, 'like', '2026-04-11 21:37:08'),
+(44, 38, 20, 'like', '2026-04-11 21:37:08'),
+(45, 40, 20, 'like', '2026-04-11 21:37:08'),
+(46, 34, 21, 'like', '2026-04-11 21:37:08'),
+(47, 35, 21, 'like', '2026-04-11 21:37:08'),
+(48, 37, 21, 'like', '2026-04-11 21:37:08'),
+(49, 38, 21, 'like', '2026-04-11 21:37:08'),
+(50, 39, 21, 'like', '2026-04-11 21:37:08'),
+(51, 35, 22, 'like', '2026-04-11 21:37:08'),
+(52, 37, 22, 'like', '2026-04-11 21:37:08'),
+(53, 40, 22, 'dislike', '2026-04-11 21:37:08'),
+(54, 34, 23, 'like', '2026-04-11 21:37:08'),
+(55, 38, 23, 'like', '2026-04-11 21:37:08'),
+(56, 41, 23, 'like', '2026-04-11 21:37:08'),
+(57, 35, 24, 'like', '2026-04-11 21:37:08'),
+(58, 37, 24, 'dislike', '2026-04-11 21:37:08'),
+(59, 39, 24, 'like', '2026-04-11 21:37:08');
 
 -- --------------------------------------------------------
 
@@ -266,6 +320,33 @@ CREATE TABLE `orders` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`order_id`, `user_id`, `total_amount`, `status`, `created_at`) VALUES
+(3, 34, 45.00, 'completed', '2026-03-17 22:10:59'),
+(4, 34, 12.00, 'completed', '2026-04-01 21:12:44'),
+(5, 35, 40.00, 'completed', '2026-03-22 22:13:45'),
+(6, 35, 200.00, 'processing', '2026-04-08 21:14:07'),
+(7, 37, 80.00, 'completed', '2026-03-24 22:16:05'),
+(8, 37, 24.00, 'cancelled', '2026-04-03 21:16:22'),
+(9, 38, 20.00, 'completed', '2026-03-12 22:18:00'),
+(10, 38, 15.00, 'processing', '2026-04-10 21:18:28'),
+(11, 39, 138.00, 'completed', '2026-03-20 22:20:00'),
+(12, 39, 44.00, 'completed', '2026-03-30 21:20:18'),
+(13, 40, 25.00, 'completed', '2026-03-28 22:21:41'),
+(14, 40, 24.00, 'cancelled', '2026-04-05 21:22:00'),
+(15, 41, 28.00, 'completed', '2026-03-14 22:23:48'),
+(16, 41, 25.00, 'processing', '2026-04-07 21:24:06'),
+(17, 9, 53.00, 'completed', '2026-03-26 22:25:41'),
+(18, 13, 50.00, 'completed', '2026-03-31 21:26:00'),
+(19, 12, 200.00, 'processing', '2026-04-09 21:26:18'),
+(20, 8, 20.00, 'completed', '2026-04-02 21:28:54'),
+(21, 34, 18.00, 'completed', '2026-03-07 22:29:10'),
+(22, 35, 45.00, 'completed', '2026-03-02 22:29:25'),
+(23, 9, 22.00, 'processing', '2026-04-11 22:40:21');
+
 -- --------------------------------------------------------
 
 --
@@ -279,6 +360,43 @@ CREATE TABLE `order_items` (
   `quantity` int(11) NOT NULL CHECK (`quantity` > 0),
   `price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`order_item_id`, `order_id`, `listing_id`, `quantity`, `price`) VALUES
+(3, 3, 7, 1, 25.00),
+(4, 3, 9, 1, 20.00),
+(5, 4, 14, 1, 12.00),
+(6, 5, 8, 1, 30.00),
+(7, 5, 12, 1, 10.00),
+(8, 6, 18, 1, 200.00),
+(9, 7, 19, 1, 45.00),
+(10, 7, 20, 1, 35.00),
+(11, 8, 23, 2, 12.00),
+(12, 9, 15, 1, 8.00),
+(13, 9, 14, 1, 12.00),
+(14, 10, 10, 1, 15.00),
+(15, 11, 17, 1, 120.00),
+(16, 11, 21, 1, 18.00),
+(17, 12, 22, 2, 22.00),
+(18, 13, 11, 1, 15.00),
+(19, 13, 12, 1, 10.00),
+(20, 14, 24, 3, 8.00),
+(21, 15, 9, 1, 20.00),
+(22, 15, 15, 1, 8.00),
+(23, 16, 7, 1, 25.00),
+(24, 17, 20, 1, 35.00),
+(25, 17, 21, 1, 18.00),
+(26, 18, 8, 1, 30.00),
+(27, 18, 9, 1, 20.00),
+(28, 19, 18, 1, 200.00),
+(29, 20, 23, 1, 12.00),
+(30, 20, 24, 1, 8.00),
+(31, 21, 13, 1, 18.00),
+(32, 22, 19, 1, 45.00),
+(33, 23, 22, 1, 22.00);
 
 -- --------------------------------------------------------
 
@@ -598,15 +716,15 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`, `role`, `email_address`) VALUES
-(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-09 21:47:15', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
+(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-11 23:37:00', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
 (8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-04 18:16:05', 'approved', 'Resident', 'nike@gmail.com'),
-(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-09 21:27:48', 'approved', 'Resident', 'josephine@gmail.com'),
-(10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-08 11:47:21', 'approved', 'SME', 'info@harmonywellbeing.com'),
+(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-11 22:40:15', 'approved', 'Resident', 'josephine@gmail.com'),
+(10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-11 23:25:12', 'approved', 'SME', 'info@harmonywellbeing.com'),
 (11, '$2y$10$pEGsw9izjII4FX3gzzaJ4.QSDLc70c6nGub9/1IU78TLgASSZUsf.', '2026-04-07 08:16:06', 'approved', 'Resident', 'victor@gmail.com'),
 (12, '$2y$10$aSQiHxr71NTJT0.ohlXxDezWv08wpyxyjnP1tR9q7tgxhcBsX.Uai', '2026-04-07 08:19:30', 'approved', 'Resident', 'jake@gmail.com'),
 (13, '$2y$10$L680iiTY/OYAE9v./tg99O4N1T/ao6GKU/AnYCR6KNO4jLIimJKHu', '2026-04-08 11:28:32', 'approved', 'Resident', 'habeeb@gmail.com'),
 (23, '$2y$10$UDiUYY47oKHijEltMpEDRusNoO93tFpEhQ389rybJJHXwzuNwcMiG', '2026-04-08 11:37:39', 'approved', 'Council Member', 'Cmember@cultureconnect.com'),
-(24, '$2y$10$ViJxAEtd.j9tpIUKfzKPw.5pPGEFm4c5JlfxBXha4GgFbGeWXTzvC', '2026-04-09 21:28:44', 'approved', 'SME', 'hello@brushstrokestudio.com'),
+(24, '$2y$10$ViJxAEtd.j9tpIUKfzKPw.5pPGEFm4c5JlfxBXha4GgFbGeWXTzvC', '2026-04-11 23:31:28', 'approved', 'SME', 'hello@brushstrokestudio.com'),
 (25, '$2y$10$eLhuVYx4TBSMRuld/k4THuwZ1XC2EhQG4fUCshbrKOlnRdgqz5Hva', '2026-04-09 18:58:45', 'approved', 'SME', 'info@hatfieldtheatre.com'),
 (26, '$2y$10$AUciDVzSGaUL7jdXeUdkM.DhFyvuMxkxFa1J8xurcFsZV8qHyg14m', '2026-04-09 19:10:10', 'approved', 'SME', 'tours@hertheritagetours.com'),
 (27, '$2y$10$.dWO5U3z4wW4FGMV32g3COS5QZbspNds4t8z853sYSp1ErZcuvvOO', '2026-04-09 19:17:47', 'approved', 'SME', 'studio@pixelcraftmedia.com'),
@@ -929,19 +1047,19 @@ ALTER TABLE `listing_requests`
 -- AUTO_INCREMENT for table `listing_votes`
 --
 ALTER TABLE `listing_votes`
-  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT for table `product_service`
