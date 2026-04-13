@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Apr 13, 2026 at 12:08 AM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Host: 127.0.0.1
+-- Generation Time: Apr 13, 2026 at 10:52 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -47,6 +47,46 @@ INSERT INTO `areas` (`area_id`, `area_name`, `description`, `postcode`, `latitud
 (4, 'Hertfordshire West', 'Famous for literature and publishing, known for independent books, poetry readings, magazines, and creative writing communities', 'AL10 0WB', 51.761500, -0.257400),
 (5, 'Hertfordshire Town Centre', 'Known for cultural markets featuring handmade goods, artisan stationery, posters, and locally produced creative merchandise', 'AL10 0JT', 51.760600, -0.242300),
 (6, 'Hertfordshire Central', 'Famous for sports and recreation, known for community sporting activities, cultural sporting events, and fitness programs', 'AL10 8HG', 51.765400, -0.220700);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `honored_residents`
+--
+
+CREATE TABLE `honored_residents` (
+  `honor_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `title` varchar(150) NOT NULL,
+  `reason` text NOT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `area_id` int(11) DEFAULT NULL,
+  `honored_date` date NOT NULL,
+  `is_visible` tinyint(1) NOT NULL DEFAULT 1,
+  `display_order` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `honored_residents_with_name`
+-- (See below for the actual view)
+--
+CREATE TABLE `honored_residents_with_name` (
+`honor_id` int(11)
+,`user_id` int(11)
+,`first_name` varchar(50)
+,`last_name` varchar(50)
+,`title` varchar(150)
+,`reason` text
+,`image_url` varchar(255)
+,`honored_date` date
+,`area_name` varchar(100)
+,`is_visible` tinyint(1)
+,`display_order` int(11)
+);
 
 -- --------------------------------------------------------
 
@@ -398,6 +438,26 @@ INSERT INTO `order_items` (`order_item_id`, `order_id`, `listing_id`, `quantity`
 (31, 21, 13, 1, 18.00),
 (32, 22, 19, 1, 45.00),
 (33, 23, 22, 1, 22.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `past_events`
+--
+
+CREATE TABLE `past_events` (
+  `event_id` int(11) NOT NULL,
+  `title` varchar(150) NOT NULL,
+  `description` text NOT NULL,
+  `event_date` date NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `area_id` int(11) DEFAULT NULL,
+  `is_visible` tinyint(1) NOT NULL DEFAULT 1,
+  `display_order` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -911,6 +971,15 @@ INSERT INTO `user_roles` (`role`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Structure for view `honored_residents_with_name`
+--
+DROP TABLE IF EXISTS `honored_residents_with_name`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `honored_residents_with_name`  AS SELECT `h`.`honor_id` AS `honor_id`, `h`.`user_id` AS `user_id`, `r`.`first_name` AS `first_name`, `r`.`last_name` AS `last_name`, `h`.`title` AS `title`, `h`.`reason` AS `reason`, `h`.`image_url` AS `image_url`, `h`.`honored_date` AS `honored_date`, `a`.`area_name` AS `area_name`, `h`.`is_visible` AS `is_visible`, `h`.`display_order` AS `display_order` FROM ((`honored_residents` `h` join `resident_profiles` `r` on(`h`.`user_id` = `r`.`user_id`)) left join `areas` `a` on(`h`.`area_id` = `a`.`area_id`)) ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `resident_product_service_interest`
 --
 DROP TABLE IF EXISTS `resident_product_service_interest`;
@@ -944,6 +1013,15 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 ALTER TABLE `areas`
   ADD PRIMARY KEY (`area_id`);
+
+--
+-- Indexes for table `honored_residents`
+--
+ALTER TABLE `honored_residents`
+  ADD PRIMARY KEY (`honor_id`),
+  ADD KEY `fk_honored_user` (`user_id`),
+  ADD KEY `fk_honored_area` (`area_id`),
+  ADD KEY `idx_honored_visible_order` (`is_visible`,`display_order`);
 
 --
 -- Indexes for table `listings`
@@ -991,6 +1069,14 @@ ALTER TABLE `order_items`
   ADD PRIMARY KEY (`order_item_id`),
   ADD KEY `fk_orderitem_order` (`order_id`),
   ADD KEY `fk_orderitem_listing` (`listing_id`);
+
+--
+-- Indexes for table `past_events`
+--
+ALTER TABLE `past_events`
+  ADD PRIMARY KEY (`event_id`),
+  ADD KEY `fk_past_event_area` (`area_id`),
+  ADD KEY `idx_visible_order` (`is_visible`,`display_order`);
 
 --
 -- Indexes for table `product_service`
@@ -1088,6 +1174,12 @@ ALTER TABLE `areas`
   MODIFY `area_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
+-- AUTO_INCREMENT for table `honored_residents`
+--
+ALTER TABLE `honored_residents`
+  MODIFY `honor_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `listings`
 --
 ALTER TABLE `listings`
@@ -1122,6 +1214,12 @@ ALTER TABLE `orders`
 --
 ALTER TABLE `order_items`
   MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+
+--
+-- AUTO_INCREMENT for table `past_events`
+--
+ALTER TABLE `past_events`
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `product_service`
@@ -1182,6 +1280,13 @@ ALTER TABLE `user_registration_requests`
 --
 
 --
+-- Constraints for table `honored_residents`
+--
+ALTER TABLE `honored_residents`
+  ADD CONSTRAINT `fk_honored_area` FOREIGN KEY (`area_id`) REFERENCES `areas` (`area_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_honored_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
 -- Constraints for table `listings`
 --
 ALTER TABLE `listings`
@@ -1221,6 +1326,12 @@ ALTER TABLE `orders`
 ALTER TABLE `order_items`
   ADD CONSTRAINT `fk_orderitems_listing` FOREIGN KEY (`listing_id`) REFERENCES `listings` (`listing_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_orderitems_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `past_events`
+--
+ALTER TABLE `past_events`
+  ADD CONSTRAINT `fk_past_event_area` FOREIGN KEY (`area_id`) REFERENCES `areas` (`area_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `product_service`
