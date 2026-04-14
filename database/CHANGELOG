@@ -1,5 +1,35 @@
 # Changelog
 
+## 13 April 2026
+
+## New Table: Past Events
+
+- Created the past_events table to store data for the homepage slideshow
+- Previously this data was hardcoded in the PHP code and is now managed from the database
+- Columns include title, description, event_date, location, and image_url
+- Added is_visible and display_order fields so admins can control what appears in the slideshow and in what order without touching the code
+- Linked the table to areas using a foreign key on area_id so each event can be associated with a Hertfordshire area
+- Foreign key uses ON DELETE SET NULL so if an area is removed the event record is kept
+
+## New Table: Honored Residents
+
+- Created the honored_residents table to store the Honored Residents section on the homepage
+- Previously this data was hardcoded in the PHP code and is now managed from the database
+- Columns include title (e.g. Community Art Champion), reason, image_url, and honored_date
+- Did not include first_name or last_name because the resident's name already exists in resident_profiles and storing it again would create duplicate data that could go out of sync
+- Instead the table uses user_id to link to the users table and the name is retrieved through a JOIN
+- Added is_visible and display_order fields for admin control over what shows on the homepage
+- Linked to both users and areas using foreign keys with ON DELETE SET NULL
+
+## New View: Honored Residents With Name
+
+- Created the honored_residents_with_name view to make querying honored residents easier
+- The view joins honored_residents to resident_profiles to pull in first_name and last_name
+- Also joins to areas to include the area_name
+- This removes the need to write JOINs in PHP every time the homepage data is fetched
+- Usage: SELECT * FROM honored_residents_with_name WHERE is_visible = 1 ORDER BY display_order ASC
+
+
 ## 08 April 2026
 
 ### Listings Table Updates
