@@ -240,7 +240,7 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Reside
         <table class="mo-table">
             <thead>
                 <tr>
-                    <th>Order #</th>
+                    <th>S/N</th>
                     <th>Date</th>
                     <th>Items</th>
                     <th>Total</th>
@@ -452,7 +452,7 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Reside
         }
  
         tr.innerHTML = `
-            <td class="mo-order-id">#${rowNum}</td>
+            <td class="mo-order-id">${rowNum}</td>
             <td>${date}</td>
             <td>${o.item_count} item${o.item_count != 1 ? 's' : ''}</td>
             <td class="mo-total-cell">£${parseFloat(o.total_amount).toFixed(2)}</td>

@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once '../db_connection.php';
  
@@ -9,13 +7,13 @@ $user_name    = '';
 if ($is_logged_in) {
     if (!empty($_SESSION['first_name']))      $user_name = $_SESSION['first_name'];
     elseif (!empty($_SESSION['business_name'])) $user_name = $_SESSION['business_name'];
-}
+  }
  
 $cart_count = isset($_SESSION['cart'])
     ? array_sum(array_column($_SESSION['cart'], 'quantity'))
     : 0;
  
-// Popular Listings (most ordered) 
+// Display Popular Listings 
 $popular_stmt = $conn->prepare("
     SELECT l.listing_id, l.title, l.caption, l.price,
            pc.category_name,
@@ -24,43 +22,41 @@ $popular_stmt = $conn->prepare("
            li.image_url AS primary_image,
            COUNT(oi.order_item_id) AS order_count
     FROM listings l
-    JOIN product_service ps                ON l.item_id        = ps.item_id
+    JOIN product_service ps ON l.item_id = ps.item_id
     JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
-    JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
-    JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
-    JOIN areas a                           ON sp.area_id        = a.area_id
-    LEFT JOIN listing_images li            ON l.listing_id      = li.listing_id AND li.is_primary = 1
-    LEFT JOIN order_items oi                ON l.listing_id      = oi.listing_id
+    JOIN product_service_categories pc ON pss.category_id   = pc.category_id
+    JOIN sme_profiles sp ON l.sme_id = sp.sme_id
+    JOIN areas a ON sp.area_id = a.area_id
+    LEFT JOIN listing_images li ON l.listing_id = li.listing_id AND li.is_primary = 1
+    LEFT JOIN order_items oi ON l.listing_id = oi.listing_id
     WHERE l.status = 'active'
     GROUP BY l.listing_id
     ORDER BY order_count DESC, l.created_at DESC
-    LIMIT 6
-");
-$popular_stmt->execute();
-$popular_listings = $popular_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$popular_stmt->close();
+    LIMIT 6");
+              $popular_stmt->execute();
+         $popular_listings = $popular_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+         $popular_stmt->close();
  
-// Recently Added Listings 
-$recent_stmt = $conn->prepare("
+// Display Recently Added Listings 
+   $recent_stmt = $conn->prepare("
     SELECT l.listing_id, l.title, l.caption, l.price,
            pc.category_name,
            sp.business_name,
            a.area_name,
            li.image_url AS primary_image
     FROM listings l
-    JOIN product_service ps                ON l.item_id        = ps.item_id
+    JOIN product_service ps ON l.item_id = ps.item_id
     JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
-    JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
-    JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
-    JOIN areas a                           ON sp.area_id        = a.area_id
-    LEFT JOIN listing_images li            ON l.listing_id      = li.listing_id AND li.is_primary = 1
+    JOIN product_service_categories pc ON pss.category_id   = pc.category_id
+    JOIN sme_profiles sp    ON l.sme_id = sp.sme_id
+    JOIN areas a ON sp.area_id = a.area_id
+    LEFT JOIN listing_images li ON l.listing_id = li.listing_id AND li.is_primary = 1
     WHERE l.status = 'active'
     ORDER BY l.created_at DESC
-    LIMIT 6
-");
-$recent_stmt->execute();
-$recent_listings = $recent_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$recent_stmt->close();
+    LIMIT 6");
+      $recent_stmt->execute();
+       $recent_listings = $recent_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+      $recent_stmt->close();
  
 //  Stats 
 $stats_r         = mysqli_query($conn, "SELECT COUNT(*) AS total FROM listings WHERE status = 'active'");
@@ -72,26 +68,27 @@ $total_biz = mysqli_fetch_assoc($biz_r)['total'] ?? 0;
 $res_r     = mysqli_query($conn, "SELECT COUNT(*) AS total FROM resident_profiles");
 $total_res = mysqli_fetch_assoc($res_r)['total'] ?? 0;
  
-// Community events (static) 
-$events = [
-    ['image' => 'event1.jpg', 'title' => 'Cultural Festival 2025',  'date' => '12 July 2025', 'desc' => 'A celebration of art, music and culture from across the Hertfordshire community.'],
-    ['image' => 'event2.jpg', 'title' => 'Community Arts Exhibition',             'date' => '24 Aug 2025',  'desc' => 'Local artists showcase their work at the Hatfield Arts Centre.'],
-    ['image' => 'event3.jpg', 'title' => 'Open Mic Night — Local Voices',         'date' => '05 Sep 2025',  'desc' => 'An evening of spoken word, poetry and live music from Hertfordshire residents.'],
-    ['image' => 'event4.jpg', 'title' => 'Heritage &amp; History Walk',           'date' => '18 Oct 2025',  'desc' => 'Explore the rich cultural heritage of Hertfordshire with our expert guides.'],
-    ['image' => 'event5.jpg', 'title' => 'Summer Movie Day',                'date' => '30 Nov 2025',  'desc' => 'Shop handmade goods, crafts and cultural products from local artisans.'],
-];
+// Past Events 
+$events_r = mysqli_query($conn, "
+    SELECT * FROM past_events
+    WHERE is_visible = 1
+    ORDER BY display_order ASC
+    LIMIT 5
+");
+$past_events = [];
+while ($row = mysqli_fetch_assoc($events_r)) $past_events[] = $row;
+
+// Honored Residents
+$honored_r = mysqli_query($conn, "
+    SELECT * FROM honored_residents_with_name
+    WHERE is_visible = 1
+    ORDER BY display_order ASC
+    LIMIT 4
+");
+$honored_residents = [];
+while ($row = mysqli_fetch_assoc($honored_r)) $honored_residents[] = $row;
  
-// Honoured Residents (static) 
-$honoured = [
-    ['name' => 'Adebola Adeyemi',      'area' => 'Hertfordshire North',   'badge' => 'Community Volunteer', 'reason' => 'Organised over 20 community events and mentored young residents in creative arts.'],
-    ['name' => 'Fatima Mahmood','area' => 'Hertfordshire Central', 'badge' => 'Cultural Champion',   'reason' => 'Founded the Hertfordshire Multicultural Arts Collective, connecting over 200 residents.'],
-    ['name' => 'Chike Obi',    'area' => 'Hertfordshire South',   'badge' => 'Youth Mentor',        'reason' => 'Dedicated 3 years to running free drama and public speaking workshops for teenagers.'],
-    ['name' => 'Priscilla Johnson',      'area' => 'Hertfordshire East',    'badge' => 'Community Donor',     'reason' => 'Funded the restoration of the Hatfield Community Library reading corner.'],
-];
- 
-function ix_safe(string $val): string {
-    return htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
-}
+function ix_safe(string $val): string { return htmlspecialchars($val, ENT_QUOTES, 'UTF-8');}
 ?>
 
 <!DOCTYPE html>
@@ -106,7 +103,7 @@ function ix_safe(string $val): string {
  
 <?php include '../components/header.php'; ?>
 
-<!-- HERO -->
+<!-- HERO CARD-->
 <section class="ix-hero">
     <div class="ix-hero-inner">
         <div class="ix-hero-text">
@@ -153,21 +150,21 @@ function ix_safe(string $val): string {
         </div>
  
         <div class="ix-carousel-wrap">
-            <?php foreach ($events as $i => $event) : ?>
+                    <?php foreach ($past_events as $i => $event) : ?>
             <div class="ix-event-slide <?= $i === 0 ? 'ix-event-slide--active' : '' ?>" id="ix-slide-<?= $i ?>">
-                <div class="ix-event-img-wrap">
-                    <img src="../images/council_events/<?= ix_safe($event['image']) ?>"
-                         alt="<?= ix_safe($event['title']) ?>"
-                         class="ix-event-img"
-                         onerror="this.parentElement.classList.add('ix-event-img-wrap--fallback')">
-                    <div class="ix-event-overlay">
-                        <span class="ix-event-date"><?= ix_safe($event['date']) ?></span>
-                        <h3 class="ix-event-title"><?= ix_safe($event['title']) ?></h3>
-                        <p class="ix-event-desc"><?= ix_safe($event['desc']) ?></p>
-                    </div>
-                </div>
-            </div>
-            <?php endforeach; ?>
+              <div class="ix-event-img-wrap">
+              <img src="../images/council_events/<?= ix_safe($event['image_url']) ?>"
+                 alt="<?= ix_safe($event['title']) ?>"
+                 class="ix-event-img"
+                 onerror="this.parentElement.classList.add('ix-event-img-wrap--fallback')">
+             <div class="ix-event-overlay">
+                 <span class="ix-event-date"><?= date('d M Y', strtotime($event['event_date'])) ?></span>
+                 <h3 class="ix-event-title"><?= ix_safe($event['title']) ?></h3>
+                 <p class="ix-event-desc"><?= ix_safe($event['description']) ?></p>
+             </div>
+           </div>
+       </div>
+         <?php endforeach; ?>
  
             <button class="ix-carousel-arrow ix-carousel-arrow--prev" onclick="ixCarouselPrev()">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="20" height="20">
@@ -181,7 +178,7 @@ function ix_safe(string $val): string {
             </button>
  
             <div class="ix-carousel-dots">
-                <?php foreach ($events as $i => $event) : ?>
+                <?php foreach ($past_events as $i => $event) : ?>
                 <button class="ix-carousel-dot <?= $i === 0 ? 'ix-carousel-dot--active' : '' ?>"
                         onclick="ixCarouselGoTo(<?= $i ?>)"></button>
                 <?php endforeach; ?>
@@ -250,24 +247,20 @@ function ix_safe(string $val): string {
         </div>
  
         <div class="ix-honoured-grid">
-            <?php foreach ($honoured as $h) : ?>
-            <div class="ix-honoured-card">
-                <div class="ix-honoured-avatar">
-                    <?= strtoupper(substr($h['name'], 0, 1)) ?>
-                </div>
-                <div class="ix-honoured-info">
-                    <h3 class="ix-honoured-name"><?= ix_safe($h['name']) ?></h3>
-                    <p class="ix-honoured-area">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="12" height="12">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                        </svg>
-                        <?= ix_safe($h['area']) ?>
-                    </p>
-                    <span class="ix-honoured-badge"><?= ix_safe($h['badge']) ?></span>
-                    <p class="ix-honoured-reason"><?= ix_safe($h['reason']) ?></p>
-                </div>
-            </div>
+            <?php foreach ($honored_residents as $h) : ?>
+             <div class="ix-honoured-card">
+             <div class="ix-honoured-info">
+                      <h3 class="ix-honoured-name"><?= ix_safe($h['first_name'] . ' ' . $h['last_name']) ?></h3>
+                      <p class="ix-honoured-area">
+                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="12" height="12">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                     </svg>
+                       <?= ix_safe($h['area_name'] ?? 'Hertfordshire') ?> </p>
+                   <span class="ix-honoured-badge"><?= ix_safe($h['title']) ?></span>
+                   <p class="ix-honoured-reason"><?= ix_safe($h['reason']) ?></p>
+               </div>
+         </div>
             <?php endforeach; ?>
         </div>
     </div>
@@ -363,7 +356,7 @@ function ixListingCard(array $l): string {
  
  <script>
     let ixSlideIndex  = 0;
-    const ixSlideCount = <?= count($events) ?>;
+    const ixSlideCount = <?= count($past_events) ?>;
     let ixAutoTimer   = null;
  
     document.addEventListener('DOMContentLoaded', () => ixStartAuto());

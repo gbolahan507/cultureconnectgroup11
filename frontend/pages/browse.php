@@ -313,8 +313,18 @@ $is_resident  = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Res
                 </select>
             </div>
             <div class="br-price-wrap">
-                <span class="br-price-label">Max Price: <span class="br-price-val" id="br-price-val">Any</span></span>
-                <input type="range" id="br-price-range" class="br-price-range" min="0" max="200" value="200" step="5" oninput="brPriceChange(this.value)">
+            <span class="br-price-label">Max Price</span>
+       <div class="br-price-input-row">
+        <span class="br-price-prefix">£</span>
+        <input type="number" id="br-price-input" class="br-price-input"
+               min="0" max="200" value="200" placeholder="e.g. 50"
+               oninput="brPriceInput(this.value)">
+        <button class="br-price-clear-btn" onclick="brPriceClear()" title="Clear">×</button>
+    </div>
+    <input type="range" id="br-price-range" class="br-price-range"
+           min="0" max="200" value="200" step="5"
+           oninput="brPriceSync(this.value)">
+            <span class="br-price-hint" id="br-price-hint">Showing all prices</span>
             </div>
         </div>
     </div>
@@ -441,17 +451,51 @@ $is_resident  = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Res
         brLoad();
     }
  
-    function brPriceChange(val) {
-        const max = parseInt(document.getElementById('br-price-range').max);
-        if (parseInt(val) >= max) {
-            brPriceMax = '';
-            document.getElementById('br-price-val').textContent = 'Any';
-        } else {
-            brPriceMax = val;
-            document.getElementById('br-price-val').textContent = '£' + val;
-        }
-        brLoad();
+    function brPriceInput(val) {
+    const max   = parseInt(document.getElementById('br-price-range').max);
+    const range = document.getElementById('br-price-range');
+    const hint  = document.getElementById('br-price-hint');
+    const n     = parseInt(val);
+    if (isNaN(n) || val === '' || n >= max) {
+        brPriceMax = '';
+        hint.textContent = 'Showing all prices';
+        range.value = max;
+    } else if (n < 0) {
+        brPriceMax = '0';
+        range.value = 0;
+        hint.textContent = 'Max: £0';
+    } else {
+        brPriceMax = String(n);
+        range.value = n;
+        hint.textContent = `Max: £${n}`;
     }
+    brLoad();
+}
+
+function brPriceSync(val) {
+    const max   = parseInt(document.getElementById('br-price-range').max);
+    const input = document.getElementById('br-price-input');
+    const hint  = document.getElementById('br-price-hint');
+    if (parseInt(val) >= max) {
+        brPriceMax   = '';
+        input.value  = max;
+        hint.textContent = 'Showing all prices';
+    } else {
+        brPriceMax   = val;
+        input.value  = val;
+        hint.textContent = `Max: £${val}`;
+    }
+    brLoad();
+}
+
+function brPriceClear() {
+    const range = document.getElementById('br-price-range');
+    document.getElementById('br-price-input').value = range.max;
+    document.getElementById('br-price-hint').textContent = 'Showing all prices';
+    brPriceMax = '';
+    range.value = range.max;
+    brLoad();
+}
  
     function brDebounce() {
         const val = document.getElementById('br-search').value;
@@ -474,9 +518,10 @@ $is_resident  = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Res
         document.getElementById('br-area-select').value = '0';
         document.getElementById('br-sub-select').innerHTML = '<option value="0">All Subcategories</option>';
         const range = document.getElementById('br-price-range');
+        document.getElementById('br-price-input').value = range.max;
         range.value = range.max;
         brPriceMax  = '';
-        document.getElementById('br-price-val').textContent = 'Any';
+        document.getElementById('br-price-hint').textContent = 'Showing all prices';
         brLoad();
     }
  

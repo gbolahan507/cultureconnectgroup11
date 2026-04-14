@@ -166,7 +166,7 @@ $users       = array_slice($all_users, $offset, $users_per_page);
         <table class="users-table">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>S/N</th>
                     <th>Name</th>
                     <th>Type</th>
                     <th>Email</th>

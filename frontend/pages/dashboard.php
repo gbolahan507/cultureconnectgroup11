@@ -1,16 +1,14 @@
 <?php
-session_start(); 
+session_start();
 
-// Redirect to login if session not set
 if (!isset($_SESSION['user_role'])) {
     header("Location: ../pages/login.php");
     exit();
 }
 
-$page = $_GET['page'] ?? 'home';
+$role = $_SESSION['user_role'] ?? '';
 
 $allowedPages = [
-    'home',
     'analytics',
     'add-product',
     'cart',
@@ -26,8 +24,18 @@ $allowedPages = [
     'view-votes'
 ];
 
+$defaultPage = match($role) {
+    'Resident'              => 'profile',
+    'SME'                   => 'manage-listings',
+    'Council Member'        => 'analytics',
+    'Council Administrator' => 'analytics',
+    default                 => 'profile'
+};
+
+$page = $_GET['page'] ?? $defaultPage;
+
 if (!in_array($page, $allowedPages)) {
-    $page = 'home';
+    $page = $defaultPage;
 }
 ?>
 <!DOCTYPE html>
@@ -94,7 +102,7 @@ if (!in_array($page, $allowedPages)) {
    if (file_exists($file)) {
     include $file;
    } else {
-    include "../pages/home.php";
+    include "../pages/" . $defaultPage . ".php";
    }?>
    
    </div>

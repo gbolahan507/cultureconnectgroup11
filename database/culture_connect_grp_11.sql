@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Apr 13, 2026 at 10:52 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost
+-- Generation Time: Apr 14, 2026 at 03:04 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -67,6 +67,16 @@ CREATE TABLE `honored_residents` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `honored_residents`
+--
+
+INSERT INTO `honored_residents` (`honor_id`, `user_id`, `title`, `reason`, `image_url`, `area_id`, `honored_date`, `is_visible`, `display_order`, `created_at`, `updated_at`) VALUES
+(1, 34, 'Community Champion', 'Marcus has been instrumental in organising cultural events and connecting residents with local businesses across Hertfordshire.', NULL, 1, '2026-03-01', 1, 1, '2026-04-14 10:12:50', '2026-04-14 10:12:50'),
+(2, 35, 'Cultural Ambassador', 'Aisha has promoted local arts and heritage through her tireless community engagement and support for emerging artists.', NULL, 2, '2026-03-01', 1, 2, '2026-04-14 10:12:50', '2026-04-14 10:12:50'),
+(3, 37, 'Local Heritage Advocate', 'Fatima has championed the preservation of Hertfordshire heritage through her active participation in guided tours and cultural programmes.', NULL, 3, '2026-03-15', 1, 3, '2026-04-14 10:12:50', '2026-04-14 10:12:50'),
+(4, 38, 'Community Connector', 'James has played a vital role in bridging the gap between local businesses and residents, actively participating in cultural programmes and encouraging others to engage with Hertfordshire\'s creative community.', NULL, 4, '2026-03-15', 1, 4, '2026-04-14 11:48:13', '2026-04-14 11:48:13');
 
 -- --------------------------------------------------------
 
@@ -459,6 +469,17 @@ CREATE TABLE `past_events` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `past_events`
+--
+
+INSERT INTO `past_events` (`event_id`, `title`, `description`, `event_date`, `location`, `image_url`, `area_id`, `is_visible`, `display_order`, `created_at`, `updated_at`) VALUES
+(1, 'Hertfordshire Cultural Festival 2025', 'A celebration of local art, music and heritage bringing together residents and businesses from across Hertfordshire.', '2025-09-14', 'Hatfield Park, Hatfield', 'event1.jpg', 2, 1, 1, '2026-04-14 10:12:17', '2026-04-14 10:13:35'),
+(2, 'Community Art Exhibition', 'A showcase of original works by local artists and SMEs on the CultureConnect platform.', '2025-11-22', 'Watford Gallery, Watford', 'event2.jpg', 1, 1, 2, '2026-04-14 10:12:17', '2026-04-14 10:13:35'),
+(3, 'Local Business Showcase', 'An afternoon event connecting Hertfordshire SMEs with residents and council members.', '2025-10-05', 'St Albans Town Hall, St Albans', 'event3.jpg', 3, 1, 3, '2026-04-14 10:12:17', '2026-04-14 10:13:35'),
+(4, 'Winter Poetry Evening', 'An intimate evening of spoken word and poetry from local Hertfordshire writers.', '2025-12-12', 'Hertford Library, Hertford', 'event4.jpg', 4, 1, 4, '2026-04-14 10:12:17', '2026-04-14 10:13:35'),
+(5, 'Heritage Walk Old Hatfield', 'A guided walk through the historic streets of Old Hatfield led by Heritage Tours.', '2026-01-18', 'Old Hatfield, Hatfield', 'event5.jpg', 2, 1, 5, '2026-04-14 10:12:17', '2026-04-14 10:32:19');
+
 -- --------------------------------------------------------
 
 --
@@ -822,19 +843,19 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`, `role`, `email_address`) VALUES
-(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-12 21:20:46', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
+(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-14 11:49:30', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
 (8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-04 18:16:05', 'approved', 'Resident', 'nike@gmail.com'),
-(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-12 22:04:50', 'approved', 'Resident', 'josephine@gmail.com'),
+(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-14 13:01:47', 'approved', 'Resident', 'josephine@gmail.com'),
 (10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-11 23:25:12', 'approved', 'SME', 'info@harmonywellbeing.com'),
 (11, '$2y$10$pEGsw9izjII4FX3gzzaJ4.QSDLc70c6nGub9/1IU78TLgASSZUsf.', '2026-04-07 08:16:06', 'approved', 'Resident', 'victor@gmail.com'),
 (12, '$2y$10$aSQiHxr71NTJT0.ohlXxDezWv08wpyxyjnP1tR9q7tgxhcBsX.Uai', '2026-04-12 21:18:58', 'approved', 'Resident', 'jake@gmail.com'),
 (13, '$2y$10$L680iiTY/OYAE9v./tg99O4N1T/ao6GKU/AnYCR6KNO4jLIimJKHu', '2026-04-08 11:28:32', 'approved', 'Resident', 'habeeb@gmail.com'),
 (23, '$2y$10$UDiUYY47oKHijEltMpEDRusNoO93tFpEhQ389rybJJHXwzuNwcMiG', '2026-04-08 11:37:39', 'approved', 'Council Member', 'Cmember@cultureconnect.com'),
-(24, '$2y$10$ViJxAEtd.j9tpIUKfzKPw.5pPGEFm4c5JlfxBXha4GgFbGeWXTzvC', '2026-04-12 19:17:16', 'approved', 'SME', 'hello@brushstrokestudio.com'),
+(24, '$2y$10$ViJxAEtd.j9tpIUKfzKPw.5pPGEFm4c5JlfxBXha4GgFbGeWXTzvC', '2026-04-14 10:29:36', 'approved', 'SME', 'hello@brushstrokestudio.com'),
 (25, '$2y$10$eLhuVYx4TBSMRuld/k4THuwZ1XC2EhQG4fUCshbrKOlnRdgqz5Hva', '2026-04-12 21:58:07', 'approved', 'SME', 'info@hatfieldtheatre.com'),
-(26, '$2y$10$AUciDVzSGaUL7jdXeUdkM.DhFyvuMxkxFa1J8xurcFsZV8qHyg14m', '2026-04-09 19:10:10', 'approved', 'SME', 'tours@hertheritagetours.com'),
+(26, '$2y$10$AUciDVzSGaUL7jdXeUdkM.DhFyvuMxkxFa1J8xurcFsZV8qHyg14m', '2026-04-14 12:53:24', 'approved', 'SME', 'tours@hertheritagetours.com'),
 (27, '$2y$10$.dWO5U3z4wW4FGMV32g3COS5QZbspNds4t8z853sYSp1ErZcuvvOO', '2026-04-12 21:16:53', 'approved', 'SME', 'studio@pixelcraftmedia.com'),
-(28, '$2y$10$LT2xJjdlHYINbJNC5PaEuup2dqUpNQMvIxct0ueW3FJRfYgObhWtK', '2026-04-09 19:25:00', 'approved', 'SME', 'shop@hatfieldhandmade.com'),
+(28, '$2y$10$LT2xJjdlHYINbJNC5PaEuup2dqUpNQMvIxct0ueW3FJRfYgObhWtK', '2026-04-14 13:02:18', 'approved', 'SME', 'shop@hatfieldhandmade.com'),
 (29, '$2y$10$HrsNx52kvUjSBIemM/6gcuaWiVz5LhBgpQMJz0pf4LxY4W1cPPC5m', '2026-04-09 19:35:19', 'approved', 'SME', 'press@hertfordink.com'),
 (34, '$2y$10$sCH/qU1xp9OQjvBqIRP1FuasIU/k/tRQ5N5JV3wSQtVllyC68uQ.q', '2026-04-10 09:25:47', 'approved', 'Resident', 'marcus.osei@gmail.com'),
 (35, '$2y$10$GSRl4qkAShFvWuyWsmdcyeB8OrG230vd7jUf9tCrV2vnbp8WlpIp6', '2026-04-10 09:27:46', 'approved', 'Resident', 'aisha.patel@gmail.com'),
@@ -946,7 +967,8 @@ INSERT INTO `user_registration_requests` (`review_id`, `user_id`, `admin_id`, `d
 (8, 11, 23, 'rejected', 'testing', '2026-04-08 11:46:25', 4),
 (9, 11, 23, 'approved', '', '2026-04-08 11:46:39', 4),
 (10, 44, 6, 'approved', '', '2026-04-12 21:51:35', 16),
-(11, 44, 6, 'rejected', 'Testing', '2026-04-12 21:51:52', 16);
+(11, 44, 6, 'rejected', 'Testing', '2026-04-12 21:51:52', 16),
+(12, 43, 6, 'approved', '', '2026-04-14 10:28:11', 15);
 
 -- --------------------------------------------------------
 
@@ -1171,13 +1193,13 @@ ALTER TABLE `user_roles`
 -- AUTO_INCREMENT for table `areas`
 --
 ALTER TABLE `areas`
-  MODIFY `area_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `area_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `honored_residents`
 --
 ALTER TABLE `honored_residents`
-  MODIFY `honor_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `honor_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `listings`
@@ -1219,7 +1241,7 @@ ALTER TABLE `order_items`
 -- AUTO_INCREMENT for table `past_events`
 --
 ALTER TABLE `past_events`
-  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `product_service`
@@ -1273,7 +1295,7 @@ ALTER TABLE `user_documents`
 -- AUTO_INCREMENT for table `user_registration_requests`
 --
 ALTER TABLE `user_registration_requests`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Constraints for dumped tables

@@ -217,7 +217,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'SME') {
         <table class="mgo-table">
             <thead>
                 <tr>
-                    <th>Order #</th>
+                    <th>S/N</th>
                     <th>Customer</th>
                     <th>Date</th>
                     <th>Items</th>
@@ -398,7 +398,7 @@ function mgoRenderPage() {
     count.textContent = `${total} order${total !== 1 ? 's' : ''} found`;
     const tbody = document.getElementById('mgo-table-body');
     tbody.innerHTML = '';
-    paged.forEach(o => tbody.appendChild(mgoBuildRow(o)));
+    paged.forEach((o, i) => tbody.appendChild(mgoBuildRow(o, (mgoPageNum - 1) * MGO_PER_PAGE + i + 1)));
     wrapper.style.display = 'block';
 
     mgoRenderPagination(totalPages);
@@ -456,7 +456,7 @@ function mgoRenderPagination(totalPages) {
          if (existing) existing.remove();
 }
  
-    function mgoBuildRow(o) {
+    function mgoBuildRow(o, rowNum) {
         const tr       = document.createElement('tr');
         const badgeCls = { processing: 'mgo-badge--processing', completed: 'mgo-badge--completed', cancelled: 'mgo-badge--cancelled' }[o.status] || '';
         const date     = new Date(o.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -469,7 +469,7 @@ function mgoRenderPagination(totalPages) {
         }
  
         tr.innerHTML = `
-            <td class="mgo-order-id">#${o.order_id}</td>
+            <td class="mgo-order-id">${rowNum}</td>
             <td class="mgo-customer-cell">
                 <p class="mgo-customer-name">${mgoEsc(customer)}</p>
                 <p class="mgo-customer-email">${mgoEsc(o.customer_email)}</p>

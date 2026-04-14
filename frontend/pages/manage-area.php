@@ -121,7 +121,7 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
         <table class="area-table">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>S/N</th>
                     <th>Area Name</th>
                     <th>Description</th>
                     <th>Postcode</th>
