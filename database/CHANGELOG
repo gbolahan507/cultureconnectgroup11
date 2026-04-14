@@ -1,5 +1,15 @@
 # Changelog
 
+## 15 April 2026
+
+An issue was identified. The resident_product_service_interest view was calculating rankings using a combination of votes, review ratings, and confirmed bookings. 
+This introduced redundancy as the ranking was pulling from multiple unrelated data sources when the intended purpose was to reflect community interest 
+based on voting alone.
+
+Change Made: Replaced the view using CREATE OR REPLACE VIEW to remove the review and booking score subqueries. 
+The view now calculates the score using only votes, with the formula: total likes minus total dislikes. 
+The column was also renamed from ranking to score to more accurately reflect that the value represents a net vote score rather than a positional rank.
+
 ## 13 April 2026
 
 ## New Table: Past Events
