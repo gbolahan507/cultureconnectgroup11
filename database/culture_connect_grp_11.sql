@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Apr 14, 2026 at 03:04 PM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Host: 127.0.0.1
+-- Generation Time: Apr 14, 2026 at 09:13 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -648,7 +648,7 @@ CREATE TABLE `resident_product_service_interest` (
 ,`price` decimal(10,2)
 ,`total_likes` decimal(22,0)
 ,`total_dislikes` decimal(22,0)
-,`ranking` decimal(56,0)
+,`score` decimal(23,0)
 );
 
 -- --------------------------------------------------------
@@ -1006,7 +1006,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `resident_product_service_interest`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `resident_product_service_interest`  AS SELECT `ps`.`item_name` AS `product_name`, `l`.`title` AS `listing_title`, `l`.`price` AS `price`, coalesce(`vote_score`.`total_likes`,0) AS `total_likes`, coalesce(`vote_score`.`total_dislikes`,0) AS `total_dislikes`, sum(coalesce(`vote_score`.`score`,0) + coalesce(`review_score`.`score`,0) + coalesce(`booking_score`.`score`,0)) AS `ranking` FROM ((((`listings` `l` join `product_service` `ps` on(`l`.`item_id` = `ps`.`item_id`)) left join (select `listing_votes`.`listing_id` AS `listing_id`,sum(case when `listing_votes`.`vote_type` = 'like' then 1 else 0 end) AS `total_likes`,sum(case when `listing_votes`.`vote_type` = 'dislike' then 1 else 0 end) AS `total_dislikes`,sum(case when `listing_votes`.`vote_type` = 'like' then 1 when `listing_votes`.`vote_type` = 'dislike' then -1 else 0 end) AS `score` from `listing_votes` group by `listing_votes`.`listing_id`) `vote_score` on(`vote_score`.`listing_id` = `l`.`listing_id`)) left join (select `product_service_reviews`.`listing_id` AS `listing_id`,sum(`product_service_reviews`.`rating`) AS `score` from `product_service_reviews` group by `product_service_reviews`.`listing_id`) `review_score` on(`review_score`.`listing_id` = `l`.`listing_id`)) left join (select `service_bookings`.`listing_id` AS `listing_id`,count(0) AS `score` from `service_bookings` where `service_bookings`.`status` = 'confirmed' and `service_bookings`.`listing_id` is not null group by `service_bookings`.`listing_id`) `booking_score` on(`booking_score`.`listing_id` = `l`.`listing_id`)) GROUP BY `ps`.`item_name`, `l`.`title`, `l`.`price`, `vote_score`.`total_likes`, `vote_score`.`total_dislikes` ORDER BY sum(coalesce(`vote_score`.`score`,0) + coalesce(`review_score`.`score`,0) + coalesce(`booking_score`.`score`,0)) DESC ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `resident_product_service_interest`  AS SELECT `ps`.`item_name` AS `product_name`, `l`.`title` AS `listing_title`, `l`.`price` AS `price`, coalesce(`v`.`total_likes`,0) AS `total_likes`, coalesce(`v`.`total_dislikes`,0) AS `total_dislikes`, coalesce(`v`.`total_likes`,0) - coalesce(`v`.`total_dislikes`,0) AS `score` FROM ((`listings` `l` join `product_service` `ps` on(`l`.`item_id` = `ps`.`item_id`)) left join (select `listing_votes`.`listing_id` AS `listing_id`,sum(case when `listing_votes`.`vote_type` = 'like' then 1 else 0 end) AS `total_likes`,sum(case when `listing_votes`.`vote_type` = 'dislike' then 1 else 0 end) AS `total_dislikes` from `listing_votes` group by `listing_votes`.`listing_id`) `v` on(`v`.`listing_id` = `l`.`listing_id`)) ORDER BY coalesce(`v`.`total_likes`,0) - coalesce(`v`.`total_dislikes`,0) DESC ;
 
 -- --------------------------------------------------------
 
