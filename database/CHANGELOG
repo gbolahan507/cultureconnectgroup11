@@ -1,6 +1,12 @@
 # Changelog
 
-## 15 April 2026
+## 15 April 2026 
+
+- Listing Request table: removed user_id since the approved_by field already captures who approved the listing, avoiding redundancy.
+- Resident Profile table: removed post_code since area_id already links to the area, which would include that information.
+
+
+## 14 April 2026
 
 An issue was identified. The resident_product_service_interest view was calculating rankings using a combination of votes, review ratings, and confirmed bookings. 
 This introduced redundancy as the ranking was pulling from multiple unrelated data sources when the intended purpose was to reflect community interest 
