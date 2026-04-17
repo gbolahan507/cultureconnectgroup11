@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 // Start session if not already active
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

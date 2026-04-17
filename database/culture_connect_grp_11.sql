@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Apr 14, 2026 at 09:13 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost
+-- Generation Time: Apr 17, 2026 at 05:24 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -140,7 +140,9 @@ INSERT INTO `listings` (`listing_id`, `sme_id`, `title`, `caption`, `description
 (21, 15, 'Limited Edition Hertfordshire Cultural Festival Poster', 'Collectible limited edition art print celebrating Hertfordshire\'s cultural calendar', 'These limited edition posters are designed exclusively by local artists to commemorate Hertfordshire\'s annual cultural festival. Each poster is A2 size, printed on 300gsm heavyweight paper with archival ink. Only 100 prints are produced per edition. Numbered and signed by the artist.', 18.00, 'active', '2026-04-09 19:31:52', '2026-04-09 19:41:19', 13, 6),
 (22, 15, 'Handmade Leather & Recycled Paper Journal', 'Beautifully crafted artisan journals made from leather and recycled paper', 'Our artisan journals feature hand-stitched recycled paper pages bound in a soft leather cover sourced from local suppliers. Each journal is unique and comes in A5 size with 120 pages. Ideal for sketching, writing, journaling or as a thoughtful gift for creative individuals.', 22.00, 'active', '2026-04-09 19:34:13', '2026-04-09 19:41:10', 14, 6),
 (23, 16, 'Hertfordshire Voices - Community Poetry Collection', 'An independently published anthology of poetry written by Hertfordshire residents', 'Hertfordshire Voices is our flagship poetry anthology featuring works from over 30 local writers. The collection explores themes of community, identity, nature and belonging through poetry in a variety of styles. Paperback, 180 pages. A portion of every sale supports our community writing workshops.', 12.00, 'active', '2026-04-09 19:37:24', '2026-04-10 11:05:13', 11, 6),
-(24, 16, 'The Hertford Quarterly - Community Zine', 'A quarterly zine featuring local art, writing, interviews and cultural commentary', 'The Hertford Quarterly is our independently produced community zine published four times a year. Each issue is packed with original short stories, poetry, local artist interviews, photography and cultural commentary from Hertfordshire residents. A5 format, 48 pages, full colour. Subscribe or buy individual issues.', 8.00, 'active', '2026-04-09 19:39:15', '2026-04-10 11:05:26', 12, 6);
+(24, 16, 'The Hertford Quarterly - Community Zine', 'A quarterly zine featuring local art, writing, interviews and cultural commentary', 'The Hertford Quarterly is our independently produced community zine published four times a year. Each issue is packed with original short stories, poetry, local artist interviews, photography and cultural commentary from Hertfordshire residents. A5 format, 48 pages, full colour. Subscribe or buy individual issues.', 8.00, 'active', '2026-04-09 19:39:15', '2026-04-10 11:05:26', 12, 6),
+(26, 3, 'Mindfulness & Art Therapy Sessions', 'Therapeutic art sessions designed to improve mental wellbeing', 'Our Mindfulness & Art Therapy Sessions combine guided mindfulness techniques with creative art-making to support mental and emotional wellbeing. No art experience is required — the focus is on the process, not the outcome. Sessions run for 75 minutes and are open to adults of all backgrounds. A safe, supportive and non-judgemental space for self-expression and healing. All materials provided.', 18.00, 'active', '2026-04-17 13:21:17', '2026-04-17 13:34:54', 1, 6),
+(27, 3, 'Music Therapy & Community Wellbeing Workshops', 'Therapeutic music sessions promoting emotional resilience and community connection', 'Our Music Therapy Workshops use rhythm, sound and group music-making to promote emotional resilience, reduce stress and build community connection. No musical experience is needed. Sessions are facilitated by a qualified music therapist and are suitable for adults aged 18 and above. Groups are kept small to ensure a personal and supportive experience for every participant.', 20.00, 'active', '2026-04-17 13:23:29', '2026-04-17 13:34:14', 1, 6);
 
 --
 -- Triggers `listings`
@@ -217,7 +219,11 @@ INSERT INTO `listing_images` (`image_id`, `listing_id`, `image_url`, `is_primary
 (30, 23, '1775767044_465feede-e7e7-4b8c-868b-d333bc277f6f_1_201_a.jpg', 1, '2026-04-09 19:37:24'),
 (31, 23, '17757670440_images-3.jpeg', 0, '2026-04-09 19:37:24'),
 (32, 24, '1775767155_images-4.jpeg', 1, '2026-04-09 19:39:15'),
-(33, 24, '17757671550_images-5.jpeg', 0, '2026-04-09 19:39:15');
+(33, 24, '17757671550_images-5.jpeg', 0, '2026-04-09 19:39:15'),
+(36, 26, '1776432077_3fd03e1453cded9edb95fa2cb50567cc.png', 1, '2026-04-17 13:21:17'),
+(37, 26, '17764320770_Mindful-Art-Activities-scaled.jpg', 0, '2026-04-17 13:21:17'),
+(38, 27, '1776432209_C0144.MP4.10_21_43_14.Still001.jpg.webp', 1, '2026-04-17 13:23:30'),
+(39, 27, '17764322100_IMG_7910.jpg', 0, '2026-04-17 13:23:30');
 
 -- --------------------------------------------------------
 
@@ -258,7 +264,9 @@ INSERT INTO `listing_requests` (`approval_id`, `listing_id`, `user_id`, `decisio
 (19, 9, 6, 'approved', 'approved', '2026-04-09 19:43:21'),
 (20, 8, 6, 'approved', 'approved', '2026-04-09 19:43:35'),
 (21, 24, 6, 'approved', '', '2026-04-09 22:30:17'),
-(22, 24, 6, 'approved', '', '2026-04-12 21:57:02');
+(22, 24, 6, 'approved', '', '2026-04-12 21:57:02'),
+(23, 27, 6, 'approved', '', '2026-04-17 13:34:14'),
+(24, 26, 6, 'approved', 'approved', '2026-04-17 13:34:54');
 
 --
 -- Triggers `listing_requests`
@@ -355,7 +363,25 @@ INSERT INTO `listing_votes` (`vote_id`, `user_id`, `listing_id`, `vote_type`, `c
 (56, 41, 23, 'like', '2026-04-11 21:37:08'),
 (57, 35, 24, 'like', '2026-04-11 21:37:08'),
 (58, 37, 24, 'dislike', '2026-04-11 21:37:08'),
-(59, 39, 24, 'like', '2026-04-11 21:37:08');
+(59, 39, 24, 'like', '2026-04-11 21:37:08'),
+(70, 37, 12, 'dislike', '2026-04-17 13:32:49'),
+(71, 39, 16, 'dislike', '2026-04-17 13:32:49'),
+(72, 38, 22, 'dislike', '2026-04-17 13:32:49'),
+(73, 41, 24, 'dislike', '2026-04-17 13:32:49'),
+(74, 9, 15, 'dislike', '2026-04-17 13:32:49'),
+(75, 13, 20, 'dislike', '2026-04-17 13:32:49'),
+(76, 8, 14, 'dislike', '2026-04-17 13:32:49'),
+(77, 9, 27, 'like', '2026-04-17 15:00:18'),
+(78, 9, 26, 'dislike', '2026-04-17 15:00:38'),
+(79, 9, 24, 'like', '2026-04-17 15:02:51'),
+(80, 9, 20, 'like', '2026-04-17 15:02:54'),
+(81, 9, 12, 'dislike', '2026-04-17 15:02:58'),
+(82, 9, 9, 'like', '2026-04-17 15:03:00'),
+(83, 9, 10, 'like', '2026-04-17 15:03:01'),
+(84, 9, 7, 'dislike', '2026-04-17 15:03:05'),
+(85, 9, 14, 'like', '2026-04-17 15:03:10'),
+(86, 9, 13, 'like', '2026-04-17 15:03:11'),
+(87, 9, 23, 'like', '2026-04-17 15:03:26');
 
 -- --------------------------------------------------------
 
@@ -396,7 +422,8 @@ INSERT INTO `orders` (`order_id`, `user_id`, `total_amount`, `status`, `created_
 (20, 8, 20.00, 'completed', '2026-04-02 21:28:54'),
 (21, 34, 18.00, 'completed', '2026-03-07 22:29:10'),
 (22, 35, 45.00, 'completed', '2026-03-02 22:29:25'),
-(23, 9, 22.00, 'processing', '2026-04-11 22:40:21');
+(23, 9, 22.00, 'processing', '2026-04-11 22:40:21'),
+(24, 9, 20.00, 'completed', '2026-04-17 15:00:29');
 
 -- --------------------------------------------------------
 
@@ -447,7 +474,8 @@ INSERT INTO `order_items` (`order_item_id`, `order_id`, `listing_id`, `quantity`
 (30, 20, 24, 1, 8.00),
 (31, 21, 13, 1, 18.00),
 (32, 22, 19, 1, 45.00),
-(33, 23, 22, 1, 22.00);
+(33, 23, 22, 1, 22.00),
+(34, 24, 27, 1, 20.00);
 
 -- --------------------------------------------------------
 
@@ -693,7 +721,8 @@ INSERT INTO `resident_profiles` (`profile_id`, `user_id`, `first_name`, `last_na
 (21, 41, 'David', 'Kofi', '1987-06-25', 'Male', '55 Ash Grove, Hatfield', '+44 7700 100017', 'AL10 9SB', '2026-04-10 09:38:53', 2),
 (22, 42, 'Tariq', 'Hussain', '1997-06-14', 'Male', '9 Hazel Court, Hatfield', '+44 7700 200001', 'AL10 9NA', '2026-04-10 09:45:08', 1),
 (23, 43, 'Siobhan', 'Oconnor', '1993-11-28', 'Female', '27 Poplar Drive, Hatfield', '+44 7700 200002', 'AL10 0ED', '2026-04-10 09:46:55', 3),
-(24, 44, 'Samuel', 'Tally', '2001-03-05', 'Male', '43 Sycamore Road, Hatfield', '+44 7700 200003', 'AL10 0WB', '2026-04-10 09:49:09', 4);
+(24, 44, 'Samuel', 'Tally', '2001-03-05', 'Male', '43 Sycamore Road, Hatfield', '+44 7700 200003', 'AL10 0WB', '2026-04-10 09:49:09', 4),
+(25, 48, 'Sophie', 'Bennett', '1995-06-15', 'Female', '42 Elm Street, Hatfield', '+44 7700 900456', 'AL10 0WB', '2026-04-17 13:41:02', 4);
 
 --
 -- Triggers `resident_profiles`
@@ -815,7 +844,7 @@ CREATE TABLE `sme_profiles` (
 --
 
 INSERT INTO `sme_profiles` (`sme_id`, `business_name`, `approval_status`, `created_at`, `area_id`, `description`, `phone`, `user_id`, `subcategory_id`) VALUES
-(3, 'Harmony Wellbeing Centre', 'pending', '2026-04-06 09:54:55', 1, 'Harmony Wellbeing Centre is a community-focused organisation dedicated to improving the mental, physical, and emotional wellbeing of local residents. We offer a range of therapeutic services including art therapy, music therapy, mindfulness workshops, and community support groups. Our mission is to foster a sense of belonging and cultural connection through inclusive and accessible wellbeing programmes tailored to the diverse needs of our community.', '+44 7700 900123', 10, 3),
+(3, 'Harmony Wellbeing Centre', 'approved', '2026-04-06 09:54:55', 1, 'Harmony Wellbeing Centre is a community-focused organisation dedicated to improving the mental, physical, and emotional wellbeing of local residents. We offer a range of therapeutic services including art therapy, music therapy, mindfulness workshops, and community support groups. Our mission is to foster a sense of belonging and cultural connection through inclusive and accessible wellbeing programmes tailored to the diverse needs of our community.', '+44 7700 900123', 10, 3),
 (11, 'Brushstroke Studio', 'approved', '2026-04-09 08:36:23', 1, 'Brushstroke Studio is a vibrant creative hub in Hertfordshire offering art classes, music lessons, and movement workshops for all ages. We believe creativity is for everyone and provide a welcoming space for beginners and experienced artists alike.', '+44 7700 100001', 24, 1),
 (12, 'Hatfield Theatre Collective', 'approved', '2026-04-09 08:37:51', 2, 'Hatfield Theatre Collective is a community-driven performing arts organisation staging live theatre, concerts and open mic nights. We celebrate local talent and bring the community together through the power of performance.', '+44 7700 100002', 25, 2),
 (13, 'Hertfordshire Heritage Tours', 'approved', '2026-04-09 08:40:06', 3, 'Hertfordshire Heritage Tours offers immersive guided cultural walks and museum programmes that bring local history to life. Our expert guides lead residents and visitors through the rich cultural landscape of Hertfordshire.', '+44 7700 100003', 26, 3),
@@ -843,14 +872,14 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`, `role`, `email_address`) VALUES
-(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-14 11:49:30', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
+(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-17 13:43:08', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
 (8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-04 18:16:05', 'approved', 'Resident', 'nike@gmail.com'),
-(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-14 13:01:47', 'approved', 'Resident', 'josephine@gmail.com'),
-(10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-11 23:25:12', 'approved', 'SME', 'info@harmonywellbeing.com'),
+(9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-17 15:02:13', 'approved', 'Resident', 'josephine@gmail.com'),
+(10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-17 15:01:24', 'approved', 'SME', 'info@harmonywellbeing.com'),
 (11, '$2y$10$pEGsw9izjII4FX3gzzaJ4.QSDLc70c6nGub9/1IU78TLgASSZUsf.', '2026-04-07 08:16:06', 'approved', 'Resident', 'victor@gmail.com'),
 (12, '$2y$10$aSQiHxr71NTJT0.ohlXxDezWv08wpyxyjnP1tR9q7tgxhcBsX.Uai', '2026-04-12 21:18:58', 'approved', 'Resident', 'jake@gmail.com'),
 (13, '$2y$10$L680iiTY/OYAE9v./tg99O4N1T/ao6GKU/AnYCR6KNO4jLIimJKHu', '2026-04-08 11:28:32', 'approved', 'Resident', 'habeeb@gmail.com'),
-(23, '$2y$10$UDiUYY47oKHijEltMpEDRusNoO93tFpEhQ389rybJJHXwzuNwcMiG', '2026-04-08 11:37:39', 'approved', 'Council Member', 'Cmember@cultureconnect.com'),
+(23, '$2y$10$UDiUYY47oKHijEltMpEDRusNoO93tFpEhQ389rybJJHXwzuNwcMiG', '2026-04-17 15:03:57', 'approved', 'Council Member', 'Cmember@cultureconnect.com'),
 (24, '$2y$10$ViJxAEtd.j9tpIUKfzKPw.5pPGEFm4c5JlfxBXha4GgFbGeWXTzvC', '2026-04-14 10:29:36', 'approved', 'SME', 'hello@brushstrokestudio.com'),
 (25, '$2y$10$eLhuVYx4TBSMRuld/k4THuwZ1XC2EhQG4fUCshbrKOlnRdgqz5Hva', '2026-04-12 21:58:07', 'approved', 'SME', 'info@hatfieldtheatre.com'),
 (26, '$2y$10$AUciDVzSGaUL7jdXeUdkM.DhFyvuMxkxFa1J8xurcFsZV8qHyg14m', '2026-04-14 12:53:24', 'approved', 'SME', 'tours@hertheritagetours.com'),
@@ -870,7 +899,8 @@ INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`,
 (44, '$2y$10$x1vCCutsYAkIALta/IzB/OwuVjieM6HfMTtUV/BLNot5kjkgfRCwm', '2026-04-10 09:49:09', 'rejected', 'Resident', 'samuel.tally@gmail.com'),
 (45, '$2y$10$1N6upPakt9SvA2705zNUF.tx5VF5hfjzlabv4BXhFgb7C1/6jcXNy', '2026-04-10 09:52:08', 'pending', 'SME', 'info@africanheritagecrafts.co.uk'),
 (46, '$2y$10$yzbl51n2Sa4whe2ggwRicuhjxExcYsKm3DoGNfDfIlClcVsYbZ6v6', '2026-04-10 09:54:48', 'pending', 'SME', 'hello@hertsmusicschool.co.uk'),
-(47, '$2y$10$EdYx3Tr2i3A.w0ayszXgDu/KgyWJbGdyzBns8BLuenmvpInRtm1xu', '2026-04-10 09:57:07', 'pending', 'SME', 'contact@communityfilmherts.co.uk');
+(47, '$2y$10$EdYx3Tr2i3A.w0ayszXgDu/KgyWJbGdyzBns8BLuenmvpInRtm1xu', '2026-04-10 09:57:07', 'pending', 'SME', 'contact@communityfilmherts.co.uk'),
+(48, '$2y$10$nCKYO.b65oO06OriTe/5EOLUb24vMe6v9jtLz4b4u33fmYD07/9.C', '2026-04-17 13:41:02', 'approved', 'Resident', 'sophie.bennett@gmail.com');
 
 --
 -- Triggers `users`
@@ -921,20 +951,28 @@ INSERT INTO `user_documents` (`document_id`, `user_id`, `document_type`, `file_p
 (5, 12, 'Bank_Statement', '../uploads/verification_documents/1775553570_bank_statement.pdf', 'approved', '2026-04-07 08:19:30'),
 (6, 13, 'Bank_Statement', '../uploads/verification_documents/1775553662_bank_statement.pdf', 'approved', '2026-04-07 08:21:02'),
 (7, 23, 'Bank_Statement', '../uploads/verification_documents/1775647905_bank_statement.pdf', 'approved', '2026-04-08 11:31:45'),
-(14, 42, 'Driver_License', '../uploads/verification_documents/placeholder_tariq.pdf', 'approved', '2026-04-12 21:51:21'),
-(15, 43, 'Utility_Bill', '../uploads/verification_documents/placeholder_siobhan.pdf', 'approved', '2026-04-12 21:51:21'),
-(16, 44, 'Bank_Statement', '../uploads/verification_documents/placeholder_samuel.pdf', 'approved', '2026-04-12 21:51:21'),
-(17, 45, 'Bank_Statement', '../uploads/verification_documents/placeholder_african.pdf', 'approved', '2026-04-12 21:51:21'),
-(18, 46, 'Bank_Statement', '../uploads/verification_documents/placeholder_herts.pdf', 'approved', '2026-04-12 21:51:21'),
-(19, 47, 'Bank_Statement', '../uploads/verification_documents/placeholder_film.pdf', 'approved', '2026-04-12 21:51:21'),
-(20, 34, 'Driver_License', '../uploads/verification_documents/placeholder_marcus.pdf', 'approved', '2026-04-12 21:56:35'),
-(21, 35, 'Driver_License', '../uploads/verification_documents/placeholder_aisha.pdf', 'approved', '2026-04-12 21:56:35'),
-(22, 36, 'Utility_Bill', '../uploads/verification_documents/placeholder_daniel.pdf', 'approved', '2026-04-12 21:56:35'),
-(23, 37, 'Driver_License', '../uploads/verification_documents/placeholder_fatima.pdf', 'approved', '2026-04-12 21:56:35'),
-(24, 38, 'Bank_Statement', '../uploads/verification_documents/placeholder_james.pdf', 'approved', '2026-04-12 21:56:35'),
-(25, 39, 'Driver_License', '../uploads/verification_documents/placeholder_priya.pdf', 'approved', '2026-04-12 21:56:35'),
-(26, 40, 'Utility_Bill', '../uploads/verification_documents/placeholder_sarah.pdf', 'approved', '2026-04-12 21:56:35'),
-(27, 41, 'Bank_Statement', '../uploads/verification_documents/placeholder_david.pdf', 'approved', '2026-04-12 21:56:35');
+(14, 42, 'Driver_License', '../uploads/verification_documents/1776435905_user42_bank_statement.pdf', 'pending', '2026-04-12 21:51:21'),
+(15, 43, 'Utility_Bill', '../uploads/verification_documents/1776435917_user43_bank_statement.pdf', 'pending', '2026-04-12 21:51:21'),
+(16, 44, 'Bank_Statement', '../uploads/verification_documents/1776435929_user44_bank_statement.pdf', 'pending', '2026-04-12 21:51:21'),
+(17, 45, 'Bank_Statement', '../uploads/verification_documents/1776435939_user45_bank_statement.pdf', 'approved', '2026-04-12 21:51:21'),
+(18, 46, 'Bank_Statement', '../uploads/verification_documents/1776435950_user46_bank_statement.pdf', 'approved', '2026-04-12 21:51:21'),
+(19, 47, 'Bank_Statement', '../uploads/verification_documents/1776435961_user47_bank_statement.pdf', 'approved', '2026-04-12 21:51:21'),
+(20, 34, 'Driver_License', '../uploads/verification_documents/1776435811_user34_bank_statement.pdf', 'approved', '2026-04-12 21:56:35'),
+(21, 35, 'Driver_License', '../uploads/verification_documents/1776435824_user35_bank_statement.pdf', 'approved', '2026-04-12 21:56:35'),
+(22, 36, 'Utility_Bill', '../uploads/verification_documents/1776435838_user36_bank_statement.pdf', 'pending', '2026-04-12 21:56:35'),
+(23, 37, 'Driver_License', '../uploads/verification_documents/1776435851_user37_bank_statement.pdf', 'approved', '2026-04-12 21:56:35'),
+(24, 38, 'Bank_Statement', '../uploads/verification_documents/1776435866_user38_bank_statement.pdf', 'approved', '2026-04-12 21:56:35'),
+(25, 39, 'Driver_License', '../uploads/verification_documents/1776435878_user39_bank_statement.pdf', 'approved', '2026-04-12 21:56:35'),
+(26, 40, 'Utility_Bill', '../uploads/verification_documents/1776435893_user40_bank_statement.pdf', 'approved', '2026-04-12 21:56:35'),
+(27, 41, 'Bank_Statement', '../uploads/verification_documents/1776435692_user41_bank_statement.pdf', 'approved', '2026-04-12 21:56:35'),
+(28, 48, 'Bank_Statement', '../uploads/verification_documents/1776433262_bank_statement.pdf', 'approved', '2026-04-17 13:41:02'),
+(29, 6, 'Bank_Statement', '../uploads/verification_documents/1776435624_user6_bank_statement.pdf', 'approved', '2026-04-17 14:20:24'),
+(30, 24, 'Bank_Statement', '../uploads/verification_documents/1776435648_user24_bank_statement.pdf', 'approved', '2026-04-17 14:20:48'),
+(31, 25, 'Bank_Statement', '../uploads/verification_documents/1776435749_user25_bank_statement.pdf', 'approved', '2026-04-17 14:22:29'),
+(32, 26, 'Bank_Statement', '../uploads/verification_documents/1776435761_user26_bank_statement.pdf', 'approved', '2026-04-17 14:22:41'),
+(33, 27, 'Bank_Statement', '../uploads/verification_documents/1776435772_user27_bank_statement.pdf', 'approved', '2026-04-17 14:22:52'),
+(34, 28, 'Bank_Statement', '../uploads/verification_documents/1776435783_user28_bank_statement.pdf', 'approved', '2026-04-17 14:23:03'),
+(35, 29, 'Bank_Statement', '../uploads/verification_documents/1776435795_user29_bank_statement.pdf', 'approved', '2026-04-17 14:23:15');
 
 -- --------------------------------------------------------
 
@@ -968,7 +1006,9 @@ INSERT INTO `user_registration_requests` (`review_id`, `user_id`, `admin_id`, `d
 (9, 11, 23, 'approved', '', '2026-04-08 11:46:39', 4),
 (10, 44, 6, 'approved', '', '2026-04-12 21:51:35', 16),
 (11, 44, 6, 'rejected', 'Testing', '2026-04-12 21:51:52', 16),
-(12, 43, 6, 'approved', '', '2026-04-14 10:28:11', 15);
+(12, 43, 6, 'approved', '', '2026-04-14 10:28:11', 15),
+(13, 34, 6, 'approved', '', '2026-04-17 13:44:29', 20),
+(14, 48, 6, 'approved', '', '2026-04-17 13:57:52', 28);
 
 -- --------------------------------------------------------
 
@@ -1193,7 +1233,7 @@ ALTER TABLE `user_roles`
 -- AUTO_INCREMENT for table `areas`
 --
 ALTER TABLE `areas`
-  MODIFY `area_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `area_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `honored_residents`
@@ -1205,37 +1245,37 @@ ALTER TABLE `honored_residents`
 -- AUTO_INCREMENT for table `listings`
 --
 ALTER TABLE `listings`
-  MODIFY `listing_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `listing_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `listing_images`
 --
 ALTER TABLE `listing_images`
-  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `listing_requests`
 --
 ALTER TABLE `listing_requests`
-  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `listing_votes`
 --
 ALTER TABLE `listing_votes`
-  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
+  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=88;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `past_events`
@@ -1271,7 +1311,7 @@ ALTER TABLE `product_service_subcategories`
 -- AUTO_INCREMENT for table `resident_profiles`
 --
 ALTER TABLE `resident_profiles`
-  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `sme_profiles`
@@ -1283,19 +1323,19 @@ ALTER TABLE `sme_profiles`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
 
 --
 -- AUTO_INCREMENT for table `user_documents`
 --
 ALTER TABLE `user_documents`
-  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `user_registration_requests`
 --
 ALTER TABLE `user_registration_requests`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- Constraints for dumped tables

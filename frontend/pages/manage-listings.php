@@ -1,6 +1,6 @@
 <?php ob_start(); ?>
 <?php
-// ── AJAX HANDLER ─────────────────────────────────────────────
+// AJAX HANDLER
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if (session_status() === PHP_SESSION_NONE) session_start();
     if (!isset($conn)) include '../db_connection.php';
@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // ── Get Listings (SME) ────────────────────────────────────
+    //  Get Listings (SME)
     if ($_POST['action'] === 'get_listings') {
         $status_filter = $_POST['status'] ?? 'all';
         if (!$sme_id) { echo json_encode(['success' => false, 'message' => 'SME profile not found.']); exit(); }
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // ── Get Business Listings (Council) ───────────────────────
+    // Get Business Listings (Council) 
     if ($_POST['action'] === 'get_business_listings') {
         if (!in_array($role, ['Council Administrator', 'Council Member'])) {
             echo json_encode(['success' => false, 'message' => 'Permission denied.']);
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // ── Get Single Listing + Images ───────────────────────────
+    //  Get Single Listing + Images 
     if ($_POST['action'] === 'get_listing') {
         $listing_id = intval($_POST['listing_id'] ?? 0);
 
@@ -145,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // ── Get Listing Images ────────────────────────────────────
+    // Get Listing Images
     if ($_POST['action'] === 'get_listing_images') {
         if ($role !== 'SME' || !$sme_id) { echo json_encode(['success' => false, 'message' => 'Permission denied.']); exit(); }
         $listing_id = intval($_POST['listing_id'] ?? 0);
@@ -171,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // ── Set Primary Image ─────────────────────────────────────
+    // Set Primary Image 
     if ($_POST['action'] === 'set_primary_image') {
         if ($role !== 'SME' || !$sme_id) { echo json_encode(['success' => false, 'message' => 'Permission denied.']); exit(); }
         $image_id   = intval($_POST['image_id']   ?? 0);
@@ -193,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // ── Delete Image ──────────────────────────────────────────
+    // Delete Image 
     if ($_POST['action'] === 'delete_image') {
         if ($role !== 'SME' || !$sme_id) { echo json_encode(['success' => false, 'message' => 'Permission denied.']); exit(); }
         $image_id   = intval($_POST['image_id']   ?? 0);
@@ -238,7 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // ── Upload Images ─────────────────────────────────────────
+    // Upload Images 
     if ($_POST['action'] === 'upload_images') {
         if ($role !== 'SME' || !$sme_id) { echo json_encode(['success' => false, 'message' => 'Permission denied.']); exit(); }
         $listing_id = intval($_POST['listing_id'] ?? 0);
@@ -285,7 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // ── Update Status (Council) ───────────────────────────────
+    // Update Status (Council) 
     if ($_POST['action'] === 'update_status') {
         if (!in_array($role, ['Council Administrator', 'Council Member'])) { echo json_encode(['success' => false, 'message' => 'Permission denied.']); exit(); }
 
@@ -313,7 +313,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // ── Update Listing (SME) ──────────────────────────────────
+    // Update Listing (SME) 
     if ($_POST['action'] === 'update_listing') {
         if ($role !== 'SME' || !$sme_id) { echo json_encode(['success' => false, 'message' => 'Permission denied.']); exit(); }
 
@@ -465,10 +465,13 @@ if ($ml_is_council) {
 ?>
 
 <?php if ($ml_is_council) : ?>
-<!-- ── COUNCIL VIEW ───────────────────────────────────────── -->
+<!--  COUNCIL VIEW  -->
 
 <div class="ml-toolbar">
     <div class="ml-count-label"><?= count($ml_businesses) ?> approved business<?= count($ml_businesses) !== 1 ? 'es' : '' ?></div>
+</div>
+<div class="search-container" style="margin-bottom:1rem;">
+    <input type="text" id="ml-biz-search" placeholder="Search by business name or category" onkeyup="mlFilterBusinesses()">
 </div>
 
 <div class="ml-table-wrapper">
@@ -529,7 +532,7 @@ if ($ml_is_council) {
 </div>
 
 <?php else : ?>
-<!-- ── SME VIEW ───────────────────────────────────────────── -->
+<!-- SME VIEW -->
 
 <div class="ml-status-tabs">
     <button class="ml-tab ml-tab--active" onclick="mlSetTab(this, 'all')">All</button>
@@ -580,7 +583,7 @@ if ($ml_is_council) {
 </div><!-- /.ml-page -->
 
 
-<!-- ── VIEW MODAL ────────────────────────────────────────── -->
+<!-- VIEW MODAL -->
 <div id="ml-view-modal" class="ml-modal-overlay" style="display:none;">
     <div class="ml-modal-box">
         <div class="ml-modal-header">
@@ -642,7 +645,7 @@ if ($ml_is_council) {
 </div>
 
 
-<!-- ── EDIT MODAL (SME only) ─────────────────────────────── -->
+<!-- EDIT MODAL (SME only) -->
 <?php if ($ml_role === 'SME') : ?>
 <div id="ml-edit-modal" class="ml-modal-overlay" style="display:none;">
     <div class="ml-modal-box">
@@ -703,7 +706,7 @@ if ($ml_is_council) {
 </div>
 
 
-<!-- ── MANAGE IMAGES MODAL (SME only) ────────────────────── -->
+<!-- MANAGE IMAGES MODAL for SME only -->
 <div id="ml-images-modal" class="ml-modal-overlay" style="display:none;">
     <div class="ml-modal-box ml-modal-box--wide">
         <div class="ml-modal-header">
@@ -746,7 +749,7 @@ if ($ml_is_council) {
 <?php endif; ?>
 
 
-<!-- ── DELETE MODAL ───────────────────────────────────────── -->
+<!-- DELETE MODAL -->
 <div id="ml-delete-modal" class="ml-modal-overlay" style="display:none;">
     <div class="ml-modal-box ml-modal-box--sm">
         <div class="ml-modal-header ml-modal-header--danger">
@@ -804,7 +807,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// ── SME: Tab switch ───────────────────────────────────────────
+// SME: Tab switch
 function mlSetTab(btn, status) {
     document.querySelectorAll('.ml-tab').forEach(function(t) { t.classList.remove('ml-tab--active'); });
     btn.classList.add('ml-tab--active');
@@ -812,7 +815,7 @@ function mlSetTab(btn, status) {
     mlLoadListings(status);
 }
 
-// ── SME: Load listings ────────────────────────────────────────
+// SME: Load listings 
 function mlLoadListings(status) {
     var tbody      = document.getElementById('ml-table-body');
     var emptyState = document.getElementById('ml-empty-state');
@@ -941,7 +944,7 @@ function mlBuildRow(l, index) {
     return tr;
 }
 
-// ── COUNCIL: Business listings panel ─────────────────────────
+// COUNCIL: Business listings panel 
 function mlLoadBizListings(sme_id, business_name) {
     mlActiveBizSmeId = sme_id;
     mlActiveBizName  = business_name;
@@ -1002,7 +1005,14 @@ function mlCloseBizPanel() {
     mlActiveBizName  = '';
 }
 
-// ── VIEW MODAL ────────────────────────────────────────────────
+function mlFilterBusinesses() {
+    var input = document.getElementById('ml-biz-search').value.toLowerCase();
+    document.querySelectorAll('[id^="ml-biz-row-"]').forEach(function(row) {
+        row.style.display = row.textContent.toLowerCase().includes(input) ? '' : 'none';
+    });
+}
+
+// VIEW MODAL 
 function mlOpenView(listing_id) {
     mlViewListingId  = listing_id;
     mlCarouselImages = [];
@@ -1063,7 +1073,7 @@ function mlToggleCommentBox() {
     document.getElementById('ml-approval-comment-wrap').style.display = status === 'active'   ? 'flex' : 'none';
 }
 
-// ── CAROUSEL ──────────────────────────────────────────────────
+// CAROUSEL
 function mlCarouselRender() {
     var total = mlCarouselImages.length;
     document.getElementById('ml-carousel-img').src = '../uploads/listings_images/' + mlCarouselImages[mlCarouselIndex];
@@ -1083,7 +1093,7 @@ function mlCarouselRender() {
 function mlCarouselPrev() { if (mlCarouselImages.length < 2) return; mlCarouselIndex = (mlCarouselIndex - 1 + mlCarouselImages.length) % mlCarouselImages.length; mlCarouselRender(); }
 function mlCarouselNext() { if (mlCarouselImages.length < 2) return; mlCarouselIndex = (mlCarouselIndex + 1) % mlCarouselImages.length; mlCarouselRender(); }
 
-// ── SAVE STATUS (Council) ─────────────────────────────────────
+// SAVE STATUS (Council)
 function mlSaveStatus() {
     if (!mlViewListingId) return;
     var status  = document.getElementById('ml-status-select').value;
@@ -1121,7 +1131,7 @@ function mlSaveStatus() {
         .finally(function() { saveBtn.disabled = false; saveBtn.textContent = 'Update Status'; });
 }
 
-// ── MANAGE IMAGES ─────────────────────────────────────────────
+// MANAGE IMAGES
 function mlOpenImages(listing_id) {
     mlImagesListingId = listing_id;
     var modal   = document.getElementById('ml-images-modal');
@@ -1235,7 +1245,7 @@ function mlUploadImages() {
 function mlShowImgAlert(message, type) { var el=document.getElementById('ml-img-alert'); el.textContent=message; el.className='ml-alert ml-alert--'+type; el.style.display='block'; }
 function mlCloseImagesModal() { document.getElementById('ml-images-modal').style.display='none'; mlImagesListingId=null; }
 
-// ── EDIT MODAL (SME) ──────────────────────────────────────────
+// EDIT MODAL (SME)
 function mlOpenEdit(listing_id) {
     var fd = new FormData(); fd.append('action','get_listing'); fd.append('listing_id',listing_id);
     fetch('../pages/manage-listings.php',{method:'POST',body:fd})
@@ -1289,7 +1299,7 @@ function mlSaveListing() {
         .finally(function(){saveBtn.disabled=false;saveBtn.textContent='Save & Resubmit';});
 }
 
-// ── UNPUBLISH ─────────────────────────────────────────────────
+// UNPUBLISH
 function mlUnpublish(listing_id, btn) {
     if(!confirm('Unpublish this listing?')) return;
     btn.disabled=true; btn.textContent='…';
@@ -1299,7 +1309,7 @@ function mlUnpublish(listing_id, btn) {
         .then(function(text){ try { var d=JSON.parse(text); if(d.success){mlShowToast(d.message,'success');mlLoadListings(mlCurrentStatus);}else{mlShowToast(d.message||'Failed.','error');btn.disabled=false;btn.textContent='Unpublish';} } catch(e){btn.disabled=false;btn.textContent='Unpublish';} });
 }
 
-// ── DELETE ────────────────────────────────────────────────────
+// DELETE
 function mlOpenDelete(listing_id, title) {
     mlDeleteListingId=listing_id;
     document.getElementById('ml-delete-listing-title').textContent=title;
@@ -1319,7 +1329,7 @@ function mlConfirmDelete() {
         .finally(function(){btn.disabled=false;btn.textContent='Yes, Delete';});
 }
 
-// ── HELPERS ───────────────────────────────────────────────────
+// HELPERS
 function mlEsc(str) {
     if(!str) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
