@@ -1,5 +1,9 @@
 # Changelog
 
+## 17 April 2026 
+
+Added the user_id and approved_by back. Taking them out would've broken another trigger (the one that restricts approvals to council/admins)
+
 ## 15 April 2026 
 
 - Listing Request table: removed user_id since the approved_by field already captures who approved the listing, avoiding redundancy.
