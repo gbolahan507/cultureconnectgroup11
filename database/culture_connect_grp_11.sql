@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 16, 2026 at 11:27 AM
+-- Generation Time: Apr 14, 2026 at 09:13 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -228,6 +228,7 @@ INSERT INTO `listing_images` (`image_id`, `listing_id`, `image_url`, `is_primary
 CREATE TABLE `listing_requests` (
   `approval_id` int(11) NOT NULL,
   `listing_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
   `decision` enum('approved','rejected') NOT NULL,
   `comment` text NOT NULL,
   `decided_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -237,27 +238,27 @@ CREATE TABLE `listing_requests` (
 -- Dumping data for table `listing_requests`
 --
 
-INSERT INTO `listing_requests` (`approval_id`, `listing_id`, `decision`, `comment`, `decided_at`) VALUES
-(3, 7, 'approved', 'Approved', '2026-04-09 11:48:14'),
-(4, 24, 'approved', '', '2026-04-09 19:40:38'),
-(5, 23, 'approved', 'approved', '2026-04-09 19:40:57'),
-(6, 22, 'approved', 'approved', '2026-04-09 19:41:10'),
-(7, 21, 'approved', 'approved', '2026-04-09 19:41:19'),
-(8, 20, 'approved', 'approved', '2026-04-09 19:41:29'),
-(9, 19, 'approved', 'approved', '2026-04-09 19:41:37'),
-(10, 18, 'approved', 'approved', '2026-04-09 19:41:48'),
-(11, 17, 'approved', 'approved', '2026-04-09 19:41:59'),
-(12, 16, 'approved', 'approved', '2026-04-09 19:42:09'),
-(13, 15, 'approved', 'approved', '2026-04-09 19:42:19'),
-(14, 14, 'approved', 'approved', '2026-04-09 19:42:29'),
-(15, 13, 'approved', 'approved', '2026-04-09 19:42:41'),
-(16, 12, 'approved', 'approved', '2026-04-09 19:42:53'),
-(17, 11, 'approved', '', '2026-04-09 19:42:58'),
-(18, 10, 'approved', 'approved', '2026-04-09 19:43:09'),
-(19, 9, 'approved', 'approved', '2026-04-09 19:43:21'),
-(20, 8, 'approved', 'approved', '2026-04-09 19:43:35'),
-(21, 24, 'approved', '', '2026-04-09 22:30:17'),
-(22, 24, 'approved', '', '2026-04-12 21:57:02');
+INSERT INTO `listing_requests` (`approval_id`, `listing_id`, `user_id`, `decision`, `comment`, `decided_at`) VALUES
+(3, 7, 6, 'approved', 'Approved', '2026-04-09 11:48:14'),
+(4, 24, 6, 'approved', '', '2026-04-09 19:40:38'),
+(5, 23, 6, 'approved', 'approved', '2026-04-09 19:40:57'),
+(6, 22, 6, 'approved', 'approved', '2026-04-09 19:41:10'),
+(7, 21, 6, 'approved', 'approved', '2026-04-09 19:41:19'),
+(8, 20, 6, 'approved', 'approved', '2026-04-09 19:41:29'),
+(9, 19, 6, 'approved', 'approved', '2026-04-09 19:41:37'),
+(10, 18, 6, 'approved', 'approved', '2026-04-09 19:41:48'),
+(11, 17, 6, 'approved', 'approved', '2026-04-09 19:41:59'),
+(12, 16, 6, 'approved', 'approved', '2026-04-09 19:42:09'),
+(13, 15, 6, 'approved', 'approved', '2026-04-09 19:42:19'),
+(14, 14, 6, 'approved', 'approved', '2026-04-09 19:42:29'),
+(15, 13, 6, 'approved', 'approved', '2026-04-09 19:42:41'),
+(16, 12, 6, 'approved', 'approved', '2026-04-09 19:42:53'),
+(17, 11, 6, 'approved', '', '2026-04-09 19:42:58'),
+(18, 10, 6, 'approved', 'approved', '2026-04-09 19:43:09'),
+(19, 9, 6, 'approved', 'approved', '2026-04-09 19:43:21'),
+(20, 8, 6, 'approved', 'approved', '2026-04-09 19:43:35'),
+(21, 24, 6, 'approved', '', '2026-04-09 22:30:17'),
+(22, 24, 6, 'approved', '', '2026-04-12 21:57:02');
 
 --
 -- Triggers `listing_requests`
@@ -665,6 +666,7 @@ CREATE TABLE `resident_profiles` (
   `gender` enum('Male','Female','Non-binary','Transgender','Genderqueer','Genderfluid','Agender','Intersex','Other','Prefer not to say') DEFAULT 'Prefer not to say',
   `address` varchar(255) NOT NULL,
   `phone` varchar(20) NOT NULL,
+  `postcode` varchar(10) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `area_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -673,25 +675,25 @@ CREATE TABLE `resident_profiles` (
 -- Dumping data for table `resident_profiles`
 --
 
-INSERT INTO `resident_profiles` (`profile_id`, `user_id`, `first_name`, `last_name`, `date_of_birth`, `gender`, `address`, `phone`, `created_at`, `area_id`) VALUES
-(6, 6, 'Council', 'Admin', '2026-03-02', 'Prefer not to say', 'Hatfield', '+44 7700000000', '2026-04-04 13:41:33', 1),
-(8, 8, 'Oyenike', 'Alade', '2022-03-13', 'Female', 'Hatfield', '+44 7000000002', '2026-04-04 18:16:05', 3),
-(9, 9, 'Josephine', 'Abioye', '2025-10-02', 'Female', 'Hatfield', '+44 7000000003', '2026-04-05 18:44:24', 3),
-(10, 11, 'Victor', 'Ikekhua', '2019-03-20', 'Male', 'Hatfield', '+44 70000000001', '2026-04-07 08:16:06', 4),
-(11, 12, 'Kenneth', 'Onyeabor', '2021-10-21', 'Male', 'Hatfield', '+44 7000000004', '2026-04-07 08:19:30', 5),
-(12, 13, 'Habeeblahi', 'Hameed', '2020-02-19', 'Male', 'Hatfield', '+44 7000000005', '2026-04-07 08:21:02', 2),
-(13, 23, 'Council', 'Member', '2026-02-23', 'Other', 'Hatfield', '+44 7000000006', '2026-04-08 11:31:45', 1),
-(14, 34, 'Marcus', 'Osei', '1990-03-15', 'Male', '12 Oak Street, Hatfield', '+44 7700 100010', '2026-04-10 09:25:47', 1),
-(15, 35, 'Aisha', 'Patel', '1995-07-22', 'Female', '45 Elm Avenue, Hatfield', '+44 7700 100011', '2026-04-10 09:27:46', 2),
-(16, 36, 'Daniel', 'Mensah', '1988-11-30', 'Male', '8 Birch Road, Hatfield', '+44 7700 100012', '2026-04-10 09:29:29', 3),
-(17, 37, 'Fatima', 'Ali', '1992-05-18', 'Female', '23 Cedar Lane, Hatfield', '+44 7700 100013', '2026-04-10 09:31:31', 4),
-(18, 38, 'James', 'Adeyemi', '1985-04-09', 'Male', '67 Maple Close, Hatfield', '+44 7700 100014', '2026-04-10 09:33:34', 5),
-(19, 39, 'Priya', 'Sharma', '1998-01-14', 'Female', '31 Willow Way, Hatfield', '+44 7700 100015', '2026-04-10 09:35:33', 6),
-(20, 40, 'Sarah', 'Nkrumah', '1993-12-08', 'Female', '14 Pine Street, Hatfield', '+44 7700 100016', '2026-04-10 09:36:58', 1),
-(21, 41, 'David', 'Kofi', '1987-06-25', 'Male', '55 Ash Grove, Hatfield', '+44 7700 100017', '2026-04-10 09:38:53', 2),
-(22, 42, 'Tariq', 'Hussain', '1997-06-14', 'Male', '9 Hazel Court, Hatfield', '+44 7700 200001', '2026-04-10 09:45:08', 1),
-(23, 43, 'Siobhan', 'Oconnor', '1993-11-28', 'Female', '27 Poplar Drive, Hatfield', '+44 7700 200002', '2026-04-10 09:46:55', 3),
-(24, 44, 'Samuel', 'Tally', '2001-03-05', 'Male', '43 Sycamore Road, Hatfield', '+44 7700 200003', '2026-04-10 09:49:09', 4);
+INSERT INTO `resident_profiles` (`profile_id`, `user_id`, `first_name`, `last_name`, `date_of_birth`, `gender`, `address`, `phone`, `postcode`, `created_at`, `area_id`) VALUES
+(6, 6, 'Council', 'Admin', '2026-03-02', 'Prefer not to say', 'Hatfield', '+44 7700000000', 'AL10 9NA', '2026-04-04 13:41:33', 1),
+(8, 8, 'Oyenike', 'Alade', '2022-03-13', 'Female', 'Hatfield', '+44 7000000002', 'AL10 0ED', '2026-04-04 18:16:05', 3),
+(9, 9, 'Josephine', 'Abioye', '2025-10-02', 'Female', 'Hatfield', '+44 7000000003', 'AL10 0ED', '2026-04-05 18:44:24', 3),
+(10, 11, 'Victor', 'Ikekhua', '2019-03-20', 'Male', 'Hatfield', '+44 70000000001', 'AL10 0WB', '2026-04-07 08:16:06', 4),
+(11, 12, 'Kenneth', 'Onyeabor', '2021-10-21', 'Male', 'Hatfield', '+44 7000000004', 'AL10 0JT', '2026-04-07 08:19:30', 5),
+(12, 13, 'Habeeblahi', 'Hameed', '2020-02-19', 'Male', 'Hatfield', '+44 7000000005', 'AL10 9SB', '2026-04-07 08:21:02', 2),
+(13, 23, 'Council', 'Member', '2026-02-23', 'Other', 'Hatfield', '+44 7000000006', 'AL10 9NA', '2026-04-08 11:31:45', 1),
+(14, 34, 'Marcus', 'Osei', '1990-03-15', 'Male', '12 Oak Street, Hatfield', '+44 7700 100010', 'AL10 9NA', '2026-04-10 09:25:47', 1),
+(15, 35, 'Aisha', 'Patel', '1995-07-22', 'Female', '45 Elm Avenue, Hatfield', '+44 7700 100011', 'AL10 9SB', '2026-04-10 09:27:46', 2),
+(16, 36, 'Daniel', 'Mensah', '1988-11-30', 'Male', '8 Birch Road, Hatfield', '+44 7700 100012', 'AL10 0ED', '2026-04-10 09:29:29', 3),
+(17, 37, 'Fatima', 'Ali', '1992-05-18', 'Female', '23 Cedar Lane, Hatfield', '+44 7700 100013', 'AL10 0WB', '2026-04-10 09:31:31', 4),
+(18, 38, 'James', 'Adeyemi', '1985-04-09', 'Male', '67 Maple Close, Hatfield', '+44 7700 100014', 'AL10 0JT', '2026-04-10 09:33:34', 5),
+(19, 39, 'Priya', 'Sharma', '1998-01-14', 'Female', '31 Willow Way, Hatfield', '+44 7700 100015', 'AL10 8HG', '2026-04-10 09:35:33', 6),
+(20, 40, 'Sarah', 'Nkrumah', '1993-12-08', 'Female', '14 Pine Street, Hatfield', '+44 7700 100016', 'AL10 9NA', '2026-04-10 09:36:58', 1),
+(21, 41, 'David', 'Kofi', '1987-06-25', 'Male', '55 Ash Grove, Hatfield', '+44 7700 100017', 'AL10 9SB', '2026-04-10 09:38:53', 2),
+(22, 42, 'Tariq', 'Hussain', '1997-06-14', 'Male', '9 Hazel Court, Hatfield', '+44 7700 200001', 'AL10 9NA', '2026-04-10 09:45:08', 1),
+(23, 43, 'Siobhan', 'Oconnor', '1993-11-28', 'Female', '27 Poplar Drive, Hatfield', '+44 7700 200002', 'AL10 0ED', '2026-04-10 09:46:55', 3),
+(24, 44, 'Samuel', 'Tally', '2001-03-05', 'Male', '43 Sycamore Road, Hatfield', '+44 7700 200003', 'AL10 0WB', '2026-04-10 09:49:09', 4);
 
 --
 -- Triggers `resident_profiles`
@@ -735,6 +737,13 @@ DELIMITER ;
 -- (See below for the actual view)
 --
 CREATE TABLE `resident_with_area` (
+`profile_id` int(11)
+,`user_id` int(11)
+,`email_address` varchar(100)
+,`first_name` varchar(50)
+,`last_name` varchar(50)
+,`postcode` varchar(10)
+,`area_name` varchar(100)
 );
 
 -- --------------------------------------------------------
@@ -834,7 +843,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`, `role`, `email_address`) VALUES
-(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-15 15:15:22', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
+(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-14 11:49:30', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
 (8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-04 18:16:05', 'approved', 'Resident', 'nike@gmail.com'),
 (9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-14 13:01:47', 'approved', 'Resident', 'josephine@gmail.com'),
 (10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-11 23:25:12', 'approved', 'SME', 'info@harmonywellbeing.com'),
@@ -1057,7 +1066,8 @@ ALTER TABLE `listing_images`
 --
 ALTER TABLE `listing_requests`
   ADD PRIMARY KEY (`approval_id`),
-  ADD KEY `listing_id` (`listing_id`);
+  ADD KEY `listing_id` (`listing_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `listing_votes`
@@ -1316,7 +1326,8 @@ ALTER TABLE `listing_images`
 -- Constraints for table `listing_requests`
 --
 ALTER TABLE `listing_requests`
-  ADD CONSTRAINT `listing_requests_ibfk_1` FOREIGN KEY (`listing_id`) REFERENCES `listings` (`listing_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `listing_requests_ibfk_1` FOREIGN KEY (`listing_id`) REFERENCES `listings` (`listing_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `listing_requests_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `listing_votes`
