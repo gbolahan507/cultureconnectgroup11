@@ -79,14 +79,19 @@ $past_events = [];
 while ($row = mysqli_fetch_assoc($events_r)) $past_events[] = $row;
 
 // Honored Residents
-$honored_r = mysqli_query($conn, "
-    SELECT * FROM honored_residents_with_name
-    WHERE is_visible = 1
-    ORDER BY display_order ASC
+$honored_r = $conn->query("
+    SELECT h.honor_id, h.user_id, h.title, h.reason, h.honored_date,
+           h.is_visible, h.display_order,
+           rp.first_name, rp.last_name,
+           a.area_name
+    FROM honored_residents h
+    LEFT JOIN resident_profiles rp ON h.user_id = rp.user_id
+    LEFT JOIN areas a ON h.area_id = a.area_id
+    WHERE h.is_visible = 1
+    ORDER BY h.display_order ASC
     LIMIT 4
 ");
-$honored_residents = [];
-while ($row = mysqli_fetch_assoc($honored_r)) $honored_residents[] = $row;
+$honored_residents = $honored_r ? $honored_r->fetch_all(MYSQLI_ASSOC) : [];
  
 function ix_safe(string $val): string { return htmlspecialchars($val, ENT_QUOTES, 'UTF-8');}
 ?>

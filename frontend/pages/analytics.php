@@ -54,17 +54,19 @@ while ($row = mysqli_fetch_assoc($listings_r)) $active_listings_data[] = $row;
 
 // Community votes
 $votes_r = mysqli_query($conn, "
-    SELECT product_name, listing_title, price, total_likes, total_dislikes, ranking
+    SELECT product_name, listing_title, price, total_likes, total_dislikes, score
     FROM resident_product_service_interest
     WHERE (total_likes + total_dislikes) > 0
-    ORDER BY ranking DESC
+    ORDER BY score DESC
     LIMIT 10
 ");
-$community_votes   = [];
+$community_votes = [];
 while ($row = mysqli_fetch_assoc($votes_r)) $community_votes[] = $row;
-$cv_total_likes    = array_sum(array_column($community_votes, 'total_likes'));
-$cv_total_dislikes = array_sum(array_column($community_votes, 'total_dislikes'));
-$cv_total          = $cv_total_likes + $cv_total_dislikes;
+
+// Use platform-wide totals from listing_votes table (not just top 10)
+$cv_total_likes    = intval($total_likes);
+$cv_total_dislikes = intval($total_dislikes);
+$cv_total          = $total_lv;
 $cv_positive_rate  = $cv_total > 0 ? round(($cv_total_likes / $cv_total) * 100) : 0;
 
 // Business performance
@@ -142,7 +144,7 @@ $json_biz_perf  = json_encode($biz_perf);
         <span class="an-card-hint">Click to explore</span>
     </div>
 
-    <div class="an-stat-card an-stat-card--green an-stat-card--clickable" data-panel="orders">
+    <div class="an-stat-card an-stat-card--orchid an-stat-card--clickable" data-panel="orders">
         <div class="an-stat-icon">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
         </div>
@@ -154,7 +156,7 @@ $json_biz_perf  = json_encode($biz_perf);
         <span class="an-card-hint">Click to explore</span>
     </div>
 
-    <div class="an-stat-card an-stat-card--blue an-stat-card--clickable" data-panel="votes">
+    <div class="an-stat-card an-stat-card--fuchsia an-stat-card--clickable" data-panel="votes">
         <div class="an-stat-icon">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904m10.598-9.75H14.25M5.904 18.5c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 0 1-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h1.053c.472 0 .745.556.5.96a8.958 8.958 0 0 0-1.302 4.665c0 1.194.232 2.333.654 3.375Z" /></svg>
         </div>
@@ -166,7 +168,7 @@ $json_biz_perf  = json_encode($biz_perf);
         <span class="an-card-hint">Click to explore</span>
     </div>
 
-    <div class="an-stat-card an-stat-card--amber an-stat-card--clickable" data-panel="business">
+    <div class="an-stat-card an-stat-card--darkviolet an-stat-card--clickable" data-panel="business">
         <div class="an-stat-icon">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016 2.993 2.993 0 0 0 2.25-1.016 3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" /></svg>
         </div>
@@ -178,7 +180,7 @@ $json_biz_perf  = json_encode($biz_perf);
         <span class="an-card-hint">Click to explore</span>
     </div>
 
-    <div class="an-stat-card an-stat-card--teal an-stat-card--clickable" data-panel="areas">
+    <div class="an-stat-card an-stat-card--softviolet an-stat-card--clickable" data-panel="areas">
         <div class="an-stat-icon">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
         </div>
@@ -246,15 +248,15 @@ $json_biz_perf  = json_encode($biz_perf);
                 <span class="an-breakdown-num"><?= number_format($total_orders) ?></span>
                 <span class="an-breakdown-lbl">Total Orders</span>
             </div>
-            <div class="an-breakdown-card an-breakdown-card--blue">
+            <div class="an-breakdown-card an-breakdown-card--fuchsia">
                 <span class="an-breakdown-num">£<?= number_format($avg_order_value, 2) ?></span>
                 <span class="an-breakdown-lbl">Avg Order Value</span>
             </div>
-            <div class="an-breakdown-card an-breakdown-card--green">
+            <div class="an-breakdown-card an-breakdown-card--orchid">
                  <span class="an-breakdown-num">£<?= number_format($completed_revenue, 2) ?></span>
                  <span class="an-breakdown-lbl">Total Revenue</span>
             </div>
-            <div class="an-breakdown-card an-breakdown-card--amber">
+            <div class="an-breakdown-card an-breakdown-card--darkviolet">
                 <span class="an-breakdown-num"><?= number_format($completed_orders) ?></span>
                 <span class="an-breakdown-lbl">Completed Orders</span>
             </div>
@@ -316,7 +318,7 @@ $json_biz_perf  = json_encode($biz_perf);
                         $total   = $likes + $dislikes;
                         $likePct = $total > 0 ? round(($likes / $total) * 100) : 0;
                         $disPct  = 100 - $likePct;
-                        $score   = $likes - $dislikes;
+                        $score = intval($vr['score']);
                     ?>
                     <tr>
                         <td class="an-rank"><?= $i + 1 ?></td>
