@@ -1,6 +1,26 @@
-# Cultural Connect
+# CultureConnect - Project Guide
 
-A platform for residents to browse and vote on cultural products and services in their local community.
+## Overview
+CultureConnect is a web-based platform for residents to browse and vote on cultural products and services in their local community (Hertfordshire Council). Built by Group 11, deadline: 31st March 2026.
+
+## Team - Group 11
+
+| Name | Role | Username | Password |
+|------|------|----------|----------|
+| Victor Ikekhua | Product Owner | victor@gmail.com | Test1234! |
+| Oyenike Alade | Requirement Engineer, Database Admin, QA | nike@gmail.com | Test1234! |
+| Kenneth Onyeabor | Scrum Master, QA | jake@gmail.com | Test1234! |
+| Josephine Abioye | Frontend Developer, Project Coordinator | josephine@gmail.com | Test1234! |
+| Habeeblahi Hameed | Backend Developer | habeeb@gmail.com | Test1234! |
+| Admin | Council_Administrator | admin@cultureconnect.com | Test1234! |
+| Council Member | Council_member | Cmember@cultureconnect.com | Test1234! |
+| Harmony Wellbeing | SME Business | info@harmonywellbeing.com | Test1234! |
+| Brushstroke Studio | SME Business | hello@brushstrokestudio.com | Test1234! |
+| Hatfield Theatre Collective | SME Business | info@hatfieldtheatre.com | Test1234! |
+| Hertfordshire Heritage Tours | SME Business | tours@hertheritagetours.com | Test1234! |
+| PixelCraft Media | SME Business | studio@pixelcraftmedia.com | Test1234! |
+| Hatfield Handmade Co. | SME Business | shop@hatfieldhandmade.com | Test1234! |
+| Hertford Ink Publishing | SME Business | press@hertfordink.com | Test1234! |
 
 ## Features
 
@@ -12,40 +32,47 @@ A platform for residents to browse and vote on cultural products and services in
 - Feedback system
 
 ## Tech Stack
-
-- **Frontend:** HTML, CSS, JavaScript
-- **Backend:** PHP
+- **Frontend:** HTML, CSS, PHP (templates), JavaScript
+- **Backend:** PHP (API)
 - **Database:** MySQL
-- **Local Environment:** XAMPP
+- **Environment:** XAMPP / PHP built-in server with `frontend/router.php`
 
-## Team - Group 11
+## Project Structure
+```
+├── frontend/
+│   ├── components/      # header.php, sidebar.php, footer.php
+│   ├── pages/           # dashboard.php, login.php, register.php, etc.
+│   ├── css/styles.css   # Main stylesheet (pink/magenta theme)
+│   ├── images/          # logo.png
+│   ├── data/            # postcodes.json
+│   ├── js/              # JavaScript files
+│   ├── router.php       # URL routing (enables clean URLs without .php)
+│   └── index.html       # Empty (not used)
+├── backend/
+│   ├── config/          # database.php (PDO connection)
+│   ├── includes/        # functions.php (helpers)
+│   └── api/             # API endpoints (pending)
+├── database/
+│   └── cultureconnect.sql  # Full schema with sample data
+└── docs/
+    ├── BackendImplementation.md  # Backend task guide
+    └── specs/                     # Detailed specs per task
+```
 
-| Name | Role | Username | password | 
-|------|------|------| ------|
-| Victor Ikekhua| Product Owner | victor@gmail.com | Test1234!|
-| Oyenike Alade | Requirement Engineer, Database Admin, QA | nike@gmail.com | Test1234!|
-| Kenneth Onyeabor | Scrum Master, QA | jake@gmail.com | Test1234!|
-| Josephine Abioye| Frontend Developer, Project Coordinator | josephine@gmail.com | Test1234!|
-| Habeeblahi Hameed | Backend Developer | habeeb@gmail.com | Test1234!|
-| Admin | Council_Administrator | admin@cultureconnect.com | Test1234!|
-| Council Member | Council_member |Cmember@cultureconnect.com | Test1234!|
-| Harmony Wellbeing | SME Business | info@harmonywellbeing.com | Test1234!|
-| Brushstroke Studio | SME Business | hello@brushstrokestudio.com | Test1234!|
-| Hatfield Theatre Collective| SME Business | info@hatfieldtheatre.com | Test1234!|
-| Hertfordshire Heritage Tours | SME Business | tours@hertheritagetours.com | Test1234!|
-| PixelCraft Media| SME Business | studio@pixelcraftmedia.com | Test1234!|
-| Hatfield Handmade Co. | SME Business | shop@hatfieldhandmade.com| Test1234!|
-| Hertford Ink Publishing | SME Business | press@hertfordink.com | Test1234!|
-
-
-
-
+## Database
+- **Name:** culture_connect_grp_11
+- **Connection:** localhost, root, no password (XAMPP default)
+- **Key tables:** users, roles, areas, categories, listings, votes, polls, poll_options, sme_businesses, orders, reviews
+- **4 Roles:** Resident, SME, Council Member, Council Administrator
+- **6 Areas:** North, South, East, West, Town Centre, Central Hertfordshire
+- **8 Categories:** Visual Arts, Music, Performing Arts, Literature, Culinary Arts, Fashion, Digital Arts, Crafts
+- **User code trigger:** Auto-generates codes (RES-XXXX, SME-XXXX, CNS-XXXX, ADM-XXXX)
 
 ## Getting Started
 
 ### Prerequisites
 
-- XAMPP installed
+- XAMPP installed (or PHP 7.4+ with MySQL)
 - Git installed
 
 ### Setup
@@ -55,36 +82,55 @@ A platform for residents to browse and vote on cultural products and services in
    git clone https://github.com/gbolahan507/cultureconnectgroup11.git
    ```
 
-2. Move the project to XAMPP's htdocs folder
-   ```bash
-   cp -r cultureconnectgroup11 /path/to/xampp/htdocs/
-   ```
+2. **Option A: Using XAMPP**
+   - Move the project to XAMPP's htdocs folder
+     ```bash
+     cp -r cultureconnectgroup11 /path/to/xampp/htdocs/
+     ```
+   - Start Apache and MySQL in XAMPP
+   - Open the project in browser: `http://localhost/cultureconnectgroup11`
 
-3. Start Apache and MySQL in XAMPP
+3. **Option B: Using PHP Built-in Server (Recommended)**
+   ```bash
+   # Navigate to project directory
+   cd cultureconnectgroup11
+
+   # Start PHP dev server with clean URL routing
+   php -S localhost:8000 -t frontend frontend/router.php
+   ```
+   - Then visit: http://localhost:8000/pages/dashboard
 
 4. Import the database
    - Open http://localhost/phpmyadmin
-   - Create a new database
-   - Import the SQL file from the `/database` folder
+   - Create a new database named `culture_connect_grp_11`
+   - Import the SQL file from `/database/culture_connect_grp_11.sql`
 
-5. Open the project in browser
-   ```
-   http://localhost/cultureconnectgroup11
-   ```
+## Frontend Architecture
+- **Entry point:** `pages/dashboard.php` (requires login session)
+- **Login:** `pages/login.php` (test login that sets session variables)
+- **Layout:** Header + Welcome banner + Sidebar + Content area + Footer
+- **Sidebar:** Role-based navigation (different menus per role)
+- **Page routing:** `dashboard.php?page=manage-area` loads `pages/manage-area.php` inside dashboard layout
+- **Session keys:** `user_role`, `user_name`, `user_email`, `user_id`
 
-## Project Structure
+## Backend API Tasks (from docs/BackendImplementation.md)
+1. Database config (done)
+2. Area CRUD API
+3. Resident CRUD API
+4. Area dropdown for residents
+5. Product/Listing CRUD API
+6. Voting system
+7. Category filter
+8. Category + price filter
+9. Authentication system
+10. Helper functions (done)
 
-```
-cultureconnectgroup11/
-├── assets/
-│   ├── css/
-│   ├── js/
-│   └── images/
-├── includes/
-├── database/
-├── pages/
-└── index.php
-```
+## Key Conventions
+- Sessions must use `session_status()` check before `session_start()` to avoid duplicate session warnings
+- PHP pages included inside `dashboard.php` are partials (no `<html>` wrapper)
+- Standalone pages (login.php, register.php, index.php) have full HTML structure
+- CSS uses pink/magenta gradient theme (`#dd3ab5`, `#a81c87`, `#E00180`)
+- Role-based access control: check `$_SESSION['user_role']` against allowed roles array
 
 ## Assignment Requirements
 
@@ -117,6 +163,13 @@ A web-based prototype using PHP that implements CRUD operations with a MySQL dat
    - INSERT statements (sample data)
 
 Export SQL: In phpMyAdmin, click root of database → 'Export' tab → ensure both CREATE and INSERT statements are included.
+
+## Marking Scheme (100 marks)
+- Basic CRUD functionality: 40 marks
+- Advanced feature (auth/reporting): 10 marks
+- UI design & usability: 20 marks
+- Team report: 20 marks
+- Demo presentation: 10 marks
 
 ## Deadline
 
