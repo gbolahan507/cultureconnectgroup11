@@ -177,11 +177,12 @@ Export SQL: In phpMyAdmin, click root of database → 'Export' tab → ensure bo
 
 
 ## Completed: 23rd April 2026
-
-Other Documents
 Software Test Report. Available at: https://docs.google.com/spreadsheets/d/1b0kasejacxnzNs-WCJHMqOmfyiApxAHaouHH0C9M2_M/edit?usp=sharing (Accessed: 23 April 2026).
 
 Project Trello Board Group 11 (2026). Available at: https://trello.com/invite/b/69a8a0e036b4022c30eafce4/ATTIca7c3a3d438570456e1cf92eba037567C82259A1/cultureconnect-web-platform-development (Accessed: 23 April 2026).
 
-Group Report Group 11
+Project Group Report Group 11
 https://docs.google.com/document/d/1SSGgbmP7hXccUHz0YGNVz8St07A15YdqYIjc9J3Pwfg/edit?usp=sharing
+
+Project Product Backlog
+https://docs.google.com/spreadsheets/d/1HuqUASOlBYBrHjrtaM6-3Dgw6y8PZkkV_v0KE-Xcu_8/edit?usp=sharing
