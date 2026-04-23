@@ -171,10 +171,11 @@ Export SQL: In phpMyAdmin, click root of database → 'Export' tab → ensure bo
 - Team report: 20 marks
 - Demo presentation: 10 marks
 
+## Start Date
+25th February 2026
+
 ## Deadline
-
 24th April 2026
-
 
 ## Completed: 23rd April 2026
 Software Test Report. Available at: https://docs.google.com/spreadsheets/d/1b0kasejacxnzNs-WCJHMqOmfyiApxAHaouHH0C9M2_M/edit?usp=sharing (Accessed: 23 April 2026).
