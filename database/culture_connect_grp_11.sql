@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 23, 2026 at 11:13 AM
+-- Generation Time: Apr 23, 2026 at 06:38 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -45,7 +45,7 @@ INSERT INTO `areas` (`area_id`, `area_name`, `description`, `postcode`) VALUES
 (4, 'Hertfordshire West', 'Famous for literature and publishing, known for independent books, poetry readings, magazines, and creative writing communities', 'AL10 0WB'),
 (5, 'Hertfordshire Town Centre', 'Known for cultural markets featuring handmade goods, artisan stationery, posters, and locally produced creative merchandise', 'AL10 0JT'),
 (6, 'Hertfordshire Central', 'Famous for sports and recreation, known for community sporting activities, cultural sporting events, and fitness programs', 'AL10 8HG'),
-(20, 'Hertfordshire Rural', 'Testing', 'AL5 3NG');
+(17, 'Hertfordshire rural', 'TESTING', 'A347653');
 
 -- --------------------------------------------------------
 
@@ -122,10 +122,10 @@ CREATE TABLE `listings` (
 --
 
 INSERT INTO `listings` (`listing_id`, `sme_id`, `title`, `caption`, `description`, `price`, `status`, `created_at`, `updated_at`, `item_id`, `approved_by`) VALUES
-(7, 11, 'Painting & Sculpture for Beginners', 'Explore your creativity with hands-on painting and sculpture sessions', 'Join our friendly beginner-friendly painting and sculpture classes held weekly at Brushstroke Studio. Whether you prefer watercolours, acrylics or working with clay, our experienced tutors guide you through every step. All materials provided. Suitable for ages 16 and above.', 25.00, 'active', '2026-04-09 09:36:45', '2026-04-09 11:48:14', 1, 6),
+(7, 11, 'Painting & Sculpture Masterclass', 'Explore your creativity with hands-on painting and sculpture sessions', 'Join our friendly beginner-friendly painting and sculpture classes held weekly at Brushstroke Studio. Whether you prefer watercolours, acrylics or working with clay, our experienced tutors guide you through every step. All materials provided. Suitable for ages 16 and above.', 30.00, 'active', '2026-04-09 09:36:45', '2026-04-23 11:56:48', 1, 6),
 (8, 11, 'Guitar & Piano Lessons for All Levels', 'One-to-one and group music lessons tailored to your pace', 'Our music lessons cover guitar and piano for complete beginners through to improvers. Sessions are available one-to-one or in small groups. Our tutors are experienced performers who make learning music enjoyable and accessible for everyone in the Hertfordshire community.', 30.00, 'active', '2026-04-09 18:52:31', '2026-04-09 19:43:35', 2, 6),
-(9, 11, 'Movement & Dance Expression Workshop', 'A creative movement workshop blending dance with artistic expression', 'This unique workshop combines movement, dance and visual art to help participants express themselves freely. No dance experience is required. Sessions run for 90 minutes and are open to adults of all fitness levels. A fantastic way to connect with your body and your community.', 20.00, 'active', '2026-04-09 18:55:06', '2026-04-09 19:43:21', 1, 6),
-(10, 11, 'Creative Arts for Kids - Ages 6 to 12', 'A fun and imaginative art class designed specially for children aged 6 to 12', 'Creative Arts for Kids is a weekly after-school and weekend art class designed to spark imagination and build confidence in children aged 6 to 12. Sessions cover painting, drawing, collage, and simple sculpture using child-safe materials. Our friendly tutors create a warm, encouraging environment where every child can express themselves freely. No experience needed — just curiosity and enthusiasm! Parents are welcome to stay and watch. All materials are provided and sessions run for 60 minutes.', 15.00, 'active', '2026-04-09 18:57:41', '2026-04-10 11:04:32', 1, 6),
+(9, 11, 'Movement & Dance Expression Workshop', 'A creative movement workshop blending dance with artistic expression', 'This unique workshop combines movement, dance and visual art to help participants express themselves freely. No dance experience is required. Sessions run for 90 minutes and are open to adults of all fitness levels. A fantastic way to connect with your body and your community.', 20.00, 'inactive', '2026-04-09 18:55:06', '2026-04-23 15:54:52', 1, 40),
+(10, 11, 'Creative Arts for Kids - Ages 6 to 12', 'A fun and imaginative art class designed specially for children aged 6 to 12', 'Creative Arts for Kids is a weekly after-school and weekend art class designed to spark imagination and build confidence in children aged 6 to 12. Sessions cover painting, drawing, collage, and simple sculpture using child-safe materials. Our friendly tutors create a warm, encouraging environment where every child can express themselves freely. No experience needed — just curiosity and enthusiasm! Parents are welcome to stay and watch. All materials are provided and sessions run for 60 minutes.', 15.00, 'active', '2026-04-09 18:57:41', '2026-04-23 15:54:24', 1, 6),
 (11, 12, 'Community Stage - Live Theatre Night', 'Original community theatre performed by local Hertfordshire talent', 'Experience the magic of live theatre performed by members of our local community. Each production is written and directed by Hertfordshire residents and explores themes of culture, identity and belonging. Shows run on selected Friday and Saturday evenings. Book early to avoid disappointment.', 15.00, 'active', '2026-04-09 19:01:47', '2026-04-10 11:04:44', 3, 6),
 (12, 12, 'Open Mic Night - Local Voices', 'A relaxed open mic evening celebrating local musicians and spoken word artists', 'Our monthly open mic nights are a celebration of local musical and spoken word talent. Whether you want to perform or simply enjoy the show, everyone is welcome. Doors open at 6:30pm with performances from 7pm. No booking required for audience members.', 10.00, 'active', '2026-04-09 19:06:32', '2026-04-10 11:04:58', 4, 6),
 (13, 12, 'Youth Drama Showcase', 'A showcase of short plays written and performed by young Hertfordshire residents', 'Our Youth Drama Showcase gives young people aged 13 to 18 a platform to perform their own original short plays. The event runs twice a year and is free to watch. This listing covers workshop participation which includes rehearsal sessions, script development and the final performance.', 18.00, 'active', '2026-04-09 19:09:00', '2026-04-09 19:42:41', 3, 6),
@@ -139,30 +139,44 @@ INSERT INTO `listings` (`listing_id`, `sme_id`, `title`, `caption`, `description
 (21, 15, 'Limited Edition Hertfordshire Cultural Festival Poster', 'Collectible limited edition art print celebrating Hertfordshire\'s cultural calendar', 'These limited edition posters are designed exclusively by local artists to commemorate Hertfordshire\'s annual cultural festival. Each poster is A2 size, printed on 300gsm heavyweight paper with archival ink. Only 100 prints are produced per edition. Numbered and signed by the artist.', 18.00, 'active', '2026-04-09 19:31:52', '2026-04-09 19:41:19', 13, 6),
 (22, 15, 'Handmade Leather & Recycled Paper Journal', 'Beautifully crafted artisan journals made from leather and recycled paper', 'Our artisan journals feature hand-stitched recycled paper pages bound in a soft leather cover sourced from local suppliers. Each journal is unique and comes in A5 size with 120 pages. Ideal for sketching, writing, journaling or as a thoughtful gift for creative individuals.', 22.00, 'active', '2026-04-09 19:34:13', '2026-04-09 19:41:10', 14, 6),
 (23, 16, 'Hertfordshire Voices - Community Poetry Collection', 'An independently published anthology of poetry written by Hertfordshire residents', 'Hertfordshire Voices is our flagship poetry anthology featuring works from over 30 local writers. The collection explores themes of community, identity, nature and belonging through poetry in a variety of styles. Paperback, 180 pages. A portion of every sale supports our community writing workshops.', 12.00, 'active', '2026-04-09 19:37:24', '2026-04-10 11:05:13', 11, 6),
-(24, 16, 'The Hertford Quarterly - Community Zine', 'A quarterly zine featuring local art, writing, interviews and cultural commentary', 'The Hertford Quarterly is our independently produced community zine published four times a year. Each issue is packed with original short stories, poetry, local artist interviews, photography and cultural commentary from Hertfordshire residents. A5 format, 48 pages, full colour. Subscribe or buy individual issues.', 8.00, 'active', '2026-04-09 19:39:15', '2026-04-10 11:05:26', 12, 6);
+(24, 16, 'The Hertford Quarterly - Community Zine', 'A quarterly zine featuring local art, writing, interviews and cultural commentary', 'The Hertford Quarterly is our independently produced community zine published four times a year. Each issue is packed with original short stories, poetry, local artist interviews, photography and cultural commentary from Hertfordshire residents. A5 format, 48 pages, full colour. Subscribe or buy individual issues.', 8.00, 'active', '2026-04-09 19:39:15', '2026-04-10 11:05:26', 12, 6),
+(26, 11, 'Testing', 'Testing', 'Testing', 50.00, 'pending', '2026-04-23 15:31:51', '2026-04-23 15:31:51', 10, 24),
+(27, 11, 'Test Pottery Workshop', 'Hands-on pottery session', 'A relaxed pottery workshop for beginners.', 35.00, 'pending', '2026-04-23 16:01:09', '2026-04-23 16:01:09', 1, NULL);
 
 --
 -- Triggers `listings`
 --
 DELIMITER $$
-CREATE TRIGGER `restrict_listing_approval` BEFORE UPDATE ON `listings` FOR EACH ROW BEGIN
-    DECLARE user_role VARCHAR(50);
-
-    -- Only check when approving
-    IF NEW.status = 'active' AND OLD.status != 'active' THEN
-
-        -- Get role of approver
-        SELECT role INTO user_role
-        FROM users
-        WHERE user_id = NEW.approved_by;
-
-        -- Restrict roles
-        IF user_role NOT IN ('Council Administrator', 'Council Member') THEN
-            SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Only council members or admins can approve listings';
-        END IF;
-
+CREATE TRIGGER `restrict_listing_approval_insert` BEFORE INSERT ON `listings` FOR EACH ROW BEGIN
+  DECLARE user_role VARCHAR(50);
+  
+  IF NEW.status = 'active' THEN
+    SELECT role INTO user_role 
+    FROM users 
+    WHERE user_id = NEW.approved_by;
+    
+    IF user_role NOT IN ('Council Administrator', 'Council Member') THEN
+      SIGNAL SQLSTATE '45000' 
+      SET MESSAGE_TEXT = 'Only council members or admins can approve listings';
     END IF;
+  END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `restrict_listing_approval_update` BEFORE UPDATE ON `listings` FOR EACH ROW BEGIN
+  DECLARE user_role VARCHAR(50);
+  
+  IF NEW.status = 'active' AND OLD.status != 'active' THEN
+    SELECT role INTO user_role 
+    FROM users 
+    WHERE user_id = NEW.approved_by;
+    
+    IF user_role NOT IN ('Council Administrator', 'Council Member') THEN
+      SIGNAL SQLSTATE '45000' 
+      SET MESSAGE_TEXT = 'Only council members or admins can approve listings';
+    END IF;
+  END IF;
 END
 $$
 DELIMITER ;
@@ -216,15 +230,16 @@ INSERT INTO `listing_images` (`image_id`, `listing_id`, `image_url`, `is_primary
 (30, 23, '1775767044_465feede-e7e7-4b8c-868b-d333bc277f6f_1_201_a.jpg', 1, '2026-04-09 19:37:24'),
 (31, 23, '17757670440_images-3.jpeg', 0, '2026-04-09 19:37:24'),
 (32, 24, '1775767155_images-4.jpeg', 1, '2026-04-09 19:39:15'),
-(33, 24, '17757671550_images-5.jpeg', 0, '2026-04-09 19:39:15');
+(33, 24, '17757671550_images-5.jpeg', 0, '2026-04-09 19:39:15'),
+(35, 26, '1776958311_Mobile Phones.jpg', 1, '2026-04-23 15:31:51');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `listing_requests`
+-- Table structure for table `listing_request_log`
 --
 
-CREATE TABLE `listing_requests` (
+CREATE TABLE `listing_request_log` (
   `approval_id` int(11) NOT NULL,
   `listing_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
@@ -234,11 +249,11 @@ CREATE TABLE `listing_requests` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `listing_requests`
+-- Dumping data for table `listing_request_log`
 --
 
-INSERT INTO `listing_requests` (`approval_id`, `listing_id`, `user_id`, `decision`, `comment`, `decided_at`) VALUES
-(3, 7, 6, 'approved', 'Approved', '2026-04-09 11:48:14'),
+INSERT INTO `listing_request_log` (`approval_id`, `listing_id`, `user_id`, `decision`, `comment`, `decided_at`) VALUES
+(3, 7, 6, 'rejected', 'Approved', '2026-04-09 11:48:14'),
 (4, 24, 6, 'approved', '', '2026-04-09 19:40:38'),
 (5, 23, 6, 'approved', 'approved', '2026-04-09 19:40:57'),
 (6, 22, 6, 'approved', 'approved', '2026-04-09 19:41:10'),
@@ -257,13 +272,14 @@ INSERT INTO `listing_requests` (`approval_id`, `listing_id`, `user_id`, `decisio
 (19, 9, 6, 'approved', 'approved', '2026-04-09 19:43:21'),
 (20, 8, 6, 'approved', 'approved', '2026-04-09 19:43:35'),
 (21, 24, 6, 'approved', '', '2026-04-09 22:30:17'),
-(22, 24, 6, 'approved', '', '2026-04-12 21:57:02');
+(22, 24, 6, 'approved', '', '2026-04-12 21:57:02'),
+(23, 7, 6, 'approved', '', '2026-04-23 11:56:48');
 
 --
--- Triggers `listing_requests`
+-- Triggers `listing_request_log`
 --
 DELIMITER $$
-CREATE TRIGGER `sync_listing_on_request_decision` AFTER INSERT ON `listing_requests` FOR EACH ROW BEGIN
+CREATE TRIGGER `sync_listing_on_request_decision` AFTER INSERT ON `listing_request_log` FOR EACH ROW BEGIN
     IF NEW.decision = 'approved' THEN
         UPDATE `listings`
         SET `status` = 'active', `approved_by` = NEW.user_id
@@ -354,7 +370,11 @@ INSERT INTO `listing_votes` (`vote_id`, `user_id`, `listing_id`, `vote_type`, `c
 (56, 41, 23, 'like', '2026-04-11 21:37:08'),
 (57, 35, 24, 'like', '2026-04-11 21:37:08'),
 (58, 37, 24, 'dislike', '2026-04-11 21:37:08'),
-(59, 39, 24, 'like', '2026-04-11 21:37:08');
+(59, 39, 24, 'like', '2026-04-11 21:37:08'),
+(60, 8, 24, 'like', '2026-04-23 11:15:02'),
+(61, 8, 23, 'like', '2026-04-23 11:15:03'),
+(62, 8, 22, 'like', '2026-04-23 11:15:05'),
+(63, 8, 21, 'like', '2026-04-23 11:15:06');
 
 -- --------------------------------------------------------
 
@@ -395,7 +415,9 @@ INSERT INTO `orders` (`order_id`, `user_id`, `total_amount`, `status`, `created_
 (20, 8, 20.00, 'completed', '2026-04-02 21:28:54'),
 (21, 34, 18.00, 'completed', '2026-03-07 22:29:10'),
 (22, 35, 45.00, 'completed', '2026-03-02 22:29:25'),
-(23, 9, 22.00, 'processing', '2026-04-11 22:40:21');
+(23, 9, 22.00, 'processing', '2026-04-11 22:40:21'),
+(24, 34, 12.00, 'processing', '2026-04-23 12:21:38'),
+(25, 34, 22.00, 'processing', '2026-04-23 12:21:38');
 
 -- --------------------------------------------------------
 
@@ -446,7 +468,9 @@ INSERT INTO `order_items` (`order_item_id`, `order_id`, `listing_id`, `quantity`
 (30, 20, 24, 1, 8.00),
 (31, 21, 13, 1, 18.00),
 (32, 22, 19, 1, 45.00),
-(33, 23, 22, 1, 22.00);
+(33, 23, 22, 1, 22.00),
+(34, 24, 23, 1, 12.00),
+(35, 25, 22, 1, 22.00);
 
 -- --------------------------------------------------------
 
@@ -692,9 +716,7 @@ INSERT INTO `resident_profiles` (`profile_id`, `user_id`, `first_name`, `last_na
 (21, 41, 'David', 'Kofi', '1987-06-25', 'Male', '55 Ash Grove, Hatfield', '+44 7700 100017', 'AL10 9SB', '2026-04-10 09:38:53', 2),
 (22, 42, 'Tariq', 'Hussain', '1997-06-14', 'Male', '9 Hazel Court, Hatfield', '+44 7700 200001', 'AL10 9NA', '2026-04-10 09:45:08', 1),
 (23, 43, 'Siobhan', 'Oconnor', '1993-11-28', 'Female', '27 Poplar Drive, Hatfield', '+44 7700 200002', 'AL10 0ED', '2026-04-10 09:46:55', 3),
-(24, 44, 'Samuel', 'Tally', '2001-03-05', 'Male', '43 Sycamore Road, Hatfield', '+44 7700 200003', 'AL10 0WB', '2026-04-10 09:49:09', 4),
-(25, 48, 'Testing', 'Testing', '2010-04-06', 'Female', 'nike@gmail.com', '+2348141935181', 'AL5 3NG', '2026-04-23 08:33:42', 20),
-(26, 49, 'Emma', 'Jones', '1994-08-12', 'Female', '2 London Road', '+44 7700 300001', 'AL10 9NA', '2026-04-23 08:49:40', 1);
+(24, 44, 'Samuel', 'Tally', '2001-03-05', 'Male', '43 Sycamore Road, Hatfield', '+44 7700 200003', 'AL10 0WB', '2026-04-10 09:49:09', 4);
 
 --
 -- Triggers `resident_profiles`
@@ -844,21 +866,21 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`, `role`, `email_address`) VALUES
-(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-23 08:50:49', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
-(8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-23 08:28:56', 'approved', 'Resident', 'nike@gmail.com'),
+(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-23 15:23:35', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
+(8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-23 11:46:12', 'approved', 'Resident', 'nike@gmail.com'),
 (9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-14 13:01:47', 'approved', 'Resident', 'josephine@gmail.com'),
 (10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-11 23:25:12', 'approved', 'SME', 'info@harmonywellbeing.com'),
 (11, '$2y$10$pEGsw9izjII4FX3gzzaJ4.QSDLc70c6nGub9/1IU78TLgASSZUsf.', '2026-04-07 08:16:06', 'approved', 'Resident', 'victor@gmail.com'),
 (12, '$2y$10$aSQiHxr71NTJT0.ohlXxDezWv08wpyxyjnP1tR9q7tgxhcBsX.Uai', '2026-04-12 21:18:58', 'approved', 'Resident', 'jake@gmail.com'),
 (13, '$2y$10$L680iiTY/OYAE9v./tg99O4N1T/ao6GKU/AnYCR6KNO4jLIimJKHu', '2026-04-08 11:28:32', 'approved', 'Resident', 'habeeb@gmail.com'),
 (23, '$2y$10$UDiUYY47oKHijEltMpEDRusNoO93tFpEhQ389rybJJHXwzuNwcMiG', '2026-04-08 11:37:39', 'approved', 'Council Member', 'Cmember@cultureconnect.com'),
-(24, '$2y$10$ViJxAEtd.j9tpIUKfzKPw.5pPGEFm4c5JlfxBXha4GgFbGeWXTzvC', '2026-04-14 10:29:36', 'approved', 'SME', 'hello@brushstrokestudio.com'),
+(24, '$2y$10$ViJxAEtd.j9tpIUKfzKPw.5pPGEFm4c5JlfxBXha4GgFbGeWXTzvC', '2026-04-23 16:06:32', 'approved', 'SME', 'hello@brushstrokestudio.com'),
 (25, '$2y$10$eLhuVYx4TBSMRuld/k4THuwZ1XC2EhQG4fUCshbrKOlnRdgqz5Hva', '2026-04-12 21:58:07', 'approved', 'SME', 'info@hatfieldtheatre.com'),
 (26, '$2y$10$AUciDVzSGaUL7jdXeUdkM.DhFyvuMxkxFa1J8xurcFsZV8qHyg14m', '2026-04-14 12:53:24', 'approved', 'SME', 'tours@hertheritagetours.com'),
 (27, '$2y$10$.dWO5U3z4wW4FGMV32g3COS5QZbspNds4t8z853sYSp1ErZcuvvOO', '2026-04-12 21:16:53', 'approved', 'SME', 'studio@pixelcraftmedia.com'),
 (28, '$2y$10$LT2xJjdlHYINbJNC5PaEuup2dqUpNQMvIxct0ueW3FJRfYgObhWtK', '2026-04-14 13:02:18', 'approved', 'SME', 'shop@hatfieldhandmade.com'),
 (29, '$2y$10$HrsNx52kvUjSBIemM/6gcuaWiVz5LhBgpQMJz0pf4LxY4W1cPPC5m', '2026-04-09 19:35:19', 'approved', 'SME', 'press@hertfordink.com'),
-(34, '$2y$10$sCH/qU1xp9OQjvBqIRP1FuasIU/k/tRQ5N5JV3wSQtVllyC68uQ.q', '2026-04-10 09:25:47', 'approved', 'Resident', 'marcus.osei@gmail.com'),
+(34, '$2y$10$sCH/qU1xp9OQjvBqIRP1FuasIU/k/tRQ5N5JV3wSQtVllyC68uQ.q', '2026-04-23 12:21:01', 'approved', 'Resident', 'marcus.osei@gmail.com'),
 (35, '$2y$10$GSRl4qkAShFvWuyWsmdcyeB8OrG230vd7jUf9tCrV2vnbp8WlpIp6', '2026-04-10 09:27:46', 'approved', 'Resident', 'aisha.patel@gmail.com'),
 (36, '$2y$10$35HzVBsn/LVPwMcI8XATwuhxDN/FaK.pa2ukr3nuS5ZBekQ0.09S.', '2026-04-10 09:29:29', 'rejected', 'Resident', 'daniel.mensah@gmail.com'),
 (37, '$2y$10$/myEQxh6qX8hmvTsl.WEAel6s3SJrAe356dW3XO3cf71hAQsnfAwu', '2026-04-10 09:31:31', 'approved', 'Resident', 'fatima.ali@gmail.com'),
@@ -871,9 +893,7 @@ INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`,
 (44, '$2y$10$x1vCCutsYAkIALta/IzB/OwuVjieM6HfMTtUV/BLNot5kjkgfRCwm', '2026-04-10 09:49:09', 'rejected', 'Resident', 'samuel.tally@gmail.com'),
 (45, '$2y$10$1N6upPakt9SvA2705zNUF.tx5VF5hfjzlabv4BXhFgb7C1/6jcXNy', '2026-04-10 09:52:08', 'pending', 'SME', 'info@africanheritagecrafts.co.uk'),
 (46, '$2y$10$yzbl51n2Sa4whe2ggwRicuhjxExcYsKm3DoGNfDfIlClcVsYbZ6v6', '2026-04-10 09:54:48', 'pending', 'SME', 'hello@hertsmusicschool.co.uk'),
-(47, '$2y$10$EdYx3Tr2i3A.w0ayszXgDu/KgyWJbGdyzBns8BLuenmvpInRtm1xu', '2026-04-10 09:57:07', 'pending', 'SME', 'contact@communityfilmherts.co.uk'),
-(48, '$2y$10$h9Ruiz7xObdnqc/oiC.5XO9Jo3jgMYTOIX67ahO//5SYi3wM79wwG', '2026-04-23 08:33:42', 'pending', 'Resident', 'nike@yahoo.com'),
-(49, '$2y$10$myIKQXCly5e.YME3x3caJegXCljo7.6JZjCJLZTg6ubmGGuTLuJ8C', '2026-04-23 08:49:40', 'approved', 'Resident', 'emma.jones@gmail.com');
+(47, '$2y$10$EdYx3Tr2i3A.w0ayszXgDu/KgyWJbGdyzBns8BLuenmvpInRtm1xu', '2026-04-10 09:57:07', 'pending', 'SME', 'contact@communityfilmherts.co.uk');
 
 --
 -- Triggers `users`
@@ -937,17 +957,15 @@ INSERT INTO `user_documents` (`document_id`, `user_id`, `document_type`, `file_p
 (24, 38, 'Bank_Statement', '../uploads/verification_documents/placeholder_james.pdf', 'approved', '2026-04-12 21:56:35'),
 (25, 39, 'Driver_License', '../uploads/verification_documents/placeholder_priya.pdf', 'approved', '2026-04-12 21:56:35'),
 (26, 40, 'Utility_Bill', '../uploads/verification_documents/placeholder_sarah.pdf', 'approved', '2026-04-12 21:56:35'),
-(27, 41, 'Bank_Statement', '../uploads/verification_documents/placeholder_david.pdf', 'approved', '2026-04-12 21:56:35'),
-(28, 48, 'Bank_Statement', '../uploads/verification_documents/1776933222_IMG_9053.jpg.jpeg', 'pending', '2026-04-23 08:33:42'),
-(29, 49, 'Driver_License', '../uploads/verification_documents/1776934180_ER table.png', 'approved', '2026-04-23 08:49:40');
+(27, 41, 'Bank_Statement', '../uploads/verification_documents/placeholder_david.pdf', 'approved', '2026-04-12 21:56:35');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_registration_requests`
+-- Table structure for table `user_registration_log`
 --
 
-CREATE TABLE `user_registration_requests` (
+CREATE TABLE `user_registration_log` (
   `review_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `admin_id` int(11) NOT NULL,
@@ -958,10 +976,10 @@ CREATE TABLE `user_registration_requests` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `user_registration_requests`
+-- Dumping data for table `user_registration_log`
 --
 
-INSERT INTO `user_registration_requests` (`review_id`, `user_id`, `admin_id`, `decision`, `comments`, `reviewed_at`, `document_id`) VALUES
+INSERT INTO `user_registration_log` (`review_id`, `user_id`, `admin_id`, `decision`, `comments`, `reviewed_at`, `document_id`) VALUES
 (1, 9, 6, 'approved', '', '2026-04-06 09:15:48', 2),
 (2, 9, 6, 'approved', '', '2026-04-06 09:16:14', 2),
 (3, 8, 6, 'rejected', 'testing', '2026-04-06 09:17:47', 1),
@@ -973,8 +991,7 @@ INSERT INTO `user_registration_requests` (`review_id`, `user_id`, `admin_id`, `d
 (9, 11, 23, 'approved', '', '2026-04-08 11:46:39', 4),
 (10, 44, 6, 'approved', '', '2026-04-12 21:51:35', 16),
 (11, 44, 6, 'rejected', 'Testing', '2026-04-12 21:51:52', 16),
-(12, 43, 6, 'approved', '', '2026-04-14 10:28:11', 15),
-(13, 49, 6, 'approved', '', '2026-04-23 08:52:06', 29);
+(12, 43, 6, 'approved', '', '2026-04-14 10:28:11', 15);
 
 -- --------------------------------------------------------
 
@@ -1040,8 +1057,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 -- Indexes for table `areas`
 --
 ALTER TABLE `areas`
-  ADD PRIMARY KEY (`area_id`),
-  ADD UNIQUE KEY `area_id` (`area_id`,`area_name`);
+  ADD PRIMARY KEY (`area_id`);
 
 --
 -- Indexes for table `honored_residents`
@@ -1069,9 +1085,9 @@ ALTER TABLE `listing_images`
   ADD KEY `listing_id` (`listing_id`);
 
 --
--- Indexes for table `listing_requests`
+-- Indexes for table `listing_request_log`
 --
-ALTER TABLE `listing_requests`
+ALTER TABLE `listing_request_log`
   ADD PRIMARY KEY (`approval_id`),
   ADD KEY `listing_id` (`listing_id`),
   ADD KEY `user_id` (`user_id`);
@@ -1082,6 +1098,7 @@ ALTER TABLE `listing_requests`
 ALTER TABLE `listing_votes`
   ADD PRIMARY KEY (`vote_id`),
   ADD UNIQUE KEY `unique_user_listing` (`user_id`,`listing_id`),
+  ADD UNIQUE KEY `user_id` (`user_id`,`listing_id`),
   ADD KEY `listing_id` (`listing_id`);
 
 --
@@ -1167,7 +1184,7 @@ ALTER TABLE `sme_profiles`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`user_id`),
   ADD UNIQUE KEY `email_address` (`email_address`),
-  ADD UNIQUE KEY `email_address_2` (`email_address`),
+  ADD UNIQUE KEY `user_id` (`user_id`),
   ADD KEY `fk_users_role` (`role`);
 
 --
@@ -1179,9 +1196,9 @@ ALTER TABLE `user_documents`
   ADD KEY `user_id` (`user_id`);
 
 --
--- Indexes for table `user_registration_requests`
+-- Indexes for table `user_registration_log`
 --
-ALTER TABLE `user_registration_requests`
+ALTER TABLE `user_registration_log`
   ADD PRIMARY KEY (`review_id`),
   ADD KEY `user_id` (`user_id`),
   ADD KEY `admin_id` (`admin_id`),
@@ -1201,7 +1218,7 @@ ALTER TABLE `user_roles`
 -- AUTO_INCREMENT for table `areas`
 --
 ALTER TABLE `areas`
-  MODIFY `area_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `area_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `honored_residents`
@@ -1213,37 +1230,37 @@ ALTER TABLE `honored_residents`
 -- AUTO_INCREMENT for table `listings`
 --
 ALTER TABLE `listings`
-  MODIFY `listing_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `listing_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `listing_images`
 --
 ALTER TABLE `listing_images`
-  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
--- AUTO_INCREMENT for table `listing_requests`
+-- AUTO_INCREMENT for table `listing_request_log`
 --
-ALTER TABLE `listing_requests`
-  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+ALTER TABLE `listing_request_log`
+  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `listing_votes`
 --
 ALTER TABLE `listing_votes`
-  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
+  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `past_events`
@@ -1279,7 +1296,7 @@ ALTER TABLE `product_service_subcategories`
 -- AUTO_INCREMENT for table `resident_profiles`
 --
 ALTER TABLE `resident_profiles`
-  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `sme_profiles`
@@ -1291,19 +1308,19 @@ ALTER TABLE `sme_profiles`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `user_documents`
 --
 ALTER TABLE `user_documents`
-  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
--- AUTO_INCREMENT for table `user_registration_requests`
+-- AUTO_INCREMENT for table `user_registration_log`
 --
-ALTER TABLE `user_registration_requests`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+ALTER TABLE `user_registration_log`
+  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Constraints for dumped tables
@@ -1331,11 +1348,11 @@ ALTER TABLE `listing_images`
   ADD CONSTRAINT `fk_listing_images_listing` FOREIGN KEY (`listing_id`) REFERENCES `listings` (`listing_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `listing_requests`
+-- Constraints for table `listing_request_log`
 --
-ALTER TABLE `listing_requests`
-  ADD CONSTRAINT `listing_requests_ibfk_1` FOREIGN KEY (`listing_id`) REFERENCES `listings` (`listing_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `listing_requests_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `listing_request_log`
+  ADD CONSTRAINT `listing_request_log_ibfk_1` FOREIGN KEY (`listing_id`) REFERENCES `listings` (`listing_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `listing_request_log_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `listing_votes`
@@ -1416,12 +1433,12 @@ ALTER TABLE `user_documents`
   ADD CONSTRAINT `user_documents_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
 --
--- Constraints for table `user_registration_requests`
+-- Constraints for table `user_registration_log`
 --
-ALTER TABLE `user_registration_requests`
+ALTER TABLE `user_registration_log`
   ADD CONSTRAINT `fk_review_document` FOREIGN KEY (`document_id`) REFERENCES `user_documents` (`document_id`),
-  ADD CONSTRAINT `user_registration_requests_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `user_registration_requests_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `users` (`user_id`);
+  ADD CONSTRAINT `user_registration_log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `user_registration_log_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `users` (`user_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
