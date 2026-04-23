@@ -101,9 +101,9 @@ if ($role === 'SME') {
                psc.subcategory_name,
                pc.category_name
         FROM sme_profiles sp
-        LEFT JOIN areas a                            ON sp.area_id        = a.area_id
+        LEFT JOIN areas a ON sp.area_id = a.area_id
         LEFT JOIN product_service_subcategories psc  ON sp.subcategory_id = psc.subcategory_id
-        LEFT JOIN product_service_categories pc      ON psc.category_id   = pc.category_id
+        LEFT JOIN product_service_categories pc ON psc.category_id   = pc.category_id
         WHERE sp.user_id = ?
         LIMIT 1
     ");
@@ -142,7 +142,7 @@ $prf_account_status = $prf_user['account_status'] ?? 'pending';
 $prf_status_info    = $prf_status_map[$prf_account_status] ?? ['label' => ucfirst($prf_account_status), 'class' => 'prf-badge--pending'];
 ?>
 
-<!-- PROFILE PAGE
+<!-- PROFILE PAGE -->
 <div class="prf-wrapper">
  
     <?php
@@ -288,9 +288,7 @@ $prf_status_info    = $prf_status_map[$prf_account_status] ?? ['label' => ucfirs
     </div>
 </div>
  
-<!-- ============================================================
-     EDIT CONTACT MODAL
-============================================================ -->
+<!--EDIT CONTACT  -->
 <div id="prf-modal-overlay" class="prf-modal-overlay" style="display:none;" onclick="prfCloseOnOverlay(event)">
     <div class="prf-modal-box">
         <div class="prf-modal-header">

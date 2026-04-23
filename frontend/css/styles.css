@@ -6176,6 +6176,38 @@ font-size:13px;
  
 .an-poll-pct { font-weight: 700; color: var(--an-violet); }
 .an-poll-no-votes { padding: 12px 18px; font-size: 13px; color: #6b7280; }
+
+.an-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.an-page-info { font-size: 13px; color: #888; }
+.an-page-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.an-page-btn {
+    padding: 7px 14px;
+    border: 1px solid #f0e6f6;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #230c33;
+    text-decoration: none;
+    background: #ffffff;
+    transition: all 0.15s;
+}
+
+.an-page-btn:hover { background: #f5f0f8; border-color: #bf2ab9; }
+
+.an-page-btn--active {
+    background: #230c33;
+    color: #ffffff;
+    border-color: #230c33;
+}
  
 /* Placeholder */
 .an-placeholder {

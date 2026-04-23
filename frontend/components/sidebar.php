@@ -6,7 +6,6 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Get user role from session
 $userRole = $_SESSION['user_role'] ?? '';
-
 ?>
 
 <aside class="sidebar">

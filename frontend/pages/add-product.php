@@ -15,7 +15,7 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowed
  
 $sme_id        = $_SESSION['sme_id'] ?? '';
 $business_name = $_SESSION['business_name'] ?? '';
-$user_id       = intval($_SESSION['user_id'] ?? 0); // ← used for approved_by placeholder
+$user_id       = intval($_SESSION['user_id'] ?? 0);
 $errors        = [];
 $success       = "";
  
@@ -197,7 +197,7 @@ while ($row = mysqli_fetch_assoc($items_result)) {
                 <input type="number" name="price" placeholder="Enter price e.g. 25.00" step="0.01" min="0" required>
             </div>
  
-            <!-- Business Name (readonly) -->
+            <!-- Business Name -->
             <div class="add-listing-field">
                 <label>Business Name</label>
                 <input type="text" value="<?= htmlspecialchars($business_name) ?>" readonly>

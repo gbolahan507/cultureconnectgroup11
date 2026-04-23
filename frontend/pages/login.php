@@ -21,7 +21,7 @@ $post_email = '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - CultureConnect</title>
+    <title>Login</title>
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -30,8 +30,6 @@ $post_email = '';
 // database and Header brings in $conn and session_start
 include '../db_connection.php';
 include '../components/header.php'; 
-
-// Now $conn is available, handle form submission
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $post_email = trim($_POST['email'] ?? '');
@@ -115,7 +113,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <!-- Login Page -->
 
 <div class="login-page-wrapper">
-<!-- Background Slideshow uses same styling with bg in register-page -->
     <div class="login-bg-slideshow">
         <div class="login-slide" style="background-image: url('../images/event1.jpg')"></div>
         <div class="login-slide" style="background-image: url('../images/event2.jpg')"></div>
@@ -123,7 +120,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="login-slide" style="background-image: url('../images/event4.jpg')"></div>
     </div>
 
-    <!-- Dark overlay -->
     <div class="login-overlay"></div>
 
 <!-- Login form Content -->

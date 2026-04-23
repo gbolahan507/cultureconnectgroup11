@@ -1,7 +1,7 @@
 <?php ob_start(); ?>
 <?php
 if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Council Administrator', 'Council Member'])) {
-    header('Location: ../pages/dashboard.php?page=home');
+    header('Location: ../pages/dashboard.php');
     exit();
 }
 if (!isset($conn)) include '../db_connection.php';
@@ -39,11 +39,11 @@ $listings_r = mysqli_query($conn, "
            sp.business_name, pc.category_name,
            COALESCE(SUM(oi.quantity), 0) AS units_sold
     FROM listings l
-    JOIN product_service ps                ON l.item_id         = ps.item_id
+    JOIN product_service ps ON l.item_id  = ps.item_id
     JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
-    JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
-    JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
-    LEFT JOIN order_items oi               ON l.listing_id      = oi.listing_id
+    JOIN product_service_categories pc ON pss.category_id   = pc.category_id
+    JOIN sme_profiles sp ON l.sme_id = sp.sme_id
+    LEFT JOIN order_items oi ON l.listing_id = oi.listing_id
     WHERE l.status = 'active'
     GROUP BY l.listing_id
     ORDER BY units_sold DESC
@@ -52,18 +52,26 @@ $listings_r = mysqli_query($conn, "
 $active_listings_data = [];
 while ($row = mysqli_fetch_assoc($listings_r)) $active_listings_data[] = $row;
 
-// Community votes
+// Community votes — all, no limit
 $votes_r = mysqli_query($conn, "
     SELECT product_name, listing_title, price, total_likes, total_dislikes, score
     FROM resident_product_service_interest
     WHERE (total_likes + total_dislikes) > 0
     ORDER BY score DESC
-    LIMIT 10
 ");
 $community_votes = [];
 while ($row = mysqli_fetch_assoc($votes_r)) $community_votes[] = $row;
 
-// Use platform-wide totals from listing_votes table (not just top 10)
+// Votes pagination
+$votes_per_page   = 8;
+$votes_page       = max(1, intval($_GET['votes_page'] ?? 1));
+$total_votes_rows = count($community_votes);
+$votes_pages      = max(1, ceil($total_votes_rows / $votes_per_page));
+$votes_page       = min($votes_page, $votes_pages);
+$votes_offset     = ($votes_page - 1) * $votes_per_page;
+$paged_votes      = array_slice($community_votes, $votes_offset, $votes_per_page);
+
+// Platform-wide vote totals
 $cv_total_likes    = intval($total_likes);
 $cv_total_dislikes = intval($total_dislikes);
 $cv_total          = $total_lv;
@@ -72,11 +80,11 @@ $cv_positive_rate  = $cv_total > 0 ? round(($cv_total_likes / $cv_total) * 100) 
 // Business performance
 $biz_r = mysqli_query($conn, "
     SELECT sp.business_name,
-           COUNT(DISTINCT l.listing_id)                 AS listing_count,
-           COUNT(DISTINCT oi.order_item_id)              AS order_count,
-           COALESCE(SUM(oi.price * oi.quantity), 0)     AS revenue
+           COUNT(DISTINCT l.listing_id) AS listing_count,
+           COUNT(DISTINCT oi.order_item_id) AS order_count,
+           COALESCE(SUM(oi.price * oi.quantity), 0) AS revenue
     FROM sme_profiles sp
-    LEFT JOIN listings l     ON sp.sme_id    = l.sme_id AND l.status = 'active'
+    LEFT JOIN listings l ON sp.sme_id  = l.sme_id AND l.status = 'active'
     LEFT JOIN order_items oi ON l.listing_id = oi.listing_id
     WHERE sp.approval_status = 'approved'
     GROUP BY sp.sme_id
@@ -85,15 +93,15 @@ $biz_r = mysqli_query($conn, "
 $biz_perf = [];
 while ($row = mysqli_fetch_assoc($biz_r)) $biz_perf[] = $row;
 
-// Area activity 
+// Area activity
 $area_r = mysqli_query($conn, "
     SELECT a.area_name,
            COUNT(DISTINCT sp.sme_id)     AS biz_count,
            COUNT(DISTINCT l.listing_id)  AS listing_count,
            COUNT(DISTINCT rp.profile_id) AS resident_count
     FROM areas a
-    LEFT JOIN sme_profiles sp      ON a.area_id = sp.area_id AND sp.approval_status = 'approved'
-    LEFT JOIN listings l           ON sp.sme_id  = l.sme_id  AND l.status = 'active'
+    LEFT JOIN sme_profiles sp  ON a.area_id = sp.area_id AND sp.approval_status = 'approved'
+    LEFT JOIN listings l ON sp.sme_id  = l.sme_id  AND l.status = 'active'
     LEFT JOIN resident_profiles rp ON a.area_id  = rp.area_id
     GROUP BY a.area_id
     ORDER BY listing_count DESC
@@ -102,10 +110,8 @@ $areas = [];
 while ($row = mysqli_fetch_assoc($area_r)) $areas[] = $row;
 $max_area_listings = !empty($areas) ? max(array_column($areas, 'listing_count')) : 1;
 
-// to convert to JSON string
 $json_user_dist = json_encode($user_dist);
 $json_biz_perf  = json_encode($biz_perf);
-
 ?>
 
 <div class="an-page">
@@ -194,7 +200,7 @@ $json_biz_perf  = json_encode($biz_perf);
 
 </div>
 
-<!-- ── DYNAMIC PANEL ──────────────────────────────────────── -->
+<!-- DYNAMIC PANEL -->
 <div id="an-dynamic" style="display:none; margin-top:1.5rem;">
 
     <!-- 1. USER DISTRIBUTION -->
@@ -218,7 +224,7 @@ $json_biz_perf  = json_encode($biz_perf);
             <table class="an-table" id="an-listings-table">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>S/N</th>
                         <th>Listing</th>
                         <th>Business</th>
                         <th>Type</th>
@@ -253,8 +259,8 @@ $json_biz_perf  = json_encode($biz_perf);
                 <span class="an-breakdown-lbl">Avg Order Value</span>
             </div>
             <div class="an-breakdown-card an-breakdown-card--orchid">
-                 <span class="an-breakdown-num">£<?= number_format($completed_revenue, 2) ?></span>
-                 <span class="an-breakdown-lbl">Total Revenue</span>
+                <span class="an-breakdown-num">£<?= number_format($completed_revenue, 2) ?></span>
+                <span class="an-breakdown-lbl">Total Revenue</span>
             </div>
             <div class="an-breakdown-card an-breakdown-card--darkviolet">
                 <span class="an-breakdown-num"><?= number_format($completed_orders) ?></span>
@@ -294,6 +300,7 @@ $json_biz_perf  = json_encode($biz_perf);
             </div>
             <?php endif; ?>
         </div>
+
         <?php if (empty($community_votes)) : ?>
         <div class="an-empty">No votes cast yet.</div>
         <?php else : ?>
@@ -301,7 +308,7 @@ $json_biz_perf  = json_encode($biz_perf);
             <table class="an-table">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>S/N</th>
                         <th>Listing</th>
                         <th>Product / Service</th>
                         <th>Price</th>
@@ -312,16 +319,17 @@ $json_biz_perf  = json_encode($biz_perf);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($community_votes as $i => $vr) :
-                        $likes   = intval($vr['total_likes']);
-                        $dislikes= intval($vr['total_dislikes']);
-                        $total   = $likes + $dislikes;
-                        $likePct = $total > 0 ? round(($likes / $total) * 100) : 0;
-                        $disPct  = 100 - $likePct;
-                        $score = intval($vr['score']);
+                    <?php foreach ($paged_votes as $i => $vr) :
+                        $likes    = intval($vr['total_likes']);
+                        $dislikes = intval($vr['total_dislikes']);
+                        $total    = $likes + $dislikes;
+                        $likePct  = $total > 0 ? round(($likes / $total) * 100) : 0;
+                        $disPct   = 100 - $likePct;
+                        $score    = intval($vr['score']);
+                        $row_num  = $votes_offset + $i + 1;
                     ?>
                     <tr>
-                        <td class="an-rank"><?= $i + 1 ?></td>
+                        <td class="an-rank"><?= $row_num ?></td>
                         <td class="an-listing-title"><?= htmlspecialchars($vr['listing_title']) ?></td>
                         <td><?= htmlspecialchars($vr['product_name']) ?></td>
                         <td class="an-revenue">£<?= number_format(floatval($vr['price']), 2) ?></td>
@@ -338,6 +346,26 @@ $json_biz_perf  = json_encode($biz_perf);
                     <?php endforeach; ?>
                 </tbody>
             </table>
+
+            <?php if ($votes_pages > 1) : ?>
+            <div class="an-pagination">
+                <span class="an-page-info">
+                    Showing <?= $votes_offset + 1 ?>–<?= min($votes_offset + $votes_per_page, $total_votes_rows) ?> of <?= $total_votes_rows ?> listings
+                </span>
+                <div class="an-page-btns">
+                    <?php if ($votes_page > 1) : ?>
+                    <a href="dashboard.php?page=analytics&votes_page=<?= $votes_page - 1 ?>" class="an-page-btn">&laquo; Prev</a>
+                    <?php endif; ?>
+                    <?php for ($p = 1; $p <= $votes_pages; $p++) : ?>
+                    <a href="dashboard.php?page=analytics&votes_page=<?= $p ?>"
+                       class="an-page-btn <?= $p === $votes_page ? 'an-page-btn--active' : '' ?>"><?= $p ?></a>
+                    <?php endfor; ?>
+                    <?php if ($votes_page < $votes_pages) : ?>
+                    <a href="dashboard.php?page=analytics&votes_page=<?= $votes_page + 1 ?>" class="an-page-btn">Next &raquo;</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
         <?php endif; ?>
     </div>
@@ -353,12 +381,17 @@ $json_biz_perf  = json_encode($biz_perf);
         <div class="an-bar-chart-wrap">
             <canvas id="an-biz-chart" height="320"></canvas>
         </div>
-        <!-- Full table -->
         <h3 class="an-biz-table-heading" style="margin-top:1.5rem;">All Businesses</h3>
         <div class="an-table-wrap">
             <table class="an-table">
                 <thead>
-                    <tr><th>#</th><th>Business</th><th>Active Listings</th><th>Total Orders</th><th>Revenue</th></tr>
+                    <tr>
+                        <th>S/N</th>
+                        <th>Business</th>
+                        <th>Active Listings</th>
+                        <th>Total Orders</th>
+                        <th>Revenue</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($biz_perf as $i => $b) : ?>
@@ -399,8 +432,8 @@ $json_biz_perf  = json_encode($biz_perf);
         <?php endif; ?>
     </div>
 
-</div><!-- /#an-dynamic -->
-</div><!-- /.an-page -->
+</div>
+</div>
 
 <script>
 (function() {
@@ -409,91 +442,68 @@ $json_biz_perf  = json_encode($biz_perf);
     var anCurrentPanel = null;
     var anBizMode = 'revenue';
 
-    // ── Card clicks ───────────────────────────────────────────
-    document.querySelectorAll('.an-stat-card--clickable').forEach(function(card) {
+    // Card clicks
+       document.querySelectorAll('.an-stat-card--clickable').forEach(function(card) {
         card.addEventListener('click', function() {
-            var panel = card.getAttribute('data-panel');
-            anShow(panel);
+            anShow(card.getAttribute('data-panel'));
         });
     });
 
     function anShow(panel) {
         var dynamic = document.getElementById('an-dynamic');
 
-        // Toggle off
         if (anCurrentPanel === panel) {
             dynamic.style.display = 'none';
-            document.querySelectorAll('.an-stat-card--clickable').forEach(function(c) {
-                c.classList.remove('an-stat-card--active');
-            });
+            document.querySelectorAll('.an-stat-card--clickable').forEach(function(c) { c.classList.remove('an-stat-card--active'); });
             anCurrentPanel = null;
             return;
         }
 
         anCurrentPanel = panel;
+        document.querySelectorAll('.an-panel').forEach(function(p) { p.style.display = 'none'; });
+        document.querySelectorAll('.an-stat-card--clickable').forEach(function(c) { c.classList.remove('an-stat-card--active'); });
 
-        // Hide all panels
-        document.querySelectorAll('.an-panel').forEach(function(p) {
-            p.style.display = 'none';
-        });
-
-        // Remove active from all cards
-        document.querySelectorAll('.an-stat-card--clickable').forEach(function(c) {
-            c.classList.remove('an-stat-card--active');
-        });
-
-        // Show selected
         var target = document.getElementById('an-panel-' + panel);
         if (!target) return;
         target.style.display = 'block';
         dynamic.style.display = 'block';
 
-        // Activate card
         var activeCard = document.querySelector('[data-panel="' + panel + '"]');
         if (activeCard) activeCard.classList.add('an-stat-card--active');
 
-        // Scroll
-        setTimeout(function() {
-            dynamic.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 50);
+        setTimeout(function() { dynamic.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 50);
 
-        // Charts
         if (panel === 'users')    setTimeout(anDrawPie, 150);
         if (panel === 'business') setTimeout(function() { anDrawBiz(anBizMode); }, 150);
     }
 
-    // ── Listing filter toggles ────────────────────────────────
+    // Listing filter toggles
     document.querySelectorAll('.an-toggle-row .an-toggle-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
             var filter = btn.getAttribute('data-filter');
             if (!filter) return;
-            document.querySelectorAll('.an-toggle-row .an-toggle-btn').forEach(function(b) {
-                b.classList.remove('an-toggle-btn--active');
-            });
+            document.querySelectorAll('.an-toggle-row .an-toggle-btn').forEach(function(b) { b.classList.remove('an-toggle-btn--active'); });
             btn.classList.add('an-toggle-btn--active');
             var rank = 1;
             document.querySelectorAll('#an-listings-table tbody tr').forEach(function(row) {
-                var cat  = row.getAttribute('data-category');
-                var show = filter === 'all' || cat === filter;
+                var show = filter === 'all' || row.getAttribute('data-category') === filter;
                 row.style.display = show ? '' : 'none';
                 if (show) row.querySelector('.an-listing-rank').textContent = rank++;
             });
         });
     });
 
-    // ── Biz chart mode toggles ────────────────────────────────
+    // Biz chart toggles
     document.querySelectorAll('#an-biz-toggles .an-toggle-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
             anBizMode = btn.getAttribute('data-biz-mode');
-            document.querySelectorAll('#an-biz-toggles .an-toggle-btn').forEach(function(b) {
-                b.classList.remove('an-toggle-btn--active');
-            });
+            document.querySelectorAll('#an-biz-toggles .an-toggle-btn').forEach(function(b) { b.classList.remove('an-toggle-btn--active'); });
             btn.classList.add('an-toggle-btn--active');
             anDrawBiz(anBizMode);
         });
     });
 
-    // ── Pie chart ─────────────────────────────────────────────
+    // Pie chart
     function anDrawPie() {
         var canvas = document.getElementById('an-pie-chart');
         if (!canvas || !canvas.getContext) return;
@@ -508,35 +518,23 @@ $json_biz_perf  = json_encode($biz_perf);
 
         AN_USER_DIST.forEach(function(row, i) {
             var slice = (parseInt(row.count) / total) * 2 * Math.PI;
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
+            ctx.beginPath(); ctx.moveTo(cx, cy);
             ctx.arc(cx, cy, r, startAngle, startAngle + slice);
             ctx.closePath();
-            ctx.fillStyle = colors[i % colors.length];
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            ctx.fillStyle = colors[i % colors.length]; ctx.fill();
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
             startAngle += slice;
         });
 
-        // Donut hole
-        ctx.beginPath();
-        ctx.arc(cx, cy, 50, 0, 2 * Math.PI);
-        ctx.fillStyle = '#fff';
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy, 50, 0, 2 * Math.PI);
+        ctx.fillStyle = '#fff'; ctx.fill();
 
-        // Centre text
-        ctx.fillStyle = '#230c33';
-        ctx.font = 'bold 20px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#230c33'; ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText(total, cx, cy - 8);
-        ctx.font = '11px Arial';
-        ctx.fillStyle = '#6b7280';
+        ctx.font = '11px Arial'; ctx.fillStyle = '#6b7280';
         ctx.fillText('Total', cx, cy + 12);
 
-        // Legend
         var legend = document.getElementById('an-pie-legend');
         if (legend) {
             legend.innerHTML = AN_USER_DIST.map(function(row, i) {
@@ -550,12 +548,11 @@ $json_biz_perf  = json_encode($biz_perf);
         }
     }
 
-    // ── Bar chart ─────────────────────────────────────────────
+    // Bar chart
     function anDrawBiz(mode) {
         var canvas = document.getElementById('an-biz-chart');
         if (!canvas || !canvas.getContext) return;
 
-        // Sort and cap at top 6
         var sorted = AN_BIZ_PERF.slice().sort(function(a, b) {
             return mode === 'revenue'
                 ? parseFloat(b.revenue) - parseFloat(a.revenue)
@@ -566,54 +563,35 @@ $json_biz_perf  = json_encode($biz_perf);
         var labels = sorted.map(function(b) { return b.business_name.length > 14 ? b.business_name.substring(0, 12) + '…' : b.business_name; });
         var maxVal = Math.max.apply(null, data.concat([1]));
 
-        var barW  = 55, gap = 24, padL = 70, padB = 80, padT = 24, chartH = 240;
-        var totalW = padL + data.length * (barW + gap) + gap;
-        canvas.width  = Math.max(totalW, 300);
+        var barW = 55, gap = 24, padL = 70, padB = 80, padT = 24, chartH = 240;
+        canvas.width  = Math.max(padL + data.length * (barW + gap) + gap, 300);
         canvas.height = chartH + padB + padT;
 
         var ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Gridlines + Y labels
         for (var i = 0; i <= 4; i++) {
             var y = padT + chartH - (i / 4) * chartH;
-            ctx.strokeStyle = '#f0e6f6';
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#f0e6f6'; ctx.lineWidth = 1;
             ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(canvas.width - 10, y); ctx.stroke();
-            ctx.fillStyle = '#6b7280';
-            ctx.font = '10px Arial';
-            ctx.textAlign = 'right';
-            var val = maxVal * i / 4;
-            ctx.fillText(mode === 'revenue' ? '£' + anFmt(val) : Math.round(val), padL - 6, y + 4);
+            ctx.fillStyle = '#6b7280'; ctx.font = '10px Arial'; ctx.textAlign = 'right';
+            ctx.fillText(mode === 'revenue' ? '£' + anFmt(maxVal * i / 4) : Math.round(maxVal * i / 4), padL - 6, y + 4);
         }
 
-        // Bars
         data.forEach(function(val, i) {
             var x    = padL + gap + i * (barW + gap);
             var barH = maxVal > 0 ? (val / maxVal) * chartH : 0;
             var y    = padT + chartH - barH;
-
             var grad = ctx.createLinearGradient(0, y, 0, y + barH);
-            grad.addColorStop(0, '#bf2ab9');
-            grad.addColorStop(1, '#e00180');
+            grad.addColorStop(0, '#bf2ab9'); grad.addColorStop(1, '#e00180');
             ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.rect(x, y, barW, barH);
-            ctx.fill();
-
-            // Value label
-            ctx.fillStyle = '#230c33';
-            ctx.font = 'bold 10px Arial';
-            ctx.textAlign = 'center';
+            ctx.beginPath(); ctx.rect(x, y, barW, barH); ctx.fill();
+            ctx.fillStyle = '#230c33'; ctx.font = 'bold 10px Arial'; ctx.textAlign = 'center';
             ctx.fillText(mode === 'revenue' ? '£' + anFmt(val) : val, x + barW / 2, y - 5);
-
-            // X label (angled)
-            ctx.fillStyle = '#6b7280';
-            ctx.font = '10px Arial';
+            ctx.fillStyle = '#6b7280'; ctx.font = '10px Arial';
             ctx.save();
             ctx.translate(x + barW / 2, padT + chartH + 10);
-            ctx.rotate(-Math.PI / 4);
-            ctx.textAlign = 'right';
+            ctx.rotate(-Math.PI / 4); ctx.textAlign = 'right';
             ctx.fillText(labels[i], 0, 0);
             ctx.restore();
         });
@@ -624,5 +602,13 @@ $json_biz_perf  = json_encode($biz_perf);
         return Math.round(n);
     }
 
-})();
+    document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('votes_page')) {
+        anShow('votes');
+    } else {
+        anShow('users');
+    } });
+
+    })();
 </script>

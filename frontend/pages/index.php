@@ -101,7 +101,7 @@ function ix_safe(string $val): string { return htmlspecialchars($val, ENT_QUOTES
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CultureConnect — Hertfordshire</title>
+    <title>CultureConnect</title>
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body class="ix-page-wrap">
@@ -272,7 +272,7 @@ function ix_safe(string $val): string { return htmlspecialchars($val, ENT_QUOTES
 </section>
  
  
-<!--STATS STRIP-->
+<!--STATS-->
 <section class="ix-section">
     <div class="ix-section-inner">
         <div class="ix-stats-strip">
@@ -302,7 +302,7 @@ function ix_safe(string $val): string { return htmlspecialchars($val, ENT_QUOTES
 </section>
  
  
-<!-- CTA (guests only)-->
+<!-- Call to action for guests only-->
 <?php if (!$is_logged_in) : ?>
 <section class="ix-cta">
     <div class="ix-cta-inner">
@@ -361,7 +361,7 @@ function ixListingCard(array $l): string {
  
  <script>
     let ixSlideIndex  = 0;
-    const ixSlideCount = <?= count($past_events) ?>;
+     const ixSlideCount = <?= count($past_events) ?>;
     let ixAutoTimer   = null;
  
     document.addEventListener('DOMContentLoaded', () => ixStartAuto());
@@ -377,7 +377,7 @@ function ixListingCard(array $l): string {
     }
  
     function ixCarouselPrev() { ixResetAuto(); ixCarouselGoTo((ixSlideIndex - 1 + ixSlideCount) % ixSlideCount); }
-    function ixCarouselNext() { ixResetAuto(); ixCarouselGoTo((ixSlideIndex + 1) % ixSlideCount); }
+     function ixCarouselNext() { ixResetAuto(); ixCarouselGoTo((ixSlideIndex + 1) % ixSlideCount); }
     function ixStartAuto()    { ixAutoTimer = setInterval(() => ixCarouselGoTo((ixSlideIndex + 1) % ixSlideCount), 5000); }
     function ixResetAuto()    { clearInterval(ixAutoTimer); ixStartAuto(); }
 </script>

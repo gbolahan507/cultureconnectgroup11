@@ -66,12 +66,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                    sp.business_name,
                    li.image_url AS primary_image
             FROM order_items oi
-            JOIN listings l                        ON oi.listing_id     = l.listing_id
-            JOIN product_service ps                ON l.item_id         = ps.item_id
+            JOIN listings l  ON oi.listing_id = l.listing_id
+            JOIN product_service ps  ON l.item_id  = ps.item_id
             JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
-            JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
-            JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
-            LEFT JOIN listing_images li            ON l.listing_id      = li.listing_id AND li.is_primary = 1
+            JOIN product_service_categories pc  ON pss.category_id   = pc.category_id
+            JOIN sme_profiles sp  ON l.sme_id  = sp.sme_id
+            LEFT JOIN listing_images li  ON l.listing_id  = li.listing_id AND li.is_primary = 1
             WHERE oi.order_id = ?
             ORDER BY sp.business_name, oi.order_item_id
         ");
@@ -133,9 +133,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                    r.rating  AS existing_rating,
                    r.comment AS existing_comment
             FROM order_items oi
-            JOIN listings l                     ON oi.listing_id = l.listing_id
-            JOIN sme_profiles sp                ON l.sme_id      = sp.sme_id
-            LEFT JOIN listing_images li         ON l.listing_id  = li.listing_id AND li.is_primary = 1
+            JOIN listings l   ON oi.listing_id = l.listing_id
+            JOIN sme_profiles sp  ON l.sme_id  = sp.sme_id
+            LEFT JOIN listing_images li  ON l.listing_id  = li.listing_id AND li.is_primary = 1
             LEFT JOIN product_service_reviews r ON l.listing_id  = r.listing_id  AND r.user_id = ?
             WHERE oi.order_id = ?
         ");
@@ -262,7 +262,7 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Reside
  
 </div>
  
-<!-- ORDER DETAIL MODAL -->
+<!-- ORDER DETAIL  -->
 <div id="mo-detail-modal" class="mo-modal-overlay" style="display:none;">
     <div class="mo-modal-box">
         <div class="mo-modal-header">
@@ -276,7 +276,7 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Reside
     </div>
 </div>
  
-<!-- CANCEL CONFIRM MODAL -->
+<!-- CANCEL CONFIRM  -->
 <div id="mo-cancel-modal" class="mo-modal-overlay" style="display:none;">
     <div class="mo-modal-box mo-modal-box--sm">
         <div class="mo-modal-header mo-modal-header--danger">

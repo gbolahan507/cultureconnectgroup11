@@ -135,7 +135,7 @@ $subtotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cart — CultureConnect</title>
+    <title>Cart</title>
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body class="ct-page-wrap">
@@ -151,7 +151,7 @@ $subtotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
             </svg>
             Your Cart
             <?php if ($cart_count > 0) : ?>
-            <span class="ct-title-count"><?= $cart_count ?> item<?= $cart_count !== 1 ? 's' : '' ?></span>
+              <span class="ct-title-count"><?= $cart_count ?> item<?= $cart_count !== 1 ? 's' : '' ?></span>
             <?php endif; ?>
         </h1>
         <a href="../pages/browse.php" class="ct-back-link">
@@ -163,7 +163,7 @@ $subtotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
     </div>
  
     <?php if (empty($cart)) : ?>
-    <!-- ── Empty cart ─────────────────────────────────────── -->
+    <!-- Empty cart  -->
     <div class="ct-empty">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" width="64" height="64">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
@@ -177,9 +177,9 @@ $subtotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
     <!-- Cart layout  -->
     <div class="ct-layout">
  
-        <!-- Left: Cart items -->
+        <!-- Cart items -->
         <div class="ct-items-col">
-            <?php foreach ($grouped as $business => $items) : ?>
+               <?php foreach ($grouped as $business => $items) : ?>
             <div class="ct-business-group">
                 <div class="ct-business-header">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="16" height="16">
@@ -238,7 +238,7 @@ $subtotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
             <?php endforeach; ?>
         </div>
  
-        <!-- Right: Summary -->
+        <!-- Summary -->
         <div class="ct-summary-col">
             <div class="ct-summary-card">
                 <h2 class="ct-summary-title">Order Summary</h2>
@@ -326,7 +326,7 @@ $subtotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
         const input = document.getElementById('ct-qty-' + listing_id);
         let val     = parseInt(input.value) + delta;
         if (val < 1)  val = 1;
-        if (val > 99) val = 99;
+         if (val > 99) val = 99;
         input.value = val;
         ctUpdateQty(listing_id, val);
     }
@@ -335,7 +335,7 @@ $subtotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
         quantity = Math.max(1, parseInt(quantity));
  
         const fd = new FormData();
-        fd.append('action',     'update_qty');
+         fd.append('action',     'update_qty');
         fd.append('listing_id', listing_id);
         fd.append('quantity',   quantity);
  
@@ -348,7 +348,7 @@ $subtotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
                         const item = ctCart.find(i => i.listing_id === listing_id);
                         if (item) {
                             item.quantity   = quantity;
-                            const lineTotal = (item.price * quantity).toFixed(2);
+                              const lineTotal = (item.price * quantity).toFixed(2);
                             const lineEl    = document.getElementById('ct-line-' + listing_id);
                             const sumEl     = document.getElementById('ct-summary-' + listing_id);
                             if (lineEl) lineEl.textContent = '£' + lineTotal;
@@ -362,7 +362,7 @@ $subtotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
  
     function ctRemoveItem(listing_id) {
         const fd = new FormData();
-        fd.append('action',     'remove_item');
+          fd.append('action',     'remove_item');
         fd.append('listing_id', listing_id);
  
         fetch('../pages/cart.php', { method: 'POST', body: fd })
@@ -389,7 +389,7 @@ $subtotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
     }
  
     function ctRecalcTotal() {
-        const total = ctCart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+         const total = ctCart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
         const el    = document.getElementById('ct-total');
         if (el) el.textContent = '£' + total.toFixed(2);
     }

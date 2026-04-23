@@ -167,7 +167,7 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
                         <button class="edit-btn" onclick="openAreaEditModal(
                             <?= $area['area_id'] ?>,
                             '<?= addslashes($area['area_name']) ?>',
-                            '<?= addslashes($area['description']) ?>',
+                             '<?= addslashes($area['description']) ?>',
                             '<?= addslashes($area['postcode']) ?>'
                         )">Edit</button>
                         <button class="delete-btn" onclick="openAreaDeleteModal(
@@ -191,7 +191,7 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
             <a href="dashboard.php?page=manage-area&area_page=<?= $area_page - 1 ?>" class="area-page-btn">&laquo; Prev</a>
             <?php endif; ?>
             <?php for ($p = 1; $p <= $total_pages; $p++) : ?>
-            <a href="dashboard.php?page=manage-area&area_page=<?= $p ?>"
+                  <a href="dashboard.php?page=manage-area&area_page=<?= $p ?>"
                class="area-page-btn <?= $p === $area_page ? 'area-page-btn--active' : '' ?>"><?= $p ?></a>
             <?php endfor; ?>
             <?php if ($area_page < $total_pages) : ?>
@@ -203,7 +203,7 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
 
 </div>
 
-<!-- ADD MODAL -->
+<!-- ADD Area -->
 <div id="add-area-modal" class="area-modal-overlay" style="display:none;">
     <div class="area-modal-box">
         <div class="area-modal-header">
@@ -232,7 +232,7 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
     </div>
 </div>
 
-<!-- EDIT MODAL -->
+<!-- EDIT AREA -->
 <div id="area-edit-modal" class="area-modal-overlay" style="display:none;">
     <div class="area-modal-box">
         <div class="area-modal-header">
@@ -262,7 +262,7 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
     </div>
 </div>
 
-<!-- DELETE MODAL -->
+<!-- DELETE AREA -->
 <div id="area-delete-modal" class="area-modal-overlay" style="display:none;">
     <div class="area-modal-box area-modal-box-small">
         <div class="area-modal-header">

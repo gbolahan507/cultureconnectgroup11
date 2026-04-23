@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 // Start session if not already active
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -20,7 +18,7 @@ $errors  = [];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - CultureConnect</title>
+    <title>Register</title>
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -52,9 +50,7 @@ while ($row = mysqli_fetch_assoc($sub_result)) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $type = $_POST['form_type'] ?? '';
 
-    // ================================
     // RESIDENT REGISTRATION
-    // ================================
     if ($type === 'resident') {
         $first_name  = trim($_POST['first_name'] ?? '');
         $last_name   = trim($_POST['last_name'] ?? '');
@@ -120,7 +116,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $user_id = mysqli_insert_id($conn);
 
                 // Step 2: Insert into resident_profiles
-                // Trigger will auto set area_id from postcode
                 $res_sql = "INSERT INTO resident_profiles 
                             (user_id, first_name, last_name, date_of_birth, gender, address, phone, postcode)
                             VALUES ('$user_id', '$first_safe', '$last_safe', '$dob', '$gender', '$address_safe', '$phone_safe', '$postcode_safe')";
@@ -158,9 +153,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // ================================
     // SME REGISTRATION
-    // ================================
     elseif ($type === 'sme') {
         $business_name   = trim($_POST['business_name'] ?? '');
         $subcategory_id  = trim($_POST['subcategory_id'] ?? '');
@@ -252,7 +245,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="register-slide" style="background-image: url('../images/event4.jpg')"></div>
        </div>
       
-      <!-- Dark overlay so form is readable -->
        <div class="register-overlay"></div>
 
       <div class="register-content">
@@ -502,8 +494,8 @@ function validateResident() {
         return false;
     }
 
-    if (form.first_name.value == '')      return showError('Please enter your first name.', form.first_name);
-    if (form.last_name.value == '')       return showError('Please enter your last name.', form.last_name);
+    if (form.first_name.value == '')  return showError('Please enter your first name.', form.first_name);
+    if (form.last_name.value == '')  return showError('Please enter your last name.', form.last_name);
     
     if (form.dob.value == '') return showError('Please enter your date of birth.', form.dob);
             const dob    = new Date(form.dob.value);
@@ -513,12 +505,12 @@ function validateResident() {
     if (month < 0 || (month === 0 && today.getDate() < dob.getDate())) age--;
     if (age < 16) return showError('You must be at least 16 years old to register.', form.dob);
     
-    if (form.gender.value == '')          return showError('Please select your gender.', form.gender);
-    if (form.phone.value == '')           return showError('Please enter your phone number.', form.phone);
-    if (form.email.value == '')           return showError('Please enter your email address.', form.email);
-    if (form.address.value == '')         return showError('Please enter your address.', form.address);
-    if (form.area_id.value == '')         return showError('Please select your area.', form.area_id);
-    if (form.password.value == '')        return showError('Please enter a password.', form.password);
+    if (form.gender.value == '') return showError('Please select your gender.', form.gender);
+    if (form.phone.value == '')  return showError('Please enter your phone number.', form.phone);
+    if (form.email.value == '')  return showError('Please enter your email address.', form.email);
+    if (form.address.value == '')  return showError('Please enter your address.', form.address);
+    if (form.area_id.value == '')  return showError('Please select your area.', form.area_id);
+    if (form.password.value == '')  return showError('Please enter a password.', form.password);
     if (form.password.value.length < 8)  return showError('Password must be at least 8 characters.', form.password);
     if (form.confirm_password.value !== form.password.value) return showError('Passwords do not match.', form.confirm_password);
     if (form.doc_type.value == '')        return showError('Please select a verification document type.', form.doc_type);
@@ -539,13 +531,13 @@ function validateSME() {
         return false;
     }
 
-    if (form.business_name.value == '')   return showError('Please enter your business name.', form.business_name);
+    if (form.business_name.value == '') return showError('Please enter your business name.', form.business_name);
     if (form.subcategory_id.value == '')  return showError('Please select a business subcategory.', form.subcategory_id);
-    if (form.description.value == '')     return showError('Please enter a business description.', form.description);
-    if (form.area_id.value == '')         return showError('Please select your area.', form.area_id);
-    if (form.phone.value == '')           return showError('Please enter your phone number.', form.phone);
-    if (form.email.value == '')           return showError('Please enter your email address.', form.email);
-    if (form.password.value == '')        return showError('Please enter a password.', form.password);
+    if (form.description.value == '')  return showError('Please enter a business description.', form.description);
+    if (form.area_id.value == '')  return showError('Please select your area.', form.area_id);
+    if (form.phone.value == '') return showError('Please enter your phone number.', form.phone);
+    if (form.email.value == '')  return showError('Please enter your email address.', form.email);
+    if (form.password.value == '') return showError('Please enter a password.', form.password);
     if (form.password.value.length < 8)  return showError('Password must be at least 8 characters.', form.password);
     if (form.confirm_password.value !== form.password.value) return showError('Passwords do not match.', form.confirm_password);
     if (form.doc_type.value == '')        return showError('Please select a verification document type.', form.doc_type);
@@ -554,7 +546,7 @@ function validateSME() {
     return true;
 }
 
-     // Set resident as default active tab on page load
+     // resident as default active tab on page load
      document.addEventListener('DOMContentLoaded', () => showForm('resident'));
   </script>
 

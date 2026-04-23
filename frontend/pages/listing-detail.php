@@ -3,7 +3,7 @@
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once '../db_connection.php';
  
-// ── AJAX HANDLER ─────────────────────────────────────────────
+// AJAX HANDLER
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     while (ob_get_level()) ob_end_clean();
     header('Content-Type: application/json');
@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $stmt = $conn->prepare("
             SELECT l.listing_id, l.title, l.price, sp.business_name, li.image_url AS primary_image
             FROM listings l
-            JOIN sme_profiles sp        ON l.sme_id     = sp.sme_id
+            JOIN sme_profiles sp  ON l.sme_id  = sp.sme_id
             LEFT JOIN listing_images li ON l.listing_id = li.listing_id AND li.is_primary = 1
             WHERE l.listing_id = ? AND l.status = 'active' LIMIT 1
         ");
@@ -194,12 +194,12 @@ $stmt = $conn->prepare("
            u.email_address AS business_email,
            a.area_name, a.description AS area_description
     FROM listings l
-    JOIN product_service ps                ON l.item_id        = ps.item_id
+    JOIN product_service ps ON l.item_id  = ps.item_id
     JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
-    JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
-    JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
-    JOIN users u                           ON sp.user_id        = u.user_id
-    JOIN areas a                           ON sp.area_id        = a.area_id
+    JOIN product_service_categories pc ON pss.category_id  = pc.category_id
+    JOIN sme_profiles sp  ON l.sme_id  = sp.sme_id
+    JOIN users u ON sp.user_id = u.user_id
+    JOIN areas a  ON sp.area_id = a.area_id
     WHERE l.listing_id = ? AND l.status = 'active' LIMIT 1
 ");
 $stmt->bind_param("i", $listing_id);
@@ -273,11 +273,11 @@ if ($is_resident) {
 $rel_stmt = $conn->prepare("
     SELECT l.listing_id, l.title, l.price, pc.category_name, li.image_url AS primary_image
     FROM listings l
-    JOIN sme_profiles sp                   ON l.sme_id         = sp.sme_id
-    JOIN product_service ps                ON l.item_id         = ps.item_id
+    JOIN sme_profiles sp   ON l.sme_id  = sp.sme_id
+    JOIN product_service ps    ON l.item_id  = ps.item_id
     JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
-    JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
-    LEFT JOIN listing_images li            ON l.listing_id      = li.listing_id AND li.is_primary = 1
+    JOIN product_service_categories pc  ON pss.category_id   = pc.category_id
+    LEFT JOIN listing_images li    ON l.listing_id      = li.listing_id AND li.is_primary = 1
     WHERE sp.business_name = ? AND l.listing_id != ? AND l.status = 'active'
     LIMIT 3
 ");
@@ -317,9 +317,9 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
     <div class="ld-subnav-inner">
         <nav class="ld-breadcrumb">
             <a href="../pages/browse.php">Browse</a>
-            <span>›</span><span><?= ld_safe($listing['category_name']) ?></span>
-            <span>›</span><span><?= ld_safe($listing['subcategory_name']) ?></span>
-            <span>›</span><span class="ld-breadcrumb-current"><?= ld_safe($listing['title']) ?></span>
+            <span> › </span><span><?= ld_safe($listing['category_name']) ?></span>
+            <span> › </span><span><?= ld_safe($listing['subcategory_name']) ?></span>
+            <span> ›</span><span class="ld-breadcrumb-current"><?= ld_safe($listing['title']) ?></span>
         </nav>
         <a href="../pages/cart.php" class="ld-cart-btn">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18">
@@ -380,7 +380,7 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
             <span id="ld-review-count" class="ld-review-count-badge"></span>
         </p>
 
-        <!-- Review form — only for eligible residents -->
+        <!-- Review form — only for residents that bought a listing -->
         <?php if ($is_resident && $can_review && !$already_reviewed) : ?>
         <div class="ld-review-form-wrap" id="ld-review-form-wrap">
             <p class="ld-review-form-label">You purchased this — leave a review!</p>
@@ -408,7 +408,7 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
         </div>
         </div>
  
-        <!-- RIGHT: Info -->
+        <!-- Info -->
         <div class="ld-right">
             <div class="ld-info-card">
                 <div class="ld-badges">
@@ -544,7 +544,7 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
  
 </div>
  
-<!-- Login prompt modal -->
+<!-- Login prompt  -->
 <div id="ld-login-modal" class="ld-login-modal-overlay" style="display:none;">
     <div class="ld-login-modal-box">
         <button class="ld-login-modal-close" onclick="ldCloseLoginModal()">&times;</button>
@@ -609,7 +609,7 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
     function ldPrev() { ldGoTo((ldIndex - 1 + LD_IMAGES.length) % LD_IMAGES.length); }
     function ldNext() { ldGoTo((ldIndex + 1) % LD_IMAGES.length); }
  
-    // ── Quantity ──────────────────────────────────────────────
+    //  Quantity 
     function ldChangeQty(delta) {
         const input = document.getElementById('ld-qty');
         let val = Math.min(99, Math.max(1, parseInt(input.value) + delta));
@@ -679,7 +679,7 @@ $btn_label    = $cat_type === 'Product' ? 'Buy Now' : 'Book Now';
             });
     }
  
-    // Login modal
+    // Login
     function ldShowLoginModal(context) {
         if (context === 'book') {
             document.getElementById('ld-modal-heading').textContent = 'Resident Account Required';

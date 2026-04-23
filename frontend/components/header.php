@@ -1,16 +1,12 @@
 <header>
 <?php
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+    session_start();}
 $current_page = basename($_SERVER['PHP_SELF']);
 
 // Check if user is logged in based on user_role
 $logged_in = isset($_SESSION['user_id']);
-
-// include database connection
 include '../db_connection.php';
-
 ?>
 
 <div class="header-container">

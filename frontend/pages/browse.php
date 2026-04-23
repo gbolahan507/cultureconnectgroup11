@@ -47,17 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                    COALESCE(SUM(lv.vote_type = 'like'),    0) AS likes,
                    COALESCE(SUM(lv.vote_type = 'dislike'), 0) AS dislikes
             FROM listings l
-            JOIN product_service ps                ON l.item_id         = ps.item_id
+            JOIN product_service ps ON l.item_id  = ps.item_id
             JOIN product_service_subcategories pss ON ps.subcategory_id  = pss.subcategory_id
-            JOIN product_service_categories pc     ON pss.category_id    = pc.category_id
-            JOIN sme_profiles sp                   ON l.sme_id           = sp.sme_id
-            JOIN areas a                           ON sp.area_id         = a.area_id
-            LEFT JOIN listing_images li            ON l.listing_id       = li.listing_id AND li.is_primary = 1
-            LEFT JOIN listing_votes lv             ON l.listing_id       = lv.listing_id
+            JOIN product_service_categories pc ON pss.category_id = pc.category_id
+            JOIN sme_profiles sp ON l.sme_id = sp.sme_id
+            JOIN areas a ON sp.area_id  = a.area_id
+            LEFT JOIN listing_images li ON l.listing_id  = li.listing_id AND li.is_primary = 1
+            LEFT JOIN listing_votes lv  ON l.listing_id = lv.listing_id
             WHERE $where_sql
             GROUP BY l.listing_id
-            ORDER BY l.created_at DESC
-        ";
+            ORDER BY l.created_at DESC";
  
         $stmt = $conn->prepare($sql);
         if (!empty($params)) $stmt->bind_param($types, ...$params);
@@ -114,11 +113,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                    sp.business_name,
                    li.image_url AS primary_image
             FROM listings l
-            JOIN sme_profiles sp        ON l.sme_id     = sp.sme_id
+            JOIN sme_profiles sp ON l.sme_id = sp.sme_id
             LEFT JOIN listing_images li ON l.listing_id = li.listing_id AND li.is_primary = 1
             WHERE l.listing_id = ? AND l.status = 'active'
-            LIMIT 1
-        ");
+            LIMIT 1 ");
         $stmt->bind_param("i", $listing_id);
         $stmt->execute();
         $listing = $stmt->get_result()->fetch_assoc();
@@ -148,8 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 'business_name' => $listing['business_name'],
                 'price'         => floatval($listing['price']),
                 'quantity'      => $quantity,
-                'image'         => $listing['primary_image'] ?? ''
-            ];
+                'image'         => $listing['primary_image'] ?? ''];
         }
  
         $cart_count = array_sum(array_column($_SESSION['cart'], 'quantity'));
@@ -256,7 +253,7 @@ $is_resident  = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Res
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browse — CultureConnect</title>
+    <title>Browse </title>
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body class="br-page-wrap">
@@ -355,7 +352,7 @@ $is_resident  = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Res
  
 </div>
  
-<!-- Login prompt modal -->
+<!-- Login prompt -->
 <div id="br-login-modal" class="br-login-modal-overlay" style="display:none;">
     <div class="br-login-modal-box">
         <button class="br-login-modal-close" onclick="brCloseVoteModal()">&times;</button>
@@ -550,13 +547,13 @@ function brPriceClear() {
                 try {
                     const data = JSON.parse(text);
                     loading.style.display = 'none';
-                    if (data.success && data.listings.length > 0) {
+                      if (data.success && data.listings.length > 0) {
                         count.textContent = `Showing ${data.count} listing${data.count !== 1 ? 's' : ''}`;
                         grid.innerHTML    = '';
                         data.listings.forEach(l => grid.appendChild(brBuildCard(l)));
                         grid.style.display = 'grid';
                         brApplyVoteStates();
-                    } else {
+                } else {
                         count.textContent   = '0 listings found';
                         empty.style.display = 'flex';
                     }
@@ -580,7 +577,7 @@ function brPriceClear() {
         const imgSrc    = l.primary_image ? `../uploads/listings_images/${brEsc(l.primary_image)}` : null;
         const priceTier = price <= 20 ? 'affordable' : price <= 50 ? 'moderate' : 'premium';
         const tierLabel = price <= 20 ? 'Affordable'  : price <= 50 ? 'Moderate'  : 'Premium';
-        const catClass  = l.category_name === 'Product' ? 'br-badge-cat--product' : 'br-badge-cat--service';
+       const catClass  = l.category_name === 'Product' ? 'br-badge-cat--product' : 'br-badge-cat--service';
  
         card.innerHTML = `
             <div class="br-card-image-wrap" onclick="brGoTo(${l.listing_id})">
@@ -598,7 +595,7 @@ function brPriceClear() {
             </div>
             <div class="br-card-body">
                 <p class="br-card-business">${brEsc(l.business_name)}</p>
-                <h3 class="br-card-title" onclick="brGoTo(${l.listing_id})">${brEsc(l.title)}</h3>
+                 <h3 class="br-card-title" onclick="brGoTo(${l.listing_id})">${brEsc(l.title)}</h3>
                 <p class="br-card-caption">${brEsc(l.caption ?? '')}</p>
                 <div class="br-cultural-benefit">${brEsc(l.subcategory_name)}</div>
                 <div class="br-card-footer">
@@ -618,7 +615,7 @@ function brPriceClear() {
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="14" height="14">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904m10.598-9.75H14.25M5.904 18.5c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 0 1-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h1.053c.472 0 .745.556.5.96a8.958 8.958 0 0 0-1.302 4.665c0 1.194.232 2.333.654 3.375Z" />
                         </svg>
-                        <span id="br-likes-${l.listing_id}">${parseInt(l.likes)}</span>
+                          <span id="br-likes-${l.listing_id}">${parseInt(l.likes)}</span>
                     </button>
                     <button class="br-vote-btn br-vote-btn--dislike"
                             id="br-dislike-${l.listing_id}"
@@ -630,7 +627,7 @@ function brPriceClear() {
                     </button>
                 </div>
                 <button class="br-card-add-btn" onclick="brAddToCart(${l.listing_id}, this)">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                     </svg>
                     Add to Cart

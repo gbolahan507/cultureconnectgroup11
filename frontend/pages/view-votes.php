@@ -31,15 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 pc.category_name,
                 pss.subcategory_name,
                 li.image_url AS primary_image,
-                COALESCE(SUM(lv.vote_type = 'like'),    0) AS likes,
+                COALESCE(SUM(lv.vote_type = 'like'),  0) AS likes,
                 COALESCE(SUM(lv.vote_type = 'dislike'), 0) AS dislikes,
                 COUNT(lv.vote_id)                          AS total_votes
             FROM listings l
-            JOIN product_service ps                ON l.item_id         = ps.item_id
+            JOIN product_service ps  ON l.item_id  = ps.item_id
             JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
-            JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
-            LEFT JOIN listing_images li            ON l.listing_id      = li.listing_id AND li.is_primary = 1
-            LEFT JOIN listing_votes lv             ON l.listing_id      = lv.listing_id
+            JOIN product_service_categories pc  ON pss.category_id   = pc.category_id
+            LEFT JOIN listing_images li ON l.listing_id  = li.listing_id AND li.is_primary = 1
+            LEFT JOIN listing_votes lv  ON l.listing_id  = lv.listing_id
             WHERE l.sme_id = ? AND l.status = 'active'
             GROUP BY l.listing_id
             ORDER BY total_votes DESC, likes DESC
@@ -109,8 +109,8 @@ $reviews_r = $conn->prepare("
            l.title AS listing_title,
            rp.first_name, rp.last_name
     FROM product_service_reviews r
-    JOIN listings l           ON r.listing_id = l.listing_id
-    JOIN sme_profiles sp      ON l.sme_id     = sp.sme_id
+    JOIN listings l  ON r.listing_id = l.listing_id
+    JOIN sme_profiles sp  ON l.sme_id     = sp.sme_id
     JOIN resident_profiles rp ON r.user_id    = rp.user_id
     WHERE sp.sme_id = ?
     ORDER BY r.created_at DESC
@@ -134,7 +134,7 @@ $reviews_r->close();
         include '../components/section_header.php';
     ?>
  
-    <!-- Vote summary stats (populated by JS) -->
+    <!-- Vote summary stats -->
     <div class="vv-stats-row" id="vv-stats-row" style="display:none;">
         <div class="vv-stat-card">
             <div class="vv-stat-icon vv-stat-icon--total">
@@ -218,7 +218,7 @@ $reviews_r->close();
         <p class="vv-empty-sub">When residents like or dislike your listings, their feedback will appear here.</p>
     </div>
  
-    <!-- ── Reviews Section ──────────────────────────────────── -->
+    <!--  Reviews Section  -->
     <div class="vv-reviews-section">
  
         <div class="vv-section-heading">

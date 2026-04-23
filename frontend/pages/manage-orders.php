@@ -1,8 +1,6 @@
 <?php ob_start(); ?>
 <?php
-// ============================================================
 // AJAX HANDLER
-// ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if (session_status() === PHP_SESSION_NONE) session_start();
     if (!isset($conn)) include '../db_connection.php';
@@ -12,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $sme_id = $_SESSION['sme_id'] ?? null;
     if (!$sme_id) { echo json_encode(['success' => false, 'message' => 'Not authenticated.']); exit(); }
  
-    // ── Get Orders ────────────────────────────────────────────
+    // Get Orders
     if ($_POST['action'] === 'get_orders') {
         $status_filter = $_POST['status'] ?? 'all';
  
@@ -25,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                        SUM(oi.price * oi.quantity) AS sme_total
                 FROM orders o
                 JOIN order_items oi  ON o.order_id   = oi.order_id
-                JOIN listings l     ON oi.listing_id = l.listing_id
-                JOIN users u        ON o.user_id     = u.user_id
+                JOIN listings l ON oi.listing_id = l.listing_id
+                JOIN users u ON o.user_id     = u.user_id
                 LEFT JOIN resident_profiles rp ON o.user_id = rp.user_id
                 WHERE l.sme_id = ?
                 GROUP BY o.order_id
@@ -42,8 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                        SUM(oi.price * oi.quantity) AS sme_total
                 FROM orders o
                 JOIN order_items oi  ON o.order_id   = oi.order_id
-                JOIN listings l     ON oi.listing_id = l.listing_id
-                JOIN users u        ON o.user_id     = u.user_id
+                JOIN listings l  ON oi.listing_id = l.listing_id
+                JOIN users u  ON o.user_id     = u.user_id
                 LEFT JOIN resident_profiles rp ON o.user_id = rp.user_id
                 WHERE l.sme_id = ? AND o.status = ?
                 GROUP BY o.order_id
@@ -62,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
  
-    // ── Get Order Details ─────────────────────────────────────
+    //  Get Order Details 
     if ($_POST['action'] === 'get_order_details') {
         $order_id = intval($_POST['order_id'] ?? 0);
  
@@ -89,11 +87,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                    pc.category_name,
                    li.image_url AS primary_image
             FROM order_items oi
-            JOIN listings l                        ON oi.listing_id     = l.listing_id
-            JOIN product_service ps                ON l.item_id         = ps.item_id
+            JOIN listings l  ON oi.listing_id  = l.listing_id
+            JOIN product_service ps ON l.item_id = ps.item_id
             JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
-            JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
-            LEFT JOIN listing_images li            ON l.listing_id      = li.listing_id AND li.is_primary = 1
+            JOIN product_service_categories pc ON pss.category_id   = pc.category_id
+            LEFT JOIN listing_images li  ON l.listing_id   = li.listing_id AND li.is_primary = 1
             WHERE oi.order_id = ? AND l.sme_id = ?
             ORDER BY oi.order_item_id
         ");
@@ -110,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
  
-    // ── Confirm Order ─────────────────────────────────────────
+    //  Confirm Order 
     if ($_POST['action'] === 'confirm_order') {
         $order_id = intval($_POST['order_id'] ?? 0);
  
@@ -141,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
  
-    // ── Cancel Order ──────────────────────────────────────────
+    //  Cancel Order 
     if ($_POST['action'] === 'cancel_order') {
         $order_id = intval($_POST['order_id'] ?? 0);
  
@@ -176,9 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     exit();
 }
  
-// ============================================================
 // PAGE GUARD
-// ============================================================
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'SME') {
     header('Location: ../pages/dashboard.php?page=home');
     exit();
@@ -239,7 +235,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'SME') {
  
 </div>
 
-<!-- ORDER DETAIL MODAL -->
+<!-- ORDER DETAIL -->
 <div id="mgo-detail-modal" class="mgo-modal-overlay" style="display:none;">
     <div class="mgo-modal-box">
         <div class="mgo-modal-header">
@@ -254,7 +250,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'SME') {
 </div>
  
  
-<!-- CONFIRM ORDER MODAL -->
+<!-- CONFIRM ORDER  -->
 <div id="mgo-confirm-modal" class="mgo-modal-overlay" style="display:none;">
     <div class="mgo-modal-box mgo-modal-box--sm">
         <div class="mgo-modal-header mgo-modal-header--success">
@@ -283,7 +279,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'SME') {
 </div>
  
  
-<!-- CANCEL ORDER MODAL -->
+<!-- CANCEL ORDER  -->
 <div id="mgo-cancel-modal" class="mgo-modal-overlay" style="display:none;">
     <div class="mgo-modal-box mgo-modal-box--sm">
         <div class="mgo-modal-header mgo-modal-header--danger">

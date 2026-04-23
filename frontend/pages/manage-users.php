@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowed
     exit();
 }
 
-// ── AJAX HANDLER ─────────────────────────────────────────────
+//  AJAX HANDLER 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     while (ob_get_level()) ob_end_clean();
     header('Content-Type: application/json');
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             if ($doc_row) {
                 $doc_id = $doc_row['document_id'];
-                $log    = $conn->prepare("INSERT INTO user_registration_requests (user_id, admin_id, decision, comments, document_id) VALUES (?, ?, ?, ?, ?)");
+                $log    = $conn->prepare("INSERT INTO user_registration_log (user_id, admin_id, decision, comments, document_id) VALUES (?, ?, ?, ?, ?)");
                 $log->bind_param("iissi", $user_id, $admin_id, $status, $comment, $doc_id);
                 $log->execute();
                 $log->close();
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     exit();
 }
 
-// ── PAGE DATA ─────────────────────────────────────────────────
+// PAGE DATA 
 $statusFilter  = $_GET['status'] ?? 'pending';
 if (!in_array($statusFilter, ['pending', 'approved', 'rejected'])) $statusFilter = 'pending';
 
@@ -130,8 +130,8 @@ $resQuery = $conn->prepare("
         u.email_address AS email,
         u.role,
         CASE u.role
-            WHEN 'Resident'              THEN 'resident'
-            WHEN 'Council Member'        THEN 'council_member'
+            WHEN 'Resident' THEN 'resident'
+            WHEN 'Council Member' THEN 'council_member'
             WHEN 'Council Administrator' THEN 'council_admin'
             ELSE 'resident'
         END AS type,
@@ -258,7 +258,7 @@ $users       = array_slice($all_users, $offset, $users_per_page);
 
 </div>
 
-<!-- ── VIEW MODAL ─────────────────────────────────────────── -->
+<!-- VIEW MODAL  -->
 <div id="users-view-modal" class="users-modal-overlay" style="display:none;">
     <div class="users-modal-box">
         <div class="users-modal-header">
@@ -272,7 +272,7 @@ $users       = array_slice($all_users, $offset, $users_per_page);
     </div>
 </div>
 
-<!-- ── STATUS MODAL ───────────────────────────────────────── -->
+<!--  STATUS MODAL -->
 <div id="users-status-modal" class="users-modal-overlay" style="display:none;">
     <div class="users-modal-box">
         <div class="users-modal-header">

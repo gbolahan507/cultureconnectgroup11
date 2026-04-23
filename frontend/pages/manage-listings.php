@@ -29,10 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                        ps.item_name, pss.subcategory_name, pc.category_name,
                        sp.business_name
                 FROM listings l
-                JOIN product_service ps                ON l.item_id         = ps.item_id
+                JOIN product_service ps  ON l.item_id  = ps.item_id
                 JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
-                JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
-                JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
+                JOIN product_service_categories pc  ON pss.category_id   = pc.category_id
+                JOIN sme_profiles sp  ON l.sme_id = sp.sme_id
                 WHERE l.sme_id = ?
                 ORDER BY l.created_at DESC
             ");
@@ -44,10 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                        ps.item_name, pss.subcategory_name, pc.category_name,
                        sp.business_name
                 FROM listings l
-                JOIN product_service ps                ON l.item_id         = ps.item_id
+                JOIN product_service ps  ON l.item_id = ps.item_id
                 JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
-                JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
-                JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
+                JOIN product_service_categories pc  ON pss.category_id  = pc.category_id
+                JOIN sme_profiles sp   ON l.sme_id  = sp.sme_id
                 WHERE l.sme_id = ? AND l.status = ?
                 ORDER BY l.created_at DESC
             ");
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // Get Business Listings (Council) 
+    // Get Business Listings for Council
     if ($_POST['action'] === 'get_business_listings') {
         if (!in_array($role, ['Council Administrator', 'Council Member'])) {
             echo json_encode(['success' => false, 'message' => 'Permission denied.']);
@@ -75,10 +75,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             SELECT l.listing_id, l.title, l.price, l.status, l.created_at,
                    ps.item_name, pc.category_name, sp.business_name
             FROM listings l
-            JOIN product_service ps                ON l.item_id         = ps.item_id
+            JOIN product_service ps  ON l.item_id  = ps.item_id
             JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
-            JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
-            JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
+            JOIN product_service_categories pc  ON pss.category_id = pc.category_id
+            JOIN sme_profiles sp  ON l.sme_id   = sp.sme_id
             WHERE l.sme_id = ?
             ORDER BY l.created_at DESC
         ");
@@ -104,10 +104,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                        pss.subcategory_name, pss.category_id,
                        pc.category_name, sp.business_name
                 FROM listings l
-                JOIN product_service ps                ON l.item_id         = ps.item_id
+                JOIN product_service ps  ON l.item_id    = ps.item_id
                 JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
-                JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
-                JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
+                JOIN product_service_categories pc  ON pss.category_id   = pc.category_id
+                JOIN sme_profiles sp  ON l.sme_id  = sp.sme_id
                 WHERE l.listing_id = ? LIMIT 1
             ");
             $stmt->bind_param("i", $listing_id);
@@ -119,10 +119,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                        pss.subcategory_name, pss.category_id,
                        pc.category_name, sp.business_name
                 FROM listings l
-                JOIN product_service ps                ON l.item_id         = ps.item_id
+                JOIN product_service ps  ON l.item_id = ps.item_id
                 JOIN product_service_subcategories pss ON ps.subcategory_id = pss.subcategory_id
-                JOIN product_service_categories pc     ON pss.category_id   = pc.category_id
-                JOIN sme_profiles sp                   ON l.sme_id          = sp.sme_id
+                JOIN product_service_categories pc ON pss.category_id   = pc.category_id
+                JOIN sme_profiles sp   ON l.sme_id  = sp.sme_id
                 WHERE l.listing_id = ? AND l.sme_id = ? LIMIT 1
             ");
             $stmt->bind_param("ii", $listing_id, $sme_id);
@@ -285,7 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // Update Status (Council) 
+    // Update Status for Council
     if ($_POST['action'] === 'update_status') {
         if (!in_array($role, ['Council Administrator', 'Council Member'])) { echo json_encode(['success' => false, 'message' => 'Permission denied.']); exit(); }
 
@@ -303,7 +303,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
         if ($new_status === 'active' || $new_status === 'inactive') {
             $decision = $new_status === 'active' ? 'approved' : 'rejected';
-            $log = $conn->prepare("INSERT INTO listing_requests (listing_id, user_id, decision, comment) VALUES (?, ?, ?, ?)");
+            $log = $conn->prepare("INSERT INTO listing_request_log (listing_id, user_id, decision, comment) VALUES (?, ?, ?, ?)");
             $log->bind_param("iiss", $listing_id, $user_id, $decision, $comment);
             $log->execute(); $log->close();
         }
@@ -343,7 +343,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // ── Unpublish (SME) ───────────────────────────────────────
+    //  Unpublish (SME)
     if ($_POST['action'] === 'unpublish_listing') {
         if ($role !== 'SME' || !$sme_id) { echo json_encode(['success' => false, 'message' => 'Permission denied.']); exit(); }
         $listing_id = intval($_POST['listing_id'] ?? 0);
@@ -362,7 +362,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit();
     }
 
-    // ── Delete Listing ────────────────────────────────────────
+    //  Delete Listing 
     if ($_POST['action'] === 'delete_listing') {
         $listing_id = intval($_POST['listing_id'] ?? 0);
         if (!$listing_id) { echo json_encode(['success' => false, 'message' => 'Invalid listing.']); exit(); }
@@ -445,7 +445,7 @@ if ($ml_is_council) {
                psc.subcategory_name,
                COUNT(l.listing_id) AS listing_count
         FROM sme_profiles sp
-        LEFT JOIN listings l                        ON sp.sme_id         = l.sme_id
+        LEFT JOIN listings l  ON sp.sme_id = l.sme_id
         LEFT JOIN product_service_subcategories psc ON sp.subcategory_id = psc.subcategory_id
         WHERE sp.approval_status = 'approved'
         GROUP BY sp.sme_id
@@ -580,10 +580,10 @@ if ($ml_is_council) {
 </div>
 
 <?php endif; ?>
-</div><!-- /.ml-page -->
+</div>
 
 
-<!-- VIEW MODAL -->
+<!-- VIEW  -->
 <div id="ml-view-modal" class="ml-modal-overlay" style="display:none;">
     <div class="ml-modal-box">
         <div class="ml-modal-header">
@@ -645,7 +645,7 @@ if ($ml_is_council) {
 </div>
 
 
-<!-- EDIT MODAL (SME only) -->
+<!-- EDIT (SME only) -->
 <?php if ($ml_role === 'SME') : ?>
 <div id="ml-edit-modal" class="ml-modal-overlay" style="display:none;">
     <div class="ml-modal-box">
@@ -706,7 +706,7 @@ if ($ml_is_council) {
 </div>
 
 
-<!-- MANAGE IMAGES MODAL for SME only -->
+<!-- MANAGE IMAGES for SME only -->
 <div id="ml-images-modal" class="ml-modal-overlay" style="display:none;">
     <div class="ml-modal-box ml-modal-box--wide">
         <div class="ml-modal-header">
@@ -749,7 +749,7 @@ if ($ml_is_council) {
 <?php endif; ?>
 
 
-<!-- DELETE MODAL -->
+<!-- DELETE -->
 <div id="ml-delete-modal" class="ml-modal-overlay" style="display:none;">
     <div class="ml-modal-box ml-modal-box--sm">
         <div class="ml-modal-header ml-modal-header--danger">

@@ -8,21 +8,8 @@ if (!isset($_SESSION['user_role'])) {
 
 $role = $_SESSION['user_role'] ?? '';
 
-$allowedPages = [
-    'analytics',
-    'add-product',
-    'cart',
-    'manage-area',
-    'manage-users',
-    'manage-orders',
-    'manage-listings',
-    'my-orders',
-    'review-products',
-    'reports',
-    'profile',
-    'settings',
-    'view-votes'
-];
+$allowedPages = ['analytics', 'add-product', 'cart', 'manage-area', 'manage-users', 'manage-orders', 'manage-listings', 'my-orders',
+    'review-products', 'reports', 'profile', 'settings', 'view-votes'];
 
 $defaultPage = match($role) {
     'Resident'              => 'profile',
@@ -61,22 +48,20 @@ if (!in_array($page, $allowedPages)) {
 <section class="dashboard-welcome">
   <div class="container welcome-container">
     <div class="welcome-text">
-      <h1 class="welcome-title">Hi,
-      <span id="userName">
+      <h1 class="welcome-title"> Hi, <span id="userName">
         <?php
           $role = $_SESSION['user_role'] ?? '';
-
           if ($role === 'SME') {
-              echo htmlspecialchars($_SESSION['business_name'] ?? 'User');
-          } elseif ($role === 'Resident') {
-              echo htmlspecialchars($_SESSION['first_name'] ?? 'User');
-          } else {
-              // Council Member and Council Administrator
-              echo htmlspecialchars($_SESSION['first_name'] ?? 'User');
-          }
+              echo htmlspecialchars($_SESSION['business_name'] ?? 'User');} 
+              
+            elseif ($role === 'Resident') {
+              echo htmlspecialchars($_SESSION['first_name'] ?? 'User');} 
+            else {
+              // For Council Member and Council Administrator
+              echo htmlspecialchars($_SESSION['first_name'] ?? 'User');}
         ?>
-      </span>! 👋</h1>
-      <p class="welcome-subtitle">Welcome to your dashboard</p>
+         </span>! </h1>
+    <p class="welcome-subtitle">Welcome to your dashboard</p>
     </div>
     <div class="role-badge">
       <p class="role-label">Role</p>
@@ -99,19 +84,14 @@ if (!in_array($page, $allowedPages)) {
    <?php
    $file = "../pages/" . $page . ".php";
 
-   if (file_exists($file)) {
-    include $file;
-   } else {
-    include "../pages/" . $defaultPage . ".php";
-   }?>
-   
+   if (file_exists($file)) { include $file; } 
+    else { include "../pages/" . $defaultPage . ".php"; }
+   ?>
    </div>
 </div>
 
-<?php
-    /* Imports component */
-    include "../components/footer.php";
-?>
+<?php include "../components/footer.php"; ?>
+
 </div>
 
 </body>
