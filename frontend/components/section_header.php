@@ -1,5 +1,4 @@
 <?php
-// $icon, $title, $subtitle are passed in before including this file
 ?>
 
 <div class="section-header">

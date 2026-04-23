@@ -2,31 +2,45 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($conn)) include '../db_connection.php';
- 
+
 $allowedRoles = ['Council Administrator', 'Council Member'];
 if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], $allowedRoles)) {
     header("Location: ../pages/dashboard.php?page=home");
     exit();
 }
- 
-// AJAX HANDLER 
+
+// AJAX HANDLER
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     while (ob_get_level()) ob_end_clean();
     header('Content-Type: application/json');
- 
+
     $action = $_POST['action'];
- 
+
     // ADD AREA
     if ($action === 'add') {
         $name        = mysqli_real_escape_string($conn, trim($_POST['area_name']   ?? ''));
         $description = mysqli_real_escape_string($conn, trim($_POST['description'] ?? ''));
         $postcode    = mysqli_real_escape_string($conn, strtoupper(trim($_POST['postcode'] ?? '')));
- 
+
         if (empty($name) || empty($description) || empty($postcode)) {
             echo json_encode(['success' => false, 'message' => 'All fields are required.']);
             exit();
         }
- 
+
+        // Check for duplicate area name
+        $name_check = mysqli_query($conn, "SELECT area_id FROM areas WHERE LOWER(area_name) = LOWER('$name') LIMIT 1");
+        if (mysqli_num_rows($name_check) > 0) {
+            echo json_encode(['success' => false, 'message' => 'An area with this name already exists.']);
+            exit();
+        }
+
+        // Check for duplicate postcode
+        $postcode_check = mysqli_query($conn, "SELECT area_id FROM areas WHERE postcode = '$postcode' LIMIT 1");
+        if (mysqli_num_rows($postcode_check) > 0) {
+            echo json_encode(['success' => false, 'message' => 'An area with this postcode already exists.']);
+            exit();
+        }
+
         $sql = "INSERT INTO areas (area_name, description, postcode) VALUES ('$name', '$description', '$postcode')";
         if (mysqli_query($conn, $sql)) {
             echo json_encode(['success' => true, 'message' => 'Area added successfully.']);
@@ -35,19 +49,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
         exit();
     }
- 
+
     // EDIT AREA
     if ($action === 'edit') {
         $area_id     = (int)($_POST['area_id'] ?? 0);
         $name        = mysqli_real_escape_string($conn, trim($_POST['area_name']   ?? ''));
         $description = mysqli_real_escape_string($conn, trim($_POST['description'] ?? ''));
         $postcode    = mysqli_real_escape_string($conn, strtoupper(trim($_POST['postcode'] ?? '')));
- 
+
         if (empty($name) || empty($description) || empty($postcode)) {
             echo json_encode(['success' => false, 'message' => 'All fields are required.']);
             exit();
         }
- 
+
+        // Check for duplicate area name (excluding current area)
+        $name_check = mysqli_query($conn, "SELECT area_id FROM areas WHERE LOWER(area_name) = LOWER('$name') AND area_id != '$area_id' LIMIT 1");
+        if (mysqli_num_rows($name_check) > 0) {
+            echo json_encode(['success' => false, 'message' => 'An area with this name already exists.']);
+            exit();
+        }
+
+        // Check for duplicate postcode (excluding current area)
+        $postcode_check = mysqli_query($conn, "SELECT area_id FROM areas WHERE postcode = '$postcode' AND area_id != '$area_id' LIMIT 1");
+        if (mysqli_num_rows($postcode_check) > 0) {
+            echo json_encode(['success' => false, 'message' => 'An area with this postcode already exists.']);
+            exit();
+        }
+
         $sql = "UPDATE areas SET area_name='$name', description='$description', postcode='$postcode' WHERE area_id='$area_id'";
         if (mysqli_query($conn, $sql)) {
             echo json_encode(['success' => true, 'message' => 'Area updated successfully.']);
@@ -56,22 +84,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
         exit();
     }
- 
+
     // DELETE AREA
     if ($action === 'delete') {
         $area_id = (int)($_POST['area_id'] ?? 0);
- 
+
         $check_res = mysqli_query($conn, "SELECT COUNT(*) AS total FROM resident_profiles WHERE area_id = '$area_id'");
         $check_sme = mysqli_query($conn, "SELECT COUNT(*) AS total FROM sme_profiles WHERE area_id = '$area_id'");
- 
+
         $res_count = mysqli_fetch_assoc($check_res)['total'];
         $sme_count = mysqli_fetch_assoc($check_sme)['total'];
- 
+
         if ($res_count > 0 || $sme_count > 0) {
             echo json_encode(['success' => false, 'message' => 'This area cannot be deleted as it has registered users assigned to it.']);
             exit();
         }
- 
+
         $sql = "DELETE FROM areas WHERE area_id = '$area_id'";
         if (mysqli_query($conn, $sql)) {
             echo json_encode(['success' => true, 'message' => 'Area deleted successfully.']);
@@ -80,12 +108,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
         exit();
     }
- 
+
     echo json_encode(['success' => false, 'message' => 'Invalid action.']);
     exit();
 }
- 
-// PAGE DATA 
+
+// PAGE DATA
 $areas_per_page = 6;
 $area_page      = max(1, intval($_GET['area_page'] ?? 1));
 $total_areas    = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS n FROM areas"))['n'];
@@ -94,9 +122,9 @@ $area_page      = min($area_page, $total_pages);
 $offset         = ($area_page - 1) * $areas_per_page;
 $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC LIMIT $areas_per_page OFFSET $offset");
 ?>
- 
+
 <div class="manage-area-page">
- 
+
     <?php
         $icon     = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -106,17 +134,17 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
         $subtitle = "View, add, edit or remove areas under the Council's jurisdiction.";
         include '../components/section_header.php';
     ?>
- 
+
     <div id="area-action-message" class="alert-box" style="display:none;"></div>
- 
+
     <div class="manage-area-actions">
         <button id="area-add-trigger-btn" onclick="openAreaAddModal()">+ Add Area</button>
     </div>
- 
+
     <div class="table-filters">
         <input type="text" id="area-search-input" placeholder="Search by area name" onkeyup="filterAreaTable()">
     </div>
- 
+
     <div class="area-table-wrapper">
         <table class="area-table">
             <thead>
@@ -152,7 +180,7 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
             </tbody>
         </table>
     </div>
- 
+
     <?php if ($total_pages > 1) : ?>
     <div class="area-pagination">
         <span class="area-page-info">
@@ -172,9 +200,9 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
         </div>
     </div>
     <?php endif; ?>
- 
+
 </div>
- 
+
 <!-- ADD MODAL -->
 <div id="add-area-modal" class="area-modal-overlay" style="display:none;">
     <div class="area-modal-box">
@@ -203,7 +231,7 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
         </div>
     </div>
 </div>
- 
+
 <!-- EDIT MODAL -->
 <div id="area-edit-modal" class="area-modal-overlay" style="display:none;">
     <div class="area-modal-box">
@@ -233,7 +261,7 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
         </div>
     </div>
 </div>
- 
+
 <!-- DELETE MODAL -->
 <div id="area-delete-modal" class="area-modal-overlay" style="display:none;">
     <div class="area-modal-box area-modal-box-small">
@@ -252,19 +280,19 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
         </div>
     </div>
 </div>
- 
+
 <script>
     function openAreaAddModal() {
-        document.getElementById('area-add-name').value    = '';
-        document.getElementById('area-add-desc').value    = '';
+        document.getElementById('area-add-name').value     = '';
+        document.getElementById('area-add-desc').value     = '';
         document.getElementById('area-add-postcode').value = '';
         document.getElementById('area-add-error').style.display = 'none';
         openAreaModal('add-area-modal');
     }
- 
+
     function openAreaModal(id)  { document.getElementById(id).style.display = 'flex'; }
     function closeAreaModal(id) { document.getElementById(id).style.display = 'none'; }
- 
+
     function openAreaEditModal(id, name, desc, postcode) {
         document.getElementById('area-edit-id').value       = id;
         document.getElementById('area-edit-name').value     = name;
@@ -273,31 +301,30 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
         document.getElementById('area-edit-error').style.display = 'none';
         openAreaModal('area-edit-modal');
     }
- 
+
     function openAreaDeleteModal(id, name) {
-        document.getElementById('area-delete-id').value      = id;
+        document.getElementById('area-delete-id').value       = id;
         document.getElementById('area-delete-name').innerText = name;
         openAreaModal('area-delete-modal');
     }
- 
+
     function showAreaMessage(message, type) {
         const box = document.getElementById('area-action-message');
-        box.className    = 'alert-box ' + (type === 'success' ? 'success-box' : 'error-box');
-        box.innerText    = message;
+        box.className     = 'alert-box ' + (type === 'success' ? 'success-box' : 'error-box');
+        box.innerText     = message;
         box.style.display = 'block';
         setTimeout(() => { box.style.display = 'none'; }, 4000);
     }
- 
+
     function sendAreaRequest(data, callback) {
         const formData = new FormData();
         for (const key in data) formData.append(key, data[key]);
- 
+
         fetch('../pages/manage-area.php', { method: 'POST', body: formData })
             .then(r => r.text())
             .then(text => {
                 try {
                     let parsed = JSON.parse(text);
-                    // Handle double-encoded response
                     if (typeof parsed === 'string') parsed = JSON.parse(parsed);
                     callback(parsed);
                 } catch(e) {
@@ -306,28 +333,28 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
             })
             .catch(() => showAreaMessage('Something went wrong. Please try again.', 'error'));
     }
- 
+
     function currentPage() {
         return new URL(window.location.href).searchParams.get('area_page') || 1;
     }
- 
+
     function reloadPage() {
         setTimeout(() => {
             window.location.href = 'dashboard.php?page=manage-area&area_page=' + currentPage();
         }, 1500);
     }
- 
+
     function submitAreaAdd() {
         const name     = document.getElementById('area-add-name').value.trim();
         const desc     = document.getElementById('area-add-desc').value.trim();
         const postcode = document.getElementById('area-add-postcode').value.trim();
         const errorBox = document.getElementById('area-add-error');
- 
+
         errorBox.style.display = 'none';
         if (!name)     { errorBox.style.display = 'block'; errorBox.innerText = 'Please enter an area name.';  return; }
         if (!desc)     { errorBox.style.display = 'block'; errorBox.innerText = 'Please enter a description.'; return; }
         if (!postcode) { errorBox.style.display = 'block'; errorBox.innerText = 'Please enter a postcode.';    return; }
- 
+
         sendAreaRequest({ action: 'add', area_name: name, description: desc, postcode }, (res) => {
             if (res.success) {
                 closeAreaModal('add-area-modal');
@@ -335,23 +362,23 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
                 reloadPage();
             } else {
                 errorBox.style.display = 'block';
-                errorBox.innerText = res.message;
+                errorBox.innerText     = res.message;
             }
         });
     }
- 
+
     function submitAreaEdit() {
         const id       = document.getElementById('area-edit-id').value;
         const name     = document.getElementById('area-edit-name').value.trim();
         const desc     = document.getElementById('area-edit-desc').value.trim();
         const postcode = document.getElementById('area-edit-postcode').value.trim();
         const errorBox = document.getElementById('area-edit-error');
- 
+
         errorBox.style.display = 'none';
         if (!name)     { errorBox.style.display = 'block'; errorBox.innerText = 'Please enter an area name.';  return; }
         if (!desc)     { errorBox.style.display = 'block'; errorBox.innerText = 'Please enter a description.'; return; }
         if (!postcode) { errorBox.style.display = 'block'; errorBox.innerText = 'Please enter a postcode.';    return; }
- 
+
         sendAreaRequest({ action: 'edit', area_id: id, area_name: name, description: desc, postcode }, (res) => {
             if (res.success) {
                 closeAreaModal('area-edit-modal');
@@ -359,11 +386,11 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
                 reloadPage();
             } else {
                 errorBox.style.display = 'block';
-                errorBox.innerText = res.message;
+                errorBox.innerText     = res.message;
             }
         });
     }
- 
+
     function submitAreaDelete() {
         const id = document.getElementById('area-delete-id').value;
         sendAreaRequest({ action: 'delete', area_id: id }, (res) => {
@@ -372,14 +399,14 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
             if (res.success) reloadPage();
         });
     }
- 
+
     function filterAreaTable() {
         const input = document.getElementById('area-search-input').value.toLowerCase();
         document.querySelectorAll('#area-table-body tr').forEach(row => {
             row.style.display = row.cells[1].innerText.toLowerCase().includes(input) ? '' : 'none';
         });
     }
- 
+
     window.addEventListener('click', (e) => {
         ['add-area-modal', 'area-edit-modal', 'area-delete-modal'].forEach(id => {
             const modal = document.getElementById(id);
@@ -387,4 +414,3 @@ $areas          = mysqli_query($conn, "SELECT * FROM areas ORDER BY area_id ASC 
         });
     });
 </script>
- 

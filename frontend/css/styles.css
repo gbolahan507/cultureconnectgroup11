@@ -5992,13 +5992,13 @@ font-size:13px;
 .an-stat-card--purple { background: linear-gradient(135deg, #230c33, #4a0a6b); }
 .an-stat-card--fuchsia { background: linear-gradient(135deg, #bf2ab9, #e00180); }
 .an-stat-card--orchid  { background: linear-gradient(135deg, #230c33, #bf2ab9);}
-.an-stat-card--fuchsia   { background: linear-gradient(135deg, #bf2ab9, #e00180); }
+.an-stat-card--fuchsia { background: linear-gradient(135deg, #bf2ab9, #e00180); }
 .an-stat-card--darkviolet {background: linear-gradient(135deg, #230c33, #bf2ab9); }
-.an-stat-card--darkviolet .an-stat-icon { background: #f59e0b; color: #fff; border-radius: 10px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
-.an-stat-card--darkviolet .an-stat-num  { color: #92400e; }
-.an-stat-card--softviolet   { background: linear-gradient(135deg, #bf2ab9, #e00180); }
-.an-stat-card--softviolet .an-stat-icon  { background: #059669; color: #fff; border-radius: 10px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; }
-.an-stat-card--softviolet .an-stat-num   { color: #065f46; }
+.an-stat-card--darkviolet .an-stat-icon { background: rgba(255,255,255,0.15); color: #fff; border-radius: 10px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+.an-stat-card--darkviolet .an-stat-num  { color: #fff; }
+.an-stat-card--softviolet { background: linear-gradient(135deg, #bf2ab9, #e00180); }
+.an-stat-card--softviolet .an-stat-icon { background: rgba(255,255,255,0.15); color: #fff; border-radius: 10px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; }
+.an-stat-card--softviolet .an-stat-num { color: #fff; }
  
 .an-stat-icon {
     width: 40px;

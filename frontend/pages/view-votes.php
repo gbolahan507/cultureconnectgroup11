@@ -1,6 +1,6 @@
 <?php ob_start(); ?>
 <?php
-// PAGE GUARD FIRST
+// PAGE GUARD TO PREVENT UNAUTHORIZED USERS
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'SME') {
     header('Location: ../pages/dashboard.php?page=home');

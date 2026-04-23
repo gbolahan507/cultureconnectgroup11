@@ -1,5 +1,5 @@
 <?php
-// Make sure session is started
+// confirm session is started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
