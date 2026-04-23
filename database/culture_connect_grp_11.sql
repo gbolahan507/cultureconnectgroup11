@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 17, 2026 at 06:54 PM
+-- Generation Time: Apr 23, 2026 at 11:13 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -45,7 +45,7 @@ INSERT INTO `areas` (`area_id`, `area_name`, `description`, `postcode`) VALUES
 (4, 'Hertfordshire West', 'Famous for literature and publishing, known for independent books, poetry readings, magazines, and creative writing communities', 'AL10 0WB'),
 (5, 'Hertfordshire Town Centre', 'Known for cultural markets featuring handmade goods, artisan stationery, posters, and locally produced creative merchandise', 'AL10 0JT'),
 (6, 'Hertfordshire Central', 'Famous for sports and recreation, known for community sporting activities, cultural sporting events, and fitness programs', 'AL10 8HG'),
-(17, 'Hertfordshire rural', 'TESTING', 'A347653');
+(20, 'Hertfordshire Rural', 'Testing', 'AL5 3NG');
 
 -- --------------------------------------------------------
 
@@ -692,7 +692,9 @@ INSERT INTO `resident_profiles` (`profile_id`, `user_id`, `first_name`, `last_na
 (21, 41, 'David', 'Kofi', '1987-06-25', 'Male', '55 Ash Grove, Hatfield', '+44 7700 100017', 'AL10 9SB', '2026-04-10 09:38:53', 2),
 (22, 42, 'Tariq', 'Hussain', '1997-06-14', 'Male', '9 Hazel Court, Hatfield', '+44 7700 200001', 'AL10 9NA', '2026-04-10 09:45:08', 1),
 (23, 43, 'Siobhan', 'Oconnor', '1993-11-28', 'Female', '27 Poplar Drive, Hatfield', '+44 7700 200002', 'AL10 0ED', '2026-04-10 09:46:55', 3),
-(24, 44, 'Samuel', 'Tally', '2001-03-05', 'Male', '43 Sycamore Road, Hatfield', '+44 7700 200003', 'AL10 0WB', '2026-04-10 09:49:09', 4);
+(24, 44, 'Samuel', 'Tally', '2001-03-05', 'Male', '43 Sycamore Road, Hatfield', '+44 7700 200003', 'AL10 0WB', '2026-04-10 09:49:09', 4),
+(25, 48, 'Testing', 'Testing', '2010-04-06', 'Female', 'nike@gmail.com', '+2348141935181', 'AL5 3NG', '2026-04-23 08:33:42', 20),
+(26, 49, 'Emma', 'Jones', '1994-08-12', 'Female', '2 London Road', '+44 7700 300001', 'AL10 9NA', '2026-04-23 08:49:40', 1);
 
 --
 -- Triggers `resident_profiles`
@@ -842,8 +844,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`, `role`, `email_address`) VALUES
-(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-17 16:45:26', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
-(8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-17 16:38:58', 'approved', 'Resident', 'nike@gmail.com'),
+(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-23 08:50:49', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
+(8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-23 08:28:56', 'approved', 'Resident', 'nike@gmail.com'),
 (9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-14 13:01:47', 'approved', 'Resident', 'josephine@gmail.com'),
 (10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-11 23:25:12', 'approved', 'SME', 'info@harmonywellbeing.com'),
 (11, '$2y$10$pEGsw9izjII4FX3gzzaJ4.QSDLc70c6nGub9/1IU78TLgASSZUsf.', '2026-04-07 08:16:06', 'approved', 'Resident', 'victor@gmail.com'),
@@ -869,7 +871,9 @@ INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`,
 (44, '$2y$10$x1vCCutsYAkIALta/IzB/OwuVjieM6HfMTtUV/BLNot5kjkgfRCwm', '2026-04-10 09:49:09', 'rejected', 'Resident', 'samuel.tally@gmail.com'),
 (45, '$2y$10$1N6upPakt9SvA2705zNUF.tx5VF5hfjzlabv4BXhFgb7C1/6jcXNy', '2026-04-10 09:52:08', 'pending', 'SME', 'info@africanheritagecrafts.co.uk'),
 (46, '$2y$10$yzbl51n2Sa4whe2ggwRicuhjxExcYsKm3DoGNfDfIlClcVsYbZ6v6', '2026-04-10 09:54:48', 'pending', 'SME', 'hello@hertsmusicschool.co.uk'),
-(47, '$2y$10$EdYx3Tr2i3A.w0ayszXgDu/KgyWJbGdyzBns8BLuenmvpInRtm1xu', '2026-04-10 09:57:07', 'pending', 'SME', 'contact@communityfilmherts.co.uk');
+(47, '$2y$10$EdYx3Tr2i3A.w0ayszXgDu/KgyWJbGdyzBns8BLuenmvpInRtm1xu', '2026-04-10 09:57:07', 'pending', 'SME', 'contact@communityfilmherts.co.uk'),
+(48, '$2y$10$h9Ruiz7xObdnqc/oiC.5XO9Jo3jgMYTOIX67ahO//5SYi3wM79wwG', '2026-04-23 08:33:42', 'pending', 'Resident', 'nike@yahoo.com'),
+(49, '$2y$10$myIKQXCly5e.YME3x3caJegXCljo7.6JZjCJLZTg6ubmGGuTLuJ8C', '2026-04-23 08:49:40', 'approved', 'Resident', 'emma.jones@gmail.com');
 
 --
 -- Triggers `users`
@@ -933,7 +937,9 @@ INSERT INTO `user_documents` (`document_id`, `user_id`, `document_type`, `file_p
 (24, 38, 'Bank_Statement', '../uploads/verification_documents/placeholder_james.pdf', 'approved', '2026-04-12 21:56:35'),
 (25, 39, 'Driver_License', '../uploads/verification_documents/placeholder_priya.pdf', 'approved', '2026-04-12 21:56:35'),
 (26, 40, 'Utility_Bill', '../uploads/verification_documents/placeholder_sarah.pdf', 'approved', '2026-04-12 21:56:35'),
-(27, 41, 'Bank_Statement', '../uploads/verification_documents/placeholder_david.pdf', 'approved', '2026-04-12 21:56:35');
+(27, 41, 'Bank_Statement', '../uploads/verification_documents/placeholder_david.pdf', 'approved', '2026-04-12 21:56:35'),
+(28, 48, 'Bank_Statement', '../uploads/verification_documents/1776933222_IMG_9053.jpg.jpeg', 'pending', '2026-04-23 08:33:42'),
+(29, 49, 'Driver_License', '../uploads/verification_documents/1776934180_ER table.png', 'approved', '2026-04-23 08:49:40');
 
 -- --------------------------------------------------------
 
@@ -967,7 +973,8 @@ INSERT INTO `user_registration_requests` (`review_id`, `user_id`, `admin_id`, `d
 (9, 11, 23, 'approved', '', '2026-04-08 11:46:39', 4),
 (10, 44, 6, 'approved', '', '2026-04-12 21:51:35', 16),
 (11, 44, 6, 'rejected', 'Testing', '2026-04-12 21:51:52', 16),
-(12, 43, 6, 'approved', '', '2026-04-14 10:28:11', 15);
+(12, 43, 6, 'approved', '', '2026-04-14 10:28:11', 15),
+(13, 49, 6, 'approved', '', '2026-04-23 08:52:06', 29);
 
 -- --------------------------------------------------------
 
@@ -1033,7 +1040,8 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 -- Indexes for table `areas`
 --
 ALTER TABLE `areas`
-  ADD PRIMARY KEY (`area_id`);
+  ADD PRIMARY KEY (`area_id`),
+  ADD UNIQUE KEY `area_id` (`area_id`,`area_name`);
 
 --
 -- Indexes for table `honored_residents`
@@ -1159,6 +1167,7 @@ ALTER TABLE `sme_profiles`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`user_id`),
   ADD UNIQUE KEY `email_address` (`email_address`),
+  ADD UNIQUE KEY `email_address_2` (`email_address`),
   ADD KEY `fk_users_role` (`role`);
 
 --
@@ -1192,7 +1201,7 @@ ALTER TABLE `user_roles`
 -- AUTO_INCREMENT for table `areas`
 --
 ALTER TABLE `areas`
-  MODIFY `area_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `area_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `honored_residents`
@@ -1270,7 +1279,7 @@ ALTER TABLE `product_service_subcategories`
 -- AUTO_INCREMENT for table `resident_profiles`
 --
 ALTER TABLE `resident_profiles`
-  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `sme_profiles`
@@ -1282,19 +1291,19 @@ ALTER TABLE `sme_profiles`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT for table `user_documents`
 --
 ALTER TABLE `user_documents`
-  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `user_registration_requests`
 --
 ALTER TABLE `user_registration_requests`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Constraints for dumped tables
