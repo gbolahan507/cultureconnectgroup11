@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Apr 23, 2026 at 06:38 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost
+-- Generation Time: Apr 23, 2026 at 09:49 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -329,7 +329,6 @@ INSERT INTO `listing_votes` (`vote_id`, `user_id`, `listing_id`, `vote_type`, `c
 (15, 37, 9, 'like', '2026-04-11 21:37:08'),
 (16, 38, 9, 'like', '2026-04-11 21:37:08'),
 (17, 41, 9, 'like', '2026-04-11 21:37:08'),
-(18, 34, 11, 'like', '2026-04-11 21:37:08'),
 (19, 35, 11, 'like', '2026-04-11 21:37:08'),
 (20, 40, 11, 'dislike', '2026-04-11 21:37:08'),
 (21, 38, 12, 'like', '2026-04-11 21:37:08'),
@@ -374,7 +373,12 @@ INSERT INTO `listing_votes` (`vote_id`, `user_id`, `listing_id`, `vote_type`, `c
 (60, 8, 24, 'like', '2026-04-23 11:15:02'),
 (61, 8, 23, 'like', '2026-04-23 11:15:03'),
 (62, 8, 22, 'like', '2026-04-23 11:15:05'),
-(63, 8, 21, 'like', '2026-04-23 11:15:06');
+(63, 8, 21, 'like', '2026-04-23 11:15:06'),
+(64, 34, 22, 'dislike', '2026-04-23 18:24:05'),
+(65, 34, 24, 'dislike', '2026-04-23 18:29:19'),
+(68, 8, 11, 'dislike', '2026-04-23 18:45:28'),
+(69, 9, 11, 'dislike', '2026-04-23 18:45:28'),
+(70, 11, 11, 'dislike', '2026-04-23 18:45:28');
 
 -- --------------------------------------------------------
 
@@ -716,7 +720,8 @@ INSERT INTO `resident_profiles` (`profile_id`, `user_id`, `first_name`, `last_na
 (21, 41, 'David', 'Kofi', '1987-06-25', 'Male', '55 Ash Grove, Hatfield', '+44 7700 100017', 'AL10 9SB', '2026-04-10 09:38:53', 2),
 (22, 42, 'Tariq', 'Hussain', '1997-06-14', 'Male', '9 Hazel Court, Hatfield', '+44 7700 200001', 'AL10 9NA', '2026-04-10 09:45:08', 1),
 (23, 43, 'Siobhan', 'Oconnor', '1993-11-28', 'Female', '27 Poplar Drive, Hatfield', '+44 7700 200002', 'AL10 0ED', '2026-04-10 09:46:55', 3),
-(24, 44, 'Samuel', 'Tally', '2001-03-05', 'Male', '43 Sycamore Road, Hatfield', '+44 7700 200003', 'AL10 0WB', '2026-04-10 09:49:09', 4);
+(24, 44, 'Samuel', 'Tally', '2001-03-05', 'Male', '43 Sycamore Road, Hatfield', '+44 7700 200003', 'AL10 0WB', '2026-04-10 09:49:09', 4),
+(25, 48, 'Sophie', 'Bennett', '1995-06-15', 'Female', '42 Elm Street, Watford', '+447700900456', 'AL10 9SB', '2026-04-23 18:09:17', 2);
 
 --
 -- Triggers `resident_profiles`
@@ -838,7 +843,7 @@ CREATE TABLE `sme_profiles` (
 --
 
 INSERT INTO `sme_profiles` (`sme_id`, `business_name`, `approval_status`, `created_at`, `area_id`, `description`, `phone`, `user_id`, `subcategory_id`) VALUES
-(3, 'Harmony Wellbeing Centre', 'pending', '2026-04-06 09:54:55', 1, 'Harmony Wellbeing Centre is a community-focused organisation dedicated to improving the mental, physical, and emotional wellbeing of local residents. We offer a range of therapeutic services including art therapy, music therapy, mindfulness workshops, and community support groups. Our mission is to foster a sense of belonging and cultural connection through inclusive and accessible wellbeing programmes tailored to the diverse needs of our community.', '+44 7700 900123', 10, 3),
+(3, 'Harmony Wellbeing Centre', 'approved', '2026-04-06 09:54:55', 1, 'Harmony Wellbeing Centre is a community-focused organisation dedicated to improving the mental, physical, and emotional wellbeing of local residents. We offer a range of therapeutic services including art therapy, music therapy, mindfulness workshops, and community support groups. Our mission is to foster a sense of belonging and cultural connection through inclusive and accessible wellbeing programmes tailored to the diverse needs of our community.', '+44 7700 900123', 10, 3),
 (11, 'Brushstroke Studio', 'approved', '2026-04-09 08:36:23', 1, 'Brushstroke Studio is a vibrant creative hub in Hertfordshire offering art classes, music lessons, and movement workshops for all ages. We believe creativity is for everyone and provide a welcoming space for beginners and experienced artists alike.', '+44 7700 100001', 24, 1),
 (12, 'Hatfield Theatre Collective', 'approved', '2026-04-09 08:37:51', 2, 'Hatfield Theatre Collective is a community-driven performing arts organisation staging live theatre, concerts and open mic nights. We celebrate local talent and bring the community together through the power of performance.', '+44 7700 100002', 25, 2),
 (13, 'Hertfordshire Heritage Tours', 'approved', '2026-04-09 08:40:06', 3, 'Hertfordshire Heritage Tours offers immersive guided cultural walks and museum programmes that bring local history to life. Our expert guides lead residents and visitors through the rich cultural landscape of Hertfordshire.', '+44 7700 100003', 26, 3),
@@ -866,7 +871,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`, `role`, `email_address`) VALUES
-(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-23 15:23:35', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
+(6, '$2y$10$01mLimPT3Pddrd30S/gtEuweOQzUYFV6fUxOYXNVK.ItevTDMTv26', '2026-04-23 18:46:07', 'approved', 'Council Administrator', 'admin@cultureconnect.com'),
 (8, '$2y$10$NdvqqVsckEpxpJfLVEokXe437ra6Nye/3TZycQoCDR/8uWAWnFWRa', '2026-04-23 11:46:12', 'approved', 'Resident', 'nike@gmail.com'),
 (9, '$2y$10$dyS/3x2E0F5qFN3gM.tbv.SJg83R6Q8N93hBx.9CtiIO5j9psQd/C', '2026-04-14 13:01:47', 'approved', 'Resident', 'josephine@gmail.com'),
 (10, '$2y$10$pD9RVt2XH2HZmJ/dQwJkI.DO1t0Wh0xEssZCFLjUW0g0CUIjIHlA6', '2026-04-11 23:25:12', 'approved', 'SME', 'info@harmonywellbeing.com'),
@@ -880,7 +885,7 @@ INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`,
 (27, '$2y$10$.dWO5U3z4wW4FGMV32g3COS5QZbspNds4t8z853sYSp1ErZcuvvOO', '2026-04-12 21:16:53', 'approved', 'SME', 'studio@pixelcraftmedia.com'),
 (28, '$2y$10$LT2xJjdlHYINbJNC5PaEuup2dqUpNQMvIxct0ueW3FJRfYgObhWtK', '2026-04-14 13:02:18', 'approved', 'SME', 'shop@hatfieldhandmade.com'),
 (29, '$2y$10$HrsNx52kvUjSBIemM/6gcuaWiVz5LhBgpQMJz0pf4LxY4W1cPPC5m', '2026-04-09 19:35:19', 'approved', 'SME', 'press@hertfordink.com'),
-(34, '$2y$10$sCH/qU1xp9OQjvBqIRP1FuasIU/k/tRQ5N5JV3wSQtVllyC68uQ.q', '2026-04-23 12:21:01', 'approved', 'Resident', 'marcus.osei@gmail.com'),
+(34, '$2y$10$sCH/qU1xp9OQjvBqIRP1FuasIU/k/tRQ5N5JV3wSQtVllyC68uQ.q', '2026-04-23 18:35:00', 'approved', 'Resident', 'marcus.osei@gmail.com'),
 (35, '$2y$10$GSRl4qkAShFvWuyWsmdcyeB8OrG230vd7jUf9tCrV2vnbp8WlpIp6', '2026-04-10 09:27:46', 'approved', 'Resident', 'aisha.patel@gmail.com'),
 (36, '$2y$10$35HzVBsn/LVPwMcI8XATwuhxDN/FaK.pa2ukr3nuS5ZBekQ0.09S.', '2026-04-10 09:29:29', 'rejected', 'Resident', 'daniel.mensah@gmail.com'),
 (37, '$2y$10$/myEQxh6qX8hmvTsl.WEAel6s3SJrAe356dW3XO3cf71hAQsnfAwu', '2026-04-10 09:31:31', 'approved', 'Resident', 'fatima.ali@gmail.com'),
@@ -893,7 +898,8 @@ INSERT INTO `users` (`user_id`, `password_hash`, `last_login`, `account_status`,
 (44, '$2y$10$x1vCCutsYAkIALta/IzB/OwuVjieM6HfMTtUV/BLNot5kjkgfRCwm', '2026-04-10 09:49:09', 'rejected', 'Resident', 'samuel.tally@gmail.com'),
 (45, '$2y$10$1N6upPakt9SvA2705zNUF.tx5VF5hfjzlabv4BXhFgb7C1/6jcXNy', '2026-04-10 09:52:08', 'pending', 'SME', 'info@africanheritagecrafts.co.uk'),
 (46, '$2y$10$yzbl51n2Sa4whe2ggwRicuhjxExcYsKm3DoGNfDfIlClcVsYbZ6v6', '2026-04-10 09:54:48', 'pending', 'SME', 'hello@hertsmusicschool.co.uk'),
-(47, '$2y$10$EdYx3Tr2i3A.w0ayszXgDu/KgyWJbGdyzBns8BLuenmvpInRtm1xu', '2026-04-10 09:57:07', 'pending', 'SME', 'contact@communityfilmherts.co.uk');
+(47, '$2y$10$EdYx3Tr2i3A.w0ayszXgDu/KgyWJbGdyzBns8BLuenmvpInRtm1xu', '2026-04-10 09:57:07', 'pending', 'SME', 'contact@communityfilmherts.co.uk'),
+(48, '$2y$10$3r/3vRMAAZDDx0aveE1rJuKvyYzmsmoZZwWojlhGhfk4FERTqcW6i', '2026-04-23 18:09:17', 'pending', 'Resident', 'sophie.bennett@gmail.com');
 
 --
 -- Triggers `users`
@@ -957,7 +963,8 @@ INSERT INTO `user_documents` (`document_id`, `user_id`, `document_type`, `file_p
 (24, 38, 'Bank_Statement', '../uploads/verification_documents/placeholder_james.pdf', 'approved', '2026-04-12 21:56:35'),
 (25, 39, 'Driver_License', '../uploads/verification_documents/placeholder_priya.pdf', 'approved', '2026-04-12 21:56:35'),
 (26, 40, 'Utility_Bill', '../uploads/verification_documents/placeholder_sarah.pdf', 'approved', '2026-04-12 21:56:35'),
-(27, 41, 'Bank_Statement', '../uploads/verification_documents/placeholder_david.pdf', 'approved', '2026-04-12 21:56:35');
+(27, 41, 'Bank_Statement', '../uploads/verification_documents/placeholder_david.pdf', 'approved', '2026-04-12 21:56:35'),
+(28, 48, 'Bank_Statement', '../uploads/verification_documents/1776967757_bank_statement.pdf', 'pending', '2026-04-23 18:09:17');
 
 -- --------------------------------------------------------
 
@@ -1248,7 +1255,7 @@ ALTER TABLE `listing_request_log`
 -- AUTO_INCREMENT for table `listing_votes`
 --
 ALTER TABLE `listing_votes`
-  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
 
 --
 -- AUTO_INCREMENT for table `orders`
@@ -1296,7 +1303,7 @@ ALTER TABLE `product_service_subcategories`
 -- AUTO_INCREMENT for table `resident_profiles`
 --
 ALTER TABLE `resident_profiles`
-  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `profile_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `sme_profiles`
@@ -1308,13 +1315,13 @@ ALTER TABLE `sme_profiles`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
 
 --
 -- AUTO_INCREMENT for table `user_documents`
 --
 ALTER TABLE `user_documents`
-  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `document_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `user_registration_log`
