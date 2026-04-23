@@ -410,7 +410,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     exit();
 }
 
-// ── PAGE GUARD ────────────────────────────────────────────────
+// ── PAGE GUARD 
 if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['SME', 'Council Administrator', 'Council Member'])) {
     header("Location: ../pages/dashboard.php?page=home");
     exit();
@@ -487,7 +487,7 @@ if ($ml_is_council) {
         </thead>
         <tbody>
             <?php if (empty($ml_businesses)) : ?>
-            <tr><td colspan="5" style="text-align:center;padding:2rem;color:#9ca3af;">No approved businesses found.</td></tr>
+            <tr><td colspan="5" style="text-align:center;padding:2rem;color:#6b7280;">No approved businesses found.</td></tr>
             <?php else : ?>
             <?php foreach ($ml_businesses as $i => $biz) : ?>
             <tr id="ml-biz-row-<?= $biz['sme_id'] ?>">
@@ -990,7 +990,7 @@ function mlLoadBizListings(sme_id, business_name) {
                         tbody.appendChild(tr);
                     });
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:#9ca3af;">No listings found for this business.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:#6b7280;">No listings found for this business.</td></tr>';
                 }
             } catch(e) {
                 tbody.innerHTML = '<tr><td colspan="7" class="ml-error-row">Failed to load listings.</td></tr>';

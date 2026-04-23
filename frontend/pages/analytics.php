@@ -580,7 +580,7 @@ $json_biz_perf  = json_encode($biz_perf);
             ctx.strokeStyle = '#f0e6f6';
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(canvas.width - 10, y); ctx.stroke();
-            ctx.fillStyle = '#9ca3af';
+            ctx.fillStyle = '#6b7280';
             ctx.font = '10px Arial';
             ctx.textAlign = 'right';
             var val = maxVal * i / 4;

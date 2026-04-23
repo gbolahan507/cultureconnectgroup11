@@ -307,7 +307,7 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Reside
             <span class="mo-modal-close-btn" onclick="moCloseReviewModal()">&times;</span>
         </div>
         <div class="mo-modal-body mo-modal-body--padded" id="mo-review-body">
-            <p style="color:#9ca3af;">Loading items...</p>
+            <p style="color:#6b7280;">Loading items...</p>
         </div>
         <div class="mo-modal-footer">
             <button class="mo-modal-close-btn-footer" onclick="moCloseReviewModal()">Close</button>
@@ -565,7 +565,7 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Reside
     function moOpenReviewModal(order_id) {
         const modal = document.getElementById('mo-review-modal');
         const body  = document.getElementById('mo-review-body');
-        body.innerHTML = '<p style="color:#9ca3af;">Loading items...</p>';
+        body.innerHTML = '<p style="color:#6b7280;">Loading items...</p>';
         modal.style.display = 'flex';
  
         const fd = new FormData();
@@ -584,7 +584,7 @@ if (!isset($_SESSION['user_role']) || !in_array($_SESSION['user_role'], ['Reside
     }
  
     function moBuildReviewHTML(items) {
-        if (!items.length) return '<p style="color:#9ca3af;">No items found.</p>';
+        if (!items.length) return '<p style="color:#6b7280;">No items found.</p>';
  
         return items.map(item => {
             const imgSrc = item.primary_image
