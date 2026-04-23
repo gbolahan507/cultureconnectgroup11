@@ -949,7 +949,7 @@ font-size:13px;
     border: none;
 }
 
-.users-table th:nth-child(1) { width: 5%; }   /* # */
+.users-table th:nth-child(1) { width: 5%; }   
 .users-table th:nth-child(2) { width: 18%; }  /* Name */
 .users-table th:nth-child(3) { width: 10%; }  /* Type */
 .users-table th:nth-child(4) { width: 22%; }  /* Email */
@@ -3745,7 +3745,7 @@ font-size:13px;
     color: #991b1b;
 }
  
-/* LISTING DETAIL — LOGIN MODAL*/
+/* LISTING DETAIL — LOGIN POPUP*/
 .ld-login-modal-overlay {
     position: fixed;
     inset: 0;
@@ -5346,7 +5346,7 @@ font-size:13px;
 .mgo-detail-item-unit     { font-size: 12px; color: #6b7280; margin: 0; }
 .mgo-detail-item-subtotal { font-size: 14px; font-weight: 700; color: var(--mgo-violet); margin: 0; white-space: nowrap; }
  
-/* Confirm / cancel modal content */
+/* Confirm / cancel popup content */
 .mgo-confirm-text { font-size: 14px; color: #374151; margin: 0 0 14px; line-height: 1.5; }
  
 .mgo-confirm-info {
