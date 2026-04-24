@@ -66,7 +66,7 @@ CultureConnect is a web-based platform for residents to browse and vote on cultu
 - **4 Roles:** Resident, SME, Council Member, Council Administrator
 - **6 Areas:** North, South, East, West, Town Centre, Central Hertfordshire
 - **8 Categories:** Visual Arts, Music, Performing Arts, Literature, Culinary Arts, Fashion, Digital Arts, Crafts
-- **User code trigger:** Auto-generates codes (RES-XXXX, SME-XXXX, CNS-XXXX, ADM-XXXX)
+- **User Role-based Assess triggers**
 
 ## Getting Started
 
